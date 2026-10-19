@@ -1,0 +1,761 @@
+[
+ {
+  "q": "Solve 2x + 5 = 17",
+  "o": [
+   "x = 5",
+   "x = 6",
+   "x = 11",
+   "x = 12"
+  ],
+  "a": 1,
+  "e": "2x = 17 − 5 = 12, so x = 6."
+ },
+ {
+  "q": "Evaluate log₁₀100 + log₁₀10",
+  "o": [
+   "2",
+   "3",
+   "10",
+   "1000"
+  ],
+  "a": 1,
+  "e": "log₁₀100 = 2 and log₁₀10 = 1, so the sum is 3."
+ },
+ {
+  "q": "Area of a circle of radius 7 cm (π = 22/7)",
+  "o": [
+   "44 cm²",
+   "154 cm²",
+   "49 cm²",
+   "22 cm²"
+  ],
+  "a": 1,
+  "e": "Area = πr² = 22/7 × 49 = 154."
+ },
+ {
+  "q": "If sin θ = 3/5 (θ acute), cos θ =",
+  "o": [
+   "3/4",
+   "4/5",
+   "5/4",
+   "4/3"
+  ],
+  "a": 1,
+  "e": "With sin = 3/5 the sides are 3, 4, 5, so cos = 4/5."
+ },
+ {
+  "q": "The gradient of the line y = 3x − 4 is",
+  "o": [
+   "−4",
+   "4",
+   "3",
+   "−3"
+  ],
+  "a": 2,
+  "e": "In y = mx + c the gradient is m, which is 3."
+ },
+ {
+  "q": "Sum of the interior angles of a hexagon",
+  "o": [
+   "540°",
+   "720°",
+   "900°",
+   "360°"
+  ],
+  "a": 1,
+  "e": "(n − 2) × 180 = 4 × 180 = 720°."
+ },
+ {
+  "q": "Simplify (x² − 9) / (x − 3)",
+  "o": [
+   "x − 3",
+   "x + 3",
+   "x² + 3",
+   "x"
+  ],
+  "a": 1,
+  "e": "x² − 9 = (x − 3)(x + 3), so cancel x − 3."
+ },
+ {
+  "q": "Find the value of 2³ × 2²",
+  "o": [
+   "10",
+   "32",
+   "64",
+   "16"
+  ],
+  "a": 1,
+  "e": "2³ × 2² = 2⁵ = 32."
+ },
+ {
+  "q": "The mean of 2, 4, 6 and 8 is",
+  "o": [
+   "4",
+   "5",
+   "6",
+   "20"
+  ],
+  "a": 1,
+  "e": "The sum is 20; 20 ÷ 4 = 5."
+ },
+ {
+  "q": "Express 0.25 as a percentage",
+  "o": [
+   "2.5%",
+   "25%",
+   "0.25%",
+   "250%"
+  ],
+  "a": 1,
+  "e": "Multiply by 100: 0.25 × 100 = 25%."
+ },
+ {
+  "q": "Solve x² − 5x + 6 = 0",
+  "o": [
+   "x = 2 or 3",
+   "x = −2 or −3",
+   "x = 1 or 6",
+   "x = 5 or 1"
+  ],
+  "a": 0,
+  "e": "(x − 2)(x − 3) = 0, so x = 2 or 3."
+ },
+ {
+  "q": "A right-angled triangle has shorter sides 3 cm and 4 cm. Its hypotenuse is",
+  "o": [
+   "5 cm",
+   "6 cm",
+   "7 cm",
+   "25 cm"
+  ],
+  "a": 0,
+  "e": "3² + 4² = 25, and √25 = 5."
+ },
+ {
+  "q": "Simplify 3² × 3³",
+  "o": [
+   "3⁶",
+   "3⁵",
+   "9⁵",
+   "27"
+  ],
+  "a": 1,
+  "e": "Add the powers when multiplying: 3²⁺³ = 3⁵ = 243."
+ },
+ {
+  "q": "Factorise x² − 9",
+  "o": [
+   "(x − 3)²",
+   "(x + 3)²",
+   "(x − 3)(x + 3)",
+   "(x − 9)(x + 1)"
+  ],
+  "a": 2,
+  "e": "This is a difference of two squares: a² − b² = (a − b)(a + b)."
+ },
+ {
+  "q": "If y = 3x − 2, find y when x = 4",
+  "o": [
+   "10",
+   "14",
+   "12",
+   "6"
+  ],
+  "a": 0,
+  "e": "y = 3(4) − 2 = 12 − 2 = 10."
+ },
+ {
+  "q": "The sum of the interior angles of a hexagon is",
+  "o": [
+   "540°",
+   "720°",
+   "900°",
+   "360°"
+  ],
+  "a": 1,
+  "e": "(n − 2) × 180° = 4 × 180° = 720°."
+ },
+ {
+  "q": "Each exterior angle of a regular octagon is",
+  "o": [
+   "30°",
+   "40°",
+   "45°",
+   "60°"
+  ],
+  "a": 2,
+  "e": "Exterior angles add up to 360°, so 360° ÷ 8 = 45°."
+ },
+ {
+  "q": "Find the mean of 2, 4, 6, 8 and 10",
+  "o": [
+   "5",
+   "6",
+   "7",
+   "8"
+  ],
+  "a": 1,
+  "e": "Sum = 30, and 30 ÷ 5 = 6."
+ },
+ {
+  "q": "Find the median of 3, 7, 1, 9, 5",
+  "o": [
+   "3",
+   "5",
+   "7",
+   "9"
+  ],
+  "a": 1,
+  "e": "Arranged: 1, 3, 5, 7, 9. The middle value is 5."
+ },
+ {
+  "q": "Find the mode of 2, 3, 3, 4, 5, 3, 6",
+  "o": [
+   "2",
+   "3",
+   "4",
+   "5"
+  ],
+  "a": 1,
+  "e": "3 appears most often (three times)."
+ },
+ {
+  "q": "A bag has 3 red and 5 blue balls. The probability of picking a red ball is",
+  "o": [
+   "3/5",
+   "3/8",
+   "5/8",
+   "1/3"
+  ],
+  "a": 1,
+  "e": "Probability = 3 red ÷ 8 balls in total = 3/8."
+ },
+ {
+  "q": "Circumference of a circle of radius 7 cm (π = 22/7)",
+  "o": [
+   "22 cm",
+   "44 cm",
+   "154 cm",
+   "14 cm"
+  ],
+  "a": 1,
+  "e": "C = 2πr = 2 × 22/7 × 7 = 44 cm."
+ },
+ {
+  "q": "The volume of a cuboid 5 cm by 4 cm by 3 cm is",
+  "o": [
+   "12 cm³",
+   "47 cm³",
+   "60 cm³",
+   "120 cm³"
+  ],
+  "a": 2,
+  "e": "V = l × w × h = 5 × 4 × 3 = 60 cm³."
+ },
+ {
+  "q": "The hypotenuse of a right-angled triangle with legs 6 cm and 8 cm is",
+  "o": [
+   "10 cm",
+   "12 cm",
+   "14 cm",
+   "100 cm"
+  ],
+  "a": 0,
+  "e": "√(6² + 8²) = √100 = 10 cm."
+ },
+ {
+  "q": "Express 0.25 as a fraction in its lowest terms",
+  "o": [
+   "1/2",
+   "1/4",
+   "2/5",
+   "1/5"
+  ],
+  "a": 1,
+  "e": "0.25 = 25/100 = 1/4."
+ },
+ {
+  "q": "Simplify 2/3 + 1/4",
+  "o": [
+   "3/7",
+   "11/12",
+   "3/12",
+   "1/6"
+  ],
+  "a": 1,
+  "e": "2/3 = 8/12 and 1/4 = 3/12, so the sum is 11/12."
+ },
+ {
+  "q": "Find 20% of 450",
+  "o": [
+   "70",
+   "80",
+   "90",
+   "100"
+  ],
+  "a": 2,
+  "e": "20/100 × 450 = 90."
+ },
+ {
+  "q": "Find the simple interest on ₦5,000 at 10% per annum for 2 years",
+  "o": [
+   "₦500",
+   "₦1,000",
+   "₦1,500",
+   "₦2,000"
+  ],
+  "a": 1,
+  "e": "I = PRT/100 = 5000 × 10 × 2 / 100 = ₦1,000."
+ },
+ {
+  "q": "Solve 3x − 7 = 11",
+  "o": [
+   "x = 4",
+   "x = 5",
+   "x = 6",
+   "x = 18"
+  ],
+  "a": 2,
+  "e": "3x = 18, so x = 6."
+ },
+ {
+  "q": "The 10th term of the AP 3, 7, 11, … is",
+  "o": [
+   "39",
+   "43",
+   "40",
+   "37"
+  ],
+  "a": 0,
+  "e": "Tₙ = a + (n − 1)d = 3 + 9 × 4 = 39."
+ },
+ {
+  "q": "The next term of the GP 2, 6, 18, … is",
+  "o": [
+   "24",
+   "36",
+   "54",
+   "72"
+  ],
+  "a": 2,
+  "e": "The common ratio is 3, so the next term is 18 × 3 = 54."
+ },
+ {
+  "q": "Evaluate log₂ 8",
+  "o": [
+   "2",
+   "3",
+   "4",
+   "8"
+  ],
+  "a": 1,
+  "e": "2³ = 8, so log₂ 8 = 3."
+ },
+ {
+  "q": "The gradient of the line joining (1, 2) and (3, 8) is",
+  "o": [
+   "2",
+   "3",
+   "4",
+   "6"
+  ],
+  "a": 1,
+  "e": "(8 − 2) ÷ (3 − 1) = 6 ÷ 2 = 3."
+ },
+ {
+  "q": "If A = {1, 2, 3, 4} and B = {3, 4, 5}, then A ∩ B is",
+  "o": [
+   "{1, 2, 3, 4, 5}",
+   "{3, 4}",
+   "{1, 2}",
+   "{5}"
+  ],
+  "a": 1,
+  "e": "The intersection holds elements found in both sets: 3 and 4."
+ },
+ {
+  "q": "How many elements are in A ∪ B, where A = {1, 2, 3, 4} and B = {3, 4, 5}?",
+  "o": [
+   "7",
+   "5",
+   "4",
+   "3"
+  ],
+  "a": 1,
+  "e": "A ∪ B = {1, 2, 3, 4, 5}, which has 5 elements."
+ },
+ {
+  "q": "Solve the inequality 2x + 1 > 7",
+  "o": [
+   "x > 3",
+   "x < 3",
+   "x > 4",
+   "x > 6"
+  ],
+  "a": 0,
+  "e": "2x > 6, so x > 3."
+ },
+ {
+  "q": "Expand (x + 2)²",
+  "o": [
+   "x² + 4",
+   "x² + 2x + 4",
+   "x² + 4x + 4",
+   "x² + 4x + 2"
+  ],
+  "a": 2,
+  "e": "(x + 2)(x + 2) = x² + 2x + 2x + 4 = x² + 4x + 4."
+ },
+ {
+  "q": "Express 4,500 in standard form",
+  "o": [
+   "4.5 × 10²",
+   "4.5 × 10³",
+   "4.5 × 10⁴",
+   "45 × 10³"
+  ],
+  "a": 1,
+  "e": "4,500 = 4.5 × 1,000 = 4.5 × 10³."
+ },
+ {
+  "q": "The area of a triangle with base 10 cm and height 6 cm is",
+  "o": [
+   "16 cm²",
+   "30 cm²",
+   "60 cm²",
+   "3 cm²"
+  ],
+  "a": 1,
+  "e": "Area = ½ × 10 × 6 = 30 cm²."
+ },
+ {
+  "q": "Convert 101101 (base 2) to a number in base 10",
+  "o": [
+   "43",
+   "47",
+   "45",
+   "41"
+  ],
+  "a": 2,
+  "e": "1×32 + 0×16 + 1×8 + 1×4 + 0×2 + 1 = 45."
+ },
+ {
+  "q": "Evaluate 2 1/2 ÷ 5/6",
+  "o": [
+   "3",
+   "2",
+   "4",
+   "25/12"
+  ],
+  "a": 0,
+  "e": "5/2 × 6/5 = 3."
+ },
+ {
+  "q": "Simplify sqrt(75) − sqrt(12)",
+  "o": [
+   "3",
+   "3 sqrt(3)",
+   "7 sqrt(3)",
+   "sqrt(63)"
+  ],
+  "a": 1,
+  "e": "sqrt(75) = 5 sqrt(3) and sqrt(12) = 2 sqrt(3), so the difference is 3 sqrt(3)."
+ },
+ {
+  "q": "Rationalise 6/(3 − sqrt(3))",
+  "o": [
+   "3 − sqrt(3)",
+   "2 + sqrt(3)",
+   "6 + 2 sqrt(3)",
+   "3 + sqrt(3)"
+  ],
+  "a": 3,
+  "e": "Multiply top and bottom by (3 + sqrt(3)): 6(3 + sqrt(3))/(9 − 3) = 3 + sqrt(3)."
+ },
+ {
+  "q": "Given that log10 2 = 0.3010, find log10 5",
+  "o": [
+   "0.6990",
+   "0.6020",
+   "0.1505",
+   "0.7010"
+  ],
+  "a": 0,
+  "e": "log10 5 = log10(10/2) = 1 − 0.3010 = 0.6990."
+ },
+ {
+  "q": "In a class, 30 students offer Physics, 25 offer Chemistry and 45 offer at least one of the two. How many offer both?",
+  "o": [
+   "5",
+   "15",
+   "20",
+   "10"
+  ],
+  "a": 3,
+  "e": "n(P ∩ C) = 30 + 25 − 45 = 10."
+ },
+ {
+  "q": "y varies inversely as x^2. If y = 4 when x = 3, find y when x = 6",
+  "o": [
+   "2",
+   "1",
+   "8",
+   "16"
+  ],
+  "a": 1,
+  "e": "k = yx^2 = 4 × 9 = 36, so y = 36/36 = 1."
+ },
+ {
+  "q": "Z varies directly as x and inversely as y. If Z = 6 when x = 4 and y = 2, find Z when x = 8 and y = 3",
+  "o": [
+   "8",
+   "6",
+   "9",
+   "12"
+  ],
+  "a": 0,
+  "e": "Z = kx/y gives 6 = 4k/2, so k = 3; then Z = 3 × 8/3 = 8."
+ },
+ {
+  "q": "Form the quadratic equation whose roots are 2 and −1/2",
+  "o": [
+   "2x^2 + 3x − 2 = 0",
+   "2x^2 − 3x − 2 = 0",
+   "2x^2 − 3x + 2 = 0",
+   "2x^2 + 3x + 2 = 0"
+  ],
+  "a": 1,
+  "e": "(x − 2)(2x + 1) = 2x^2 − 3x − 2 = 0."
+ },
+ {
+  "q": "If 2x + 3y = 12 and x − y = 1, find the value of xy",
+  "o": [
+   "5",
+   "6",
+   "8",
+   "12"
+  ],
+  "a": 1,
+  "e": "From x = y + 1: 2y + 2 + 3y = 12, so y = 2, x = 3 and xy = 6."
+ },
+ {
+  "q": "Solve the inequality 3 − 2x < 9",
+  "o": [
+   "x < −3",
+   "x > 3",
+   "x < 3",
+   "x > −3"
+  ],
+  "a": 3,
+  "e": "−2x < 6; dividing by −2 reverses the sign, so x > −3."
+ },
+ {
+  "q": "Find the sum of the first 12 terms of the AP 5, 8, 11, …",
+  "o": [
+   "246",
+   "264",
+   "258",
+   "270"
+  ],
+  "a": 2,
+  "e": "S = n/2 [2a + (n − 1)d] = 6(10 + 33) = 258."
+ },
+ {
+  "q": "Find the sum to infinity of the GP 8, 4, 2, …",
+  "o": [
+   "12",
+   "15",
+   "32",
+   "16"
+  ],
+  "a": 3,
+  "e": "S = a/(1 − r) = 8/(1 − 1/2) = 16."
+ },
+ {
+  "q": "Find the equation of the line through (2, 3) with gradient −2",
+  "o": [
+   "y = −2x − 1",
+   "y = −2x + 7",
+   "y = 2x − 1",
+   "y = −2x + 1"
+  ],
+  "a": 1,
+  "e": "y − 3 = −2(x − 2), so y = −2x + 7."
+ },
+ {
+  "q": "Find the midpoint of the line joining (−2, 5) and (6, 1)",
+  "o": [
+   "(4, 6)",
+   "(−2, 3)",
+   "(2, −3)",
+   "(2, 3)"
+  ],
+  "a": 3,
+  "e": "((−2 + 6)/2, (5 + 1)/2) = (2, 3)."
+ },
+ {
+  "q": "Evaluate tan 60° × cos 30°",
+  "o": [
+   "1/2",
+   "sqrt(3)/2",
+   "3",
+   "3/2"
+  ],
+  "a": 3,
+  "e": "sqrt(3) × sqrt(3)/2 = 3/2."
+ },
+ {
+  "q": "From a point 30 m from the foot of a tower on level ground, the angle of elevation of the top is 60°. Find the height of the tower",
+  "o": [
+   "30 m",
+   "10 sqrt(3) m",
+   "30 sqrt(3) m",
+   "60 m"
+  ],
+  "a": 2,
+  "e": "h = 30 tan 60° = 30 sqrt(3) m."
+ },
+ {
+  "q": "Find the length of the arc of a sector of radius 12 cm and angle 60°",
+  "o": [
+   "4π cm",
+   "2π cm",
+   "8π cm",
+   "6π cm"
+  ],
+  "a": 0,
+  "e": "Arc = 60/360 × 2π × 12 = 4π cm."
+ },
+ {
+  "q": "Find the volume of a cylinder of radius 7 cm and height 10 cm (π = 22/7)",
+  "o": [
+   "440 cm^3",
+   "770 cm^3",
+   "1540 cm^3",
+   "3080 cm^3"
+  ],
+  "a": 2,
+  "e": "V = πr^2h = 22/7 × 49 × 10 = 1540 cm^3."
+ },
+ {
+  "q": "The angle subtended by an arc at the centre of a circle is 100°. The angle it subtends at the circumference is",
+  "o": [
+   "25°",
+   "100°",
+   "200°",
+   "50°"
+  ],
+  "a": 3,
+  "e": "The angle at the centre is twice the angle at the circumference, so 100° ÷ 2 = 50°."
+ },
+ {
+  "q": "A trader sells an article for ₦4,500 at a profit of 25%. Find the cost price",
+  "o": [
+   "₦3,375",
+   "₦4,000",
+   "₦3,600",
+   "₦5,625"
+  ],
+  "a": 2,
+  "e": "Selling price = 125% of cost, so cost = 4500 × 100/125 = ₦3,600."
+ },
+ {
+  "q": "The mean of five numbers is 8. When a sixth number 14 is added, the new mean is",
+  "o": [
+   "8",
+   "9",
+   "10",
+   "11"
+  ],
+  "a": 1,
+  "e": "Total = 40 + 14 = 54, and 54 ÷ 6 = 9."
+ },
+ {
+  "q": "Find the standard deviation of 2, 4, 4, 4, 5, 5, 7, 9",
+  "o": [
+   "2",
+   "4",
+   "3",
+   "5"
+  ],
+  "a": 0,
+  "e": "Mean = 5; squared deviations sum to 32; variance = 32/8 = 4, so SD = 2."
+ },
+ {
+  "q": "Two fair dice are thrown. The probability that the sum of the scores is 7 is",
+  "o": [
+   "1/12",
+   "5/36",
+   "1/6",
+   "7/36"
+  ],
+  "a": 2,
+  "e": "There are 6 favourable outcomes out of 36, so 6/36 = 1/6."
+ },
+ {
+  "q": "A and B are independent events with P(A) = 0.4 and P(B) = 0.5. Find P(A or B)",
+  "o": [
+   "0.7",
+   "0.9",
+   "0.2",
+   "0.1"
+  ],
+  "a": 0,
+  "e": "P(A ∪ B) = 0.4 + 0.5 − 0.4 × 0.5 = 0.7."
+ },
+ {
+  "q": "If a = (3, −1) and b = (1, 2), find 2a − b",
+  "o": [
+   "(5, −4)",
+   "(7, 0)",
+   "(5, 0)",
+   "(−5, 4)"
+  ],
+  "a": 0,
+  "e": "2a = (6, −2); subtracting b gives (6 − 1, −2 − 2) = (5, −4)."
+ },
+ {
+  "q": "If y = 3x^3 − 5x^2 + 2x − 1, find dy/dx at x = 2",
+  "o": [
+   "22",
+   "14",
+   "18",
+   "30"
+  ],
+  "a": 2,
+  "e": "dy/dx = 9x^2 − 10x + 2; at x = 2 this is 36 − 20 + 2 = 18."
+ },
+ {
+  "q": "Evaluate the integral of (2x + 1) dx from x = 1 to x = 3",
+  "o": [
+   "8",
+   "10",
+   "12",
+   "14"
+  ],
+  "a": 1,
+  "e": "[x^2 + x] from 1 to 3 = (9 + 3) − (1 + 1) = 10."
+ },
+ {
+  "q": "Find the determinant of the matrix with rows (3, 2) and (1, 4)",
+  "o": [
+   "10",
+   "14",
+   "12",
+   "8"
+  ],
+  "a": 0,
+  "e": "3 × 4 − 2 × 1 = 10."
+ },
+ {
+  "q": "Find the compound interest on ₦10,000 for 2 years at 10% per annum",
+  "o": [
+   "₦2,000",
+   "₦2,100",
+   "₦1,100",
+   "₦12,100"
+  ],
+  "a": 1,
+  "e": "Amount = 10000 × 1.1^2 = ₦12,100, so interest = 12,100 − 10,000 = ₦2,100."
+ }
+]

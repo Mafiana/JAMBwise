@@ -1,0 +1,49 @@
+// Starts a Paystack payment. The price always comes from the plans table, never from the browser.
+// Deploy:  supabase functions deploy paystack-init
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { allowedOrigins, corsHeaders, readJson, reply } from '../_shared/cors.ts'
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(req) })
+  if (req.method !== 'POST') return reply(req, { error: 'Method not allowed' }, 405)
+
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
+    auth: { persistSession: false },
+  })
+  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+  const { data: { user } } = await db.auth.getUser(token)
+  if (!user) return reply(req, { error: 'Please log in first.' }, 401)
+
+  const { data: me } = await db.from('profiles').select('suspended').eq('id', user.id).maybeSingle()
+  if (!me || me.suspended) return reply(req, { error: 'This account cannot make payments.' }, 403)
+
+  const body = await readJson(req)
+  const { data: plan } = await db.from('plans').select('id, price_kobo').eq('id', String(body.plan ?? '')).maybeSingle()
+  if (!plan || !plan.price_kobo) return reply(req, { error: 'Unknown plan.' }, 400)
+
+  // Where Paystack sends the student back to. Only our own allowed origins are accepted.
+  const list = allowedOrigins()
+  const asked = String(body.origin ?? '').replace(/\/$/, '')
+  const origin = list.includes(asked) ? asked : list[0]
+  if (!origin) return reply(req, { error: 'Server is missing ALLOWED_ORIGINS.' }, 500)
+
+  const reference = 'JW' + crypto.randomUUID().replace(/-/g, '').slice(0, 16)
+  const r = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + Deno.env.get('PAYSTACK_SECRET_KEY'), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: user.email,
+      amount: plan.price_kobo,
+      currency: 'NGN',
+      reference,
+      callback_url: origin + '/app/billing',
+      metadata: { user_id: user.id, plan: plan.id },
+    }),
+  })
+  const j = await r.json().catch(() => ({}))
+  if (!j.status) return reply(req, { error: j.message ?? 'Payment provider error.' }, 502)
+
+  const { error } = await db.from('payments').insert({ reference, user_id: user.id, plan: plan.id, amount_kobo: plan.price_kobo })
+  if (error) return reply(req, { error: 'Could not record the payment.' }, 500)
+  return reply(req, { url: j.data.authorization_url, reference })
+})

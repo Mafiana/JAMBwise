@@ -1,0 +1,772 @@
+[
+ {
+  "q": "Growing different crops in turn on the same land is",
+  "o": [
+   "mixed farming",
+   "crop rotation",
+   "fallowing",
+   "irrigation"
+  ],
+  "a": 1,
+  "e": "Rotating crops keeps soil fertile and breaks pest cycles."
+ },
+ {
+  "q": "Which of these is a leguminous crop?",
+  "o": [
+   "maize",
+   "cowpea",
+   "cassava",
+   "yam"
+  ],
+  "a": 1,
+  "e": "Cowpea is a legume."
+ },
+ {
+  "q": "The largest soil particles are",
+  "o": [
+   "clay",
+   "silt",
+   "sand",
+   "humus"
+  ],
+  "a": 2,
+  "e": "Sand has the largest soil particles."
+ },
+ {
+  "q": "Root nodules with nitrogen-fixing bacteria are found in",
+  "o": [
+   "cereals",
+   "legumes",
+   "tubers",
+   "grasses"
+  ],
+  "a": 1,
+  "e": "Legumes host nitrogen-fixing bacteria in their root nodules."
+ },
+ {
+  "q": "The rearing of bees is called",
+  "o": [
+   "sericulture",
+   "apiculture",
+   "aquaculture",
+   "horticulture"
+  ],
+  "a": 1,
+  "e": "Apiculture means keeping bees."
+ },
+ {
+  "q": "Which of these is a ruminant?",
+  "o": [
+   "pig",
+   "cattle",
+   "poultry",
+   "rabbit"
+  ],
+  "a": 1,
+  "e": "Ruminants such as cattle chew the cud."
+ },
+ {
+  "q": "Which of these is a cereal crop?",
+  "o": [
+   "cassava",
+   "rice",
+   "cocoa",
+   "groundnut"
+  ],
+  "a": 1,
+  "e": "Rice is a cereal grass crop."
+ },
+ {
+  "q": "Keeping fish in ponds is called",
+  "o": [
+   "aquaculture",
+   "apiculture",
+   "forestry",
+   "horticulture"
+  ],
+  "a": 0,
+  "e": "Fish farming is called aquaculture."
+ },
+ {
+  "q": "A soil with pH below 7 is",
+  "o": [
+   "acidic",
+   "alkaline",
+   "neutral",
+   "saline"
+  ],
+  "a": 0,
+  "e": "A pH below 7 means the soil is acidic."
+ },
+ {
+  "q": "Manure is best described as",
+  "o": [
+   "organic fertiliser",
+   "inorganic fertiliser",
+   "pesticide",
+   "herbicide"
+  ],
+  "a": 0,
+  "e": "Manure is organic fertiliser from animal waste or plant matter."
+ },
+ {
+  "q": "The main purpose of weeding is to",
+  "o": [
+   "reduce competition for nutrients",
+   "raise soil pH",
+   "attract pests",
+   "cool the soil"
+  ],
+  "a": 0,
+  "e": "Weeds compete with crops for water, light and nutrients."
+ },
+ {
+  "q": "A castrated male cattle is called a",
+  "o": [
+   "bull",
+   "steer",
+   "heifer",
+   "cow"
+  ],
+  "a": 1,
+  "e": "A castrated male cattle is a steer."
+ },
+ {
+  "q": "The layer of soil richest in humus is the",
+  "o": [
+   "bedrock",
+   "subsoil",
+   "topsoil",
+   "parent material"
+  ],
+  "a": 2,
+  "e": "The topsoil holds most organic matter and nutrients."
+ },
+ {
+  "q": "Loamy soil is a mixture of",
+  "o": [
+   "sand only",
+   "sand, silt and clay",
+   "clay only",
+   "gravel only"
+  ],
+  "a": 1,
+  "e": "Loam is regarded as the best agricultural soil."
+ },
+ {
+  "q": "Which of these is a nitrogen fertiliser?",
+  "o": [
+   "single superphosphate",
+   "urea",
+   "muriate of potash",
+   "lime"
+  ],
+  "a": 1,
+  "e": "Urea is rich in nitrogen."
+ },
+ {
+  "q": "NPK fertiliser supplies",
+  "o": [
+   "nitrogen, phosphorus and potassium",
+   "nickel, phosphorus and calcium",
+   "nitrogen, protein and calcium",
+   "nitrates only"
+  ],
+  "a": 0,
+  "e": "N is nitrogen, P is phosphorus and K is potassium."
+ },
+ {
+  "q": "Lime is applied to soil to",
+  "o": [
+   "increase acidity",
+   "reduce acidity",
+   "kill weeds",
+   "add nitrogen"
+  ],
+  "a": 1,
+  "e": "Lime neutralises acidic soils."
+ },
+ {
+  "q": "Which of these is a root tuber?",
+  "o": [
+   "maize",
+   "cassava",
+   "cowpea",
+   "rice"
+  ],
+  "a": 1,
+  "e": "Cassava is a root tuber crop."
+ },
+ {
+  "q": "Which of these is a cereal?",
+  "o": [
+   "yam",
+   "rice",
+   "cocoa",
+   "cowpea"
+  ],
+  "a": 1,
+  "e": "Rice is a cereal grain."
+ },
+ {
+  "q": "Cocoa in Nigeria is mainly grown as a",
+  "o": [
+   "subsistence crop",
+   "cash crop",
+   "cover crop",
+   "fodder crop"
+  ],
+  "a": 1,
+  "e": "Cocoa is grown mainly for sale and export."
+ },
+ {
+  "q": "A cover crop is planted mainly to",
+  "o": [
+   "protect the soil from erosion",
+   "attract pests",
+   "dry the soil",
+   "produce wool"
+  ],
+  "a": 0,
+  "e": "Ground cover reduces erosion and keeps the soil moist."
+ },
+ {
+  "q": "Mulching is the covering of the soil with",
+  "o": [
+   "organic material to retain moisture",
+   "water",
+   "fertiliser",
+   "pesticide"
+  ],
+  "a": 0,
+  "e": "Mulch reduces evaporation and suppresses weeds."
+ },
+ {
+  "q": "Chemicals used to kill weeds are called",
+  "o": [
+   "fungicides",
+   "herbicides",
+   "insecticides",
+   "rodenticides"
+  ],
+  "a": 1,
+  "e": "Herbicides kill weeds."
+ },
+ {
+  "q": "Cassava is commonly propagated by",
+  "o": [
+   "seeds",
+   "stem cuttings",
+   "grafting",
+   "runners"
+  ],
+  "a": 1,
+  "e": "Pieces of cassava stem are planted to grow new plants."
+ },
+ {
+  "q": "Newcastle disease affects",
+  "o": [
+   "cattle",
+   "poultry",
+   "goats",
+   "fish"
+  ],
+  "a": 1,
+  "e": "Newcastle disease is a viral disease of birds."
+ },
+ {
+  "q": "Nagana in cattle is spread by the",
+  "o": [
+   "tsetse fly",
+   "tick",
+   "mosquito",
+   "housefly"
+  ],
+  "a": 0,
+  "e": "Tsetse flies transmit the trypanosomes that cause nagana."
+ },
+ {
+  "q": "Which breed of cattle is kept mainly for milk?",
+  "o": [
+   "Friesian",
+   "Sokoto Gudali",
+   "Muturu",
+   "N'Dama"
+  ],
+  "a": 0,
+  "e": "The Friesian is a high-yielding dairy breed."
+ },
+ {
+  "q": "Birds kept mainly for egg production are called",
+  "o": [
+   "broilers",
+   "layers",
+   "cockerels",
+   "capons"
+  ],
+  "a": 1,
+  "e": "Layers produce eggs; broilers are raised for meat."
+ },
+ {
+  "q": "Day-old chicks are kept warm in a",
+  "o": [
+   "pen",
+   "brooder",
+   "kraal",
+   "cage"
+  ],
+  "a": 1,
+  "e": "A brooder supplies heat to young chicks."
+ },
+ {
+  "q": "In which poultry system do birds roam freely outdoors?",
+  "o": [
+   "battery cage",
+   "deep litter",
+   "free range",
+   "tethering"
+  ],
+  "a": 2,
+  "e": "Free-range birds move about outside."
+ },
+ {
+  "q": "Fish farming is also called",
+  "o": [
+   "apiculture",
+   "pisciculture",
+   "sericulture",
+   "horticulture"
+  ],
+  "a": 1,
+  "e": "Pisciculture is the rearing of fish."
+ },
+ {
+  "q": "Horticulture is the cultivation of",
+  "o": [
+   "forest trees",
+   "vegetables, fruits and flowers",
+   "only cereals",
+   "only animals"
+  ],
+  "a": 1,
+  "e": "Horticulture covers garden crops."
+ },
+ {
+  "q": "A land tenure system in which land belongs to the family or community is",
+  "o": [
+   "freehold",
+   "communal ownership",
+   "leasehold",
+   "rent"
+  ],
+  "a": 1,
+  "e": "Communal ownership is common in many parts of Nigeria."
+ },
+ {
+  "q": "The Land Use Act of 1978 vests land in each state in the",
+  "o": [
+   "traditional ruler",
+   "state governor",
+   "President",
+   "local chief"
+  ],
+  "a": 1,
+  "e": "The governor holds land in trust for the people."
+ },
+ {
+  "q": "Farm records are kept mainly to",
+  "o": [
+   "monitor income and expenditure",
+   "decorate the farm",
+   "avoid paying tax",
+   "hide costs"
+  ],
+  "a": 0,
+  "e": "Records show profit, loss and where to improve."
+ },
+ {
+  "q": "Irrigation is the",
+  "o": [
+   "removal of excess water",
+   "artificial supply of water to crops",
+   "addition of fertiliser",
+   "removal of weeds"
+  ],
+  "a": 1,
+  "e": "Irrigation waters crops when rain is not enough."
+ },
+ {
+  "q": "Fallowing means",
+  "o": [
+   "leaving land uncultivated to regain fertility",
+   "planting twice a year",
+   "burning the land",
+   "clearing forests"
+  ],
+  "a": 0,
+  "e": "Rest allows the soil to recover."
+ },
+ {
+  "q": "In shifting cultivation, farmers",
+  "o": [
+   "farm the same plot for ever",
+   "move to new land when the soil loses fertility",
+   "use irrigation",
+   "use heavy fertiliser"
+  ],
+  "a": 1,
+  "e": "Land is abandoned after a few seasons and left to recover."
+ },
+ {
+  "q": "A tool used for digging and weeding by hand is the",
+  "o": [
+   "sickle",
+   "hoe",
+   "tractor",
+   "combine harvester"
+  ],
+  "a": 1,
+  "e": "The hoe is a basic hand tool for tillage and weeding."
+ },
+ {
+  "q": "Silage is",
+  "o": [
+   "fresh grass",
+   "preserved green fodder",
+   "dry hay",
+   "concentrate feed"
+  ],
+  "a": 1,
+  "e": "Silage is green fodder preserved by fermentation for feeding animals."
+ },
+ {
+  "q": "Which soil type has the highest water-holding capacity?",
+  "o": [
+   "Sandy soil",
+   "Gravelly soil",
+   "Clay soil",
+   "Laterite"
+  ],
+  "a": 2,
+  "e": "Clay has very fine particles and many tiny pores that hold water strongly."
+ },
+ {
+  "q": "The conversion of ammonium compounds in the soil to nitrates by bacteria is called",
+  "o": [
+   "Denitrification",
+   "Nitrification",
+   "Ammonification",
+   "Nitrogen fixation"
+  ],
+  "a": 1,
+  "e": "Nitrifying bacteria such as Nitrosomonas and Nitrobacter oxidise ammonium to nitrate."
+ },
+ {
+  "q": "Which of these diseases is caused by a fungus and attacks cocoa pods?",
+  "o": [
+   "Swollen shoot",
+   "Rosette",
+   "Newcastle disease",
+   "Black pod"
+  ],
+  "a": 3,
+  "e": "Black pod is caused by the fungus Phytophthora palmivora."
+ },
+ {
+  "q": "Cassava mosaic disease is spread mainly by",
+  "o": [
+   "Whitefly",
+   "Aphid",
+   "Grasshopper",
+   "Weevil"
+  ],
+  "a": 0,
+  "e": "The whitefly Bemisia tabaci transmits the cassava mosaic virus."
+ },
+ {
+  "q": "A farmer harvested 4,500 kg of maize from 3 hectares. The yield per hectare is",
+  "o": [
+   "1,350 kg",
+   "1,500 kg",
+   "13,500 kg",
+   "2,250 kg"
+  ],
+  "a": 1,
+  "e": "Yield per hectare = 4,500 / 3 = 1,500 kg."
+ },
+ {
+  "q": "The average gestation period of a sow is about",
+  "o": [
+   "60 days",
+   "90 days",
+   "114 days",
+   "150 days"
+  ],
+  "a": 2,
+  "e": "Pigs are pregnant for roughly 3 months, 3 weeks and 3 days, about 114 days."
+ },
+ {
+  "q": "The first and largest compartment of the stomach of a cow is the",
+  "o": [
+   "Omasum",
+   "Abomasum",
+   "Reticulum",
+   "Rumen"
+  ],
+  "a": 3,
+  "e": "The rumen is the largest chamber where microbial fermentation of fibre takes place."
+ },
+ {
+  "q": "Which of the following is a principle of co-operative societies?",
+  "o": [
+   "Open and voluntary membership",
+   "Membership by inheritance only",
+   "Votes based on shares held",
+   "Profit goes to the chairman alone"
+  ],
+  "a": 0,
+  "e": "Co-operatives admit members voluntarily and operate one member, one vote."
+ },
+ {
+  "q": "A broiler flock consumed 150 kg of feed and gained 50 kg in body weight. The feed conversion ratio is",
+  "o": [
+   "0.33",
+   "1.5",
+   "3.0",
+   "100"
+  ],
+  "a": 2,
+  "e": "FCR = feed eaten / weight gained = 150 / 50 = 3."
+ },
+ {
+  "q": "Foot-and-mouth disease in cattle is caused by a",
+  "o": [
+   "Bacterium",
+   "Virus",
+   "Protozoan",
+   "Fungus"
+  ],
+  "a": 1,
+  "e": "Foot-and-mouth disease is caused by a highly contagious virus."
+ },
+ {
+  "q": "Which of these tools is used for levelling the soil surface after tillage?",
+  "o": [
+   "Cutlass",
+   "Hoe",
+   "Spade",
+   "Rake"
+  ],
+  "a": 3,
+  "e": "A rake breaks clods and levels the seedbed."
+ },
+ {
+  "q": "Which implement is used for primary tillage on a large farm?",
+  "o": [
+   "Plough",
+   "Harrow",
+   "Planter",
+   "Sprayer"
+  ],
+  "a": 0,
+  "e": "The plough is the first implement to cut and turn the soil."
+ },
+ {
+  "q": "A farmer sold his produce for N120,000 after spending N85,000 on production. His profit is",
+  "o": [
+   "N205,000",
+   "N35,000",
+   "N45,000",
+   "N25,000"
+  ],
+  "a": 1,
+  "e": "Profit = revenue minus total cost = 120,000 - 85,000 = N35,000."
+ },
+ {
+  "q": "Striga (witchweed) is a weed that",
+  "o": [
+   "Floats on water",
+   "Climbs trees",
+   "Parasitises cereal roots",
+   "Grows only in forests"
+  ],
+  "a": 2,
+  "e": "Striga attaches to the roots of maize, sorghum and millet and steals nutrients."
+ },
+ {
+  "q": "A heterozygous tall plant (Tt) is crossed with a dwarf plant (tt). The expected ratio of tall to dwarf offspring is",
+  "o": [
+   "3:1",
+   "All tall",
+   "All dwarf",
+   "1:1"
+  ],
+  "a": 3,
+  "e": "Tt x tt gives Tt and tt in equal numbers, a 1:1 ratio."
+ },
+ {
+  "q": "Yellowing of leaves (chlorosis) in crops is a common sign of deficiency of",
+  "o": [
+   "Nitrogen",
+   "Calcium",
+   "Sodium",
+   "Iodine"
+  ],
+  "a": 0,
+  "e": "Nitrogen is needed for chlorophyll, so its lack causes pale yellow leaves."
+ },
+ {
+  "q": "An agricultural extension agent mainly serves as a link between",
+  "o": [
+   "Farmers and moneylenders",
+   "Research institutes and farmers",
+   "Farmers and tax officials",
+   "Markets and consumers"
+  ],
+  "a": 1,
+  "e": "Extension agents carry research findings to farmers and bring farmers' problems back to researchers."
+ },
+ {
+  "q": "Afforestation means",
+  "o": [
+   "Cutting down a forest",
+   "Replanting a felled forest",
+   "Planting trees where there was no forest before",
+   "Burning of bush"
+  ],
+  "a": 2,
+  "e": "Afforestation is establishing forest on land that was not previously forested."
+ },
+ {
+  "q": "If 25 out of 500 chicks died in a brooder, the mortality rate is",
+  "o": [
+   "25%",
+   "0.5%",
+   "20%",
+   "5%"
+  ],
+  "a": 3,
+  "e": "Mortality = 25/500 x 100 = 5%."
+ },
+ {
+  "q": "Which breed of chicken is a dual-purpose breed?",
+  "o": [
+   "Rhode Island Red",
+   "White Leghorn",
+   "Cornish",
+   "Muscovy"
+  ],
+  "a": 0,
+  "e": "Rhode Island Red is kept for both eggs and meat."
+ },
+ {
+  "q": "Which fish is commonly cultured in ponds in Nigeria?",
+  "o": [
+   "Mackerel",
+   "Catfish (Clarias)",
+   "Sardine",
+   "Tuna"
+  ],
+  "a": 1,
+  "e": "Clarias catfish is hardy and widely raised in freshwater ponds."
+ },
+ {
+  "q": "The law of diminishing returns states that",
+  "o": [
+   "Output rises forever as input rises",
+   "Prices fall as supply increases",
+   "Extra units of input eventually give smaller extra output",
+   "Costs never change"
+  ],
+  "a": 2,
+  "e": "Adding more of one input to fixed others eventually yields smaller additions to output."
+ },
+ {
+  "q": "Which breed of cattle is trypanotolerant?",
+  "o": [
+   "Friesian",
+   "Jersey",
+   "White Fulani",
+   "N'Dama"
+  ],
+  "a": 3,
+  "e": "N'Dama cattle resist trypanosomiasis in tsetse-infested areas."
+ },
+ {
+  "q": "A common insect pest of stored grains is the",
+  "o": [
+   "Weevil",
+   "Stem borer",
+   "Aphid",
+   "Locust"
+  ],
+  "a": 0,
+  "e": "Weevils feed on grains in storage and cause heavy losses."
+ },
+ {
+  "q": "Which of the following is a fixed asset on a farm?",
+  "o": [
+   "Fertiliser",
+   "Seeds",
+   "Tractor",
+   "Labour wages"
+  ],
+  "a": 2,
+  "e": "A tractor is durable and used over many seasons, unlike inputs consumed in one season."
+ },
+ {
+  "q": "A farmer uses a seed rate of 20 kg per hectare. The seed needed for 2.5 hectares is",
+  "o": [
+   "8 kg",
+   "50 kg",
+   "40 kg",
+   "22.5 kg"
+  ],
+  "a": 1,
+  "e": "Seed needed = 20 x 2.5 = 50 kg."
+ },
+ {
+  "q": "The first milk produced by a cow after calving is called",
+  "o": [
+   "Whey",
+   "Skim milk",
+   "Curd",
+   "Colostrum"
+  ],
+  "a": 3,
+  "e": "Colostrum is rich in antibodies and essential for the newborn calf."
+ },
+ {
+  "q": "The best method of controlling erosion on a sloping farmland is",
+  "o": [
+   "Bush burning",
+   "Ploughing up and down the slope",
+   "Contour ploughing",
+   "Overgrazing"
+  ],
+  "a": 2,
+  "e": "Ploughing along the contour slows runoff and reduces soil loss."
+ },
+ {
+  "q": "The increased vigour of offspring over their parents resulting from crossing unrelated parents is called",
+  "o": [
+   "Inbreeding depression",
+   "Hybrid vigour",
+   "Mutation",
+   "Culling"
+  ],
+  "a": 1,
+  "e": "Hybrid vigour, or heterosis, is the superior performance of crossbred offspring."
+ },
+ {
+  "q": "Night blindness in farm animals and humans is caused by deficiency of",
+  "o": [
+   "Vitamin C",
+   "Vitamin D",
+   "Vitamin K",
+   "Vitamin A"
+  ],
+  "a": 3,
+  "e": "Vitamin A is needed for the retina to work in dim light."
+ }
+]

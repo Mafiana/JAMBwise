@@ -1,0 +1,772 @@
+[
+ {
+  "q": "The SI unit of force is the",
+  "o": [
+   "joule",
+   "watt",
+   "newton",
+   "pascal"
+  ],
+  "a": 2,
+  "e": "Force is measured in newtons (N)."
+ },
+ {
+  "q": "A car covers 120 km in 2 hours. Its average speed is",
+  "o": [
+   "240 km/h",
+   "60 km/h",
+   "30 km/h",
+   "122 km/h"
+  ],
+  "a": 1,
+  "e": "Speed = distance ÷ time = 120 ÷ 2 = 60 km/h."
+ },
+ {
+  "q": "Which of these is a vector quantity?",
+  "o": [
+   "speed",
+   "mass",
+   "velocity",
+   "time"
+  ],
+  "a": 2,
+  "e": "Velocity has size and direction, so it is a vector."
+ },
+ {
+  "q": "A wave has period 0.02 s. Its frequency is",
+  "o": [
+   "0.02 Hz",
+   "2 Hz",
+   "50 Hz",
+   "200 Hz"
+  ],
+  "a": 2,
+  "e": "Frequency = 1 ÷ period = 1 ÷ 0.02 = 50 Hz."
+ },
+ {
+  "q": "A 5 Ω resistor carries 2 A. The p.d. across it is",
+  "o": [
+   "2.5 V",
+   "7 V",
+   "10 V",
+   "0.4 V"
+  ],
+  "a": 2,
+  "e": "V = IR = 2 × 5 = 10 V."
+ },
+ {
+  "q": "Energy due to the position of a body is",
+  "o": [
+   "kinetic",
+   "potential",
+   "thermal",
+   "chemical"
+  ],
+  "a": 1,
+  "e": "Energy due to position or height is potential energy."
+ },
+ {
+  "q": "The SI unit of electric current is the",
+  "o": [
+   "volt",
+   "ampere",
+   "ohm",
+   "coulomb"
+  ],
+  "a": 1,
+  "e": "Electric current is measured in amperes."
+ },
+ {
+  "q": "Acceleration due to gravity near Earth's surface is about",
+  "o": [
+   "9.8 m/s²",
+   "98 m/s²",
+   "0.98 m/s²",
+   "3 m/s²"
+  ],
+  "a": 0,
+  "e": "g is about 9.8 m/s² near Earth's surface."
+ },
+ {
+  "q": "Which mirror is used as a car's rear-view mirror?",
+  "o": [
+   "concave",
+   "convex",
+   "plane",
+   "parabolic"
+  ],
+  "a": 1,
+  "e": "A convex mirror gives a wider field of view."
+ },
+ {
+  "q": "Sound cannot travel through",
+  "o": [
+   "water",
+   "steel",
+   "air",
+   "a vacuum"
+  ],
+  "a": 3,
+  "e": "Sound needs a medium, so it cannot travel in a vacuum."
+ },
+ {
+  "q": "Power is the rate of",
+  "o": [
+   "doing work",
+   "moving",
+   "heating",
+   "accelerating"
+  ],
+  "a": 0,
+  "e": "Power = work done ÷ time taken."
+ },
+ {
+  "q": "The speed of light in a vacuum is approximately",
+  "o": [
+   "3 × 10⁸ m/s",
+   "3 × 10⁶ m/s",
+   "3 × 10⁵ m/s",
+   "3 × 10¹⁰ m/s"
+  ],
+  "a": 0,
+  "e": "Light travels at about 3 × 10⁸ m/s."
+ },
+ {
+  "q": "The SI unit of energy is the",
+  "o": [
+   "newton",
+   "joule",
+   "watt",
+   "pascal"
+  ],
+  "a": 1,
+  "e": "Energy and work are measured in joules (J)."
+ },
+ {
+  "q": "The SI unit of power is the",
+  "o": [
+   "joule",
+   "newton",
+   "watt",
+   "ampere"
+  ],
+  "a": 2,
+  "e": "Power is measured in watts (W), which is one joule per second."
+ },
+ {
+  "q": "The acceleration due to gravity on Earth is about",
+  "o": [
+   "9.8 m/s²",
+   "98 m/s²",
+   "0.98 m/s²",
+   "1.6 m/s²"
+  ],
+  "a": 0,
+  "e": "On Earth, g is about 9.8 m/s² (often rounded to 10 m/s²)."
+ },
+ {
+  "q": "Newton's first law of motion is about",
+  "o": [
+   "inertia",
+   "acceleration",
+   "action and reaction",
+   "gravity"
+  ],
+  "a": 0,
+  "e": "A body stays at rest or in uniform motion unless a force acts on it. This is inertia."
+ },
+ {
+  "q": "A 5 kg mass accelerates at 4 m/s². The force acting on it is",
+  "o": [
+   "9 N",
+   "20 N",
+   "1.25 N",
+   "0.8 N"
+  ],
+  "a": 1,
+  "e": "F = ma = 5 × 4 = 20 N."
+ },
+ {
+  "q": "The momentum of a 3 kg mass moving at 4 m/s is",
+  "o": [
+   "7 kg m/s",
+   "12 kg m/s",
+   "0.75 kg m/s",
+   "1.33 kg m/s"
+  ],
+  "a": 1,
+  "e": "Momentum = mass × velocity = 3 × 4 = 12 kg m/s."
+ },
+ {
+  "q": "The work done by a 10 N force moving a body 5 m in its direction is",
+  "o": [
+   "2 J",
+   "15 J",
+   "50 J",
+   "5 J"
+  ],
+  "a": 2,
+  "e": "Work = force × distance = 10 × 5 = 50 J."
+ },
+ {
+  "q": "A machine does 600 J of work in 20 s. Its power is",
+  "o": [
+   "30 W",
+   "620 W",
+   "12,000 W",
+   "580 W"
+  ],
+  "a": 0,
+  "e": "Power = work ÷ time = 600 ÷ 20 = 30 W."
+ },
+ {
+  "q": "The kinetic energy of a 2 kg mass moving at 3 m/s is",
+  "o": [
+   "6 J",
+   "9 J",
+   "18 J",
+   "3 J"
+  ],
+  "a": 1,
+  "e": "KE = ½mv² = ½ × 2 × 9 = 9 J."
+ },
+ {
+  "q": "The potential energy of a 2 kg mass at a height of 5 m (g = 10 m/s²) is",
+  "o": [
+   "10 J",
+   "50 J",
+   "100 J",
+   "20 J"
+  ],
+  "a": 2,
+  "e": "PE = mgh = 2 × 10 × 5 = 100 J."
+ },
+ {
+  "q": "Sound waves are",
+  "o": [
+   "transverse",
+   "longitudinal",
+   "electromagnetic",
+   "only stationary"
+  ],
+  "a": 1,
+  "e": "Sound travels as longitudinal waves of compressions and rarefactions."
+ },
+ {
+  "q": "The speed of light in a vacuum is about",
+  "o": [
+   "3 × 10⁶ m/s",
+   "3 × 10⁸ m/s",
+   "3 × 10⁵ m/s",
+   "3 × 10¹⁰ m/s"
+  ],
+  "a": 1,
+  "e": "Light travels at about 3 × 10⁸ m/s."
+ },
+ {
+  "q": "A wave has frequency 50 Hz and wavelength 4 m. Its speed is",
+  "o": [
+   "12.5 m/s",
+   "54 m/s",
+   "200 m/s",
+   "46 m/s"
+  ],
+  "a": 2,
+  "e": "v = fλ = 50 × 4 = 200 m/s."
+ },
+ {
+  "q": "A convex lens is also called a",
+  "o": [
+   "diverging lens",
+   "converging lens",
+   "plane lens",
+   "concave lens"
+  ],
+  "a": 1,
+  "e": "A convex lens brings parallel rays together, so it is a converging lens."
+ },
+ {
+  "q": "Two resistors of 4 Ω and 6 Ω are connected in series. Their total resistance is",
+  "o": [
+   "2.4 Ω",
+   "10 Ω",
+   "24 Ω",
+   "5 Ω"
+  ],
+  "a": 1,
+  "e": "In series, resistances add: 4 + 6 = 10 Ω."
+ },
+ {
+  "q": "Two 6 Ω resistors are connected in parallel. Their total resistance is",
+  "o": [
+   "12 Ω",
+   "6 Ω",
+   "3 Ω",
+   "36 Ω"
+  ],
+  "a": 2,
+  "e": "1/R = 1/6 + 1/6 = 2/6, so R = 3 Ω."
+ },
+ {
+  "q": "The SI unit of electric charge is the",
+  "o": [
+   "ampere",
+   "coulomb",
+   "volt",
+   "ohm"
+  ],
+  "a": 1,
+  "e": "Charge is measured in coulombs (C)."
+ },
+ {
+  "q": "Heat can reach us from the Sun through space by",
+  "o": [
+   "conduction",
+   "convection",
+   "radiation",
+   "evaporation"
+  ],
+  "a": 2,
+  "e": "Radiation needs no medium, so it can travel through a vacuum."
+ },
+ {
+  "q": "How much heat is needed to raise 2 kg of a substance (c = 400 J/kg°C) by 5°C?",
+  "o": [
+   "800 J",
+   "4,000 J",
+   "2,000 J",
+   "400 J"
+  ],
+  "a": 1,
+  "e": "Q = mcΔθ = 2 × 400 × 5 = 4,000 J."
+ },
+ {
+  "q": "0°C is equal to",
+  "o": [
+   "0 K",
+   "100 K",
+   "273 K",
+   "373 K"
+  ],
+  "a": 2,
+  "e": "0°C = 273 K."
+ },
+ {
+  "q": "A force of 100 N acts on an area of 4 m². The pressure is",
+  "o": [
+   "400 Pa",
+   "25 Pa",
+   "104 Pa",
+   "0.04 Pa"
+  ],
+  "a": 1,
+  "e": "Pressure = force ÷ area = 100 ÷ 4 = 25 Pa."
+ },
+ {
+  "q": "Atmospheric pressure is measured with a",
+  "o": [
+   "thermometer",
+   "barometer",
+   "ammeter",
+   "hydrometer"
+  ],
+  "a": 1,
+  "e": "A barometer measures atmospheric pressure."
+ },
+ {
+  "q": "Archimedes' principle is about the",
+  "o": [
+   "upthrust on a body in a fluid",
+   "flow of heat",
+   "flow of current",
+   "speed of waves"
+  ],
+  "a": 0,
+  "e": "A body in a fluid experiences an upthrust equal to the weight of fluid it displaces."
+ },
+ {
+  "q": "Which radiation has the greatest penetrating power?",
+  "o": [
+   "alpha",
+   "beta",
+   "gamma",
+   "they are equal"
+  ],
+  "a": 2,
+  "e": "Gamma rays penetrate most; alpha particles are stopped by paper."
+ },
+ {
+  "q": "A sample of 80 g has a half-life of 2 days. How much is left after 6 days?",
+  "o": [
+   "40 g",
+   "20 g",
+   "10 g",
+   "5 g"
+  ],
+  "a": 2,
+  "e": "6 days is 3 half-lives: 80 → 40 → 20 → 10 g."
+ },
+ {
+  "q": "Which colour of visible light has the longest wavelength?",
+  "o": [
+   "violet",
+   "green",
+   "red",
+   "blue"
+  ],
+  "a": 2,
+  "e": "Red has the longest wavelength and violet the shortest."
+ },
+ {
+  "q": "A generator converts",
+  "o": [
+   "electrical energy to mechanical energy",
+   "mechanical energy to electrical energy",
+   "heat to light",
+   "chemical energy to heat"
+  ],
+  "a": 1,
+  "e": "A generator (dynamo) turns mechanical energy into electrical energy."
+ },
+ {
+  "q": "The slope of a velocity-time graph gives the",
+  "o": [
+   "distance",
+   "acceleration",
+   "speed",
+   "displacement"
+  ],
+  "a": 1,
+  "e": "Acceleration is the rate of change of velocity, which is the gradient."
+ },
+ {
+  "q": "Which of the following is the correct expression of the unit of pressure in base SI units?",
+  "o": [
+   "kg m s^-2",
+   "kg m^2 s^-2",
+   "kg m^-1 s^-2",
+   "kg m^-2 s^-1"
+  ],
+  "a": 2,
+  "e": "Pressure = force/area = (kg m s^-2)/m^2 = kg m^-1 s^-2."
+ },
+ {
+  "q": "A car starts from rest and accelerates uniformly at 3 m/s^2 for 8 s. The distance covered is",
+  "o": [
+   "96 m",
+   "24 m",
+   "192 m",
+   "48 m"
+  ],
+  "a": 0,
+  "e": "s = ut + (1/2)at^2 = 0 + 0.5 x 3 x 8^2 = 96 m."
+ },
+ {
+  "q": "A ball is thrown vertically upwards with a speed of 20 m/s. Taking g = 10 m/s^2, the maximum height reached is",
+  "o": [
+   "40 m",
+   "20 m",
+   "10 m",
+   "80 m"
+  ],
+  "a": 1,
+  "e": "H = u^2/2g = 400/20 = 20 m."
+ },
+ {
+  "q": "A body moves at a constant 5 m/s for 4 s and then decelerates uniformly to rest in the next 6 s. The total distance covered is",
+  "o": [
+   "20 m",
+   "30 m",
+   "25 m",
+   "35 m"
+  ],
+  "a": 3,
+  "e": "Distance = 5 x 4 + (1/2) x 5 x 6 = 20 + 15 = 35 m (area under the v-t graph)."
+ },
+ {
+  "q": "A constant force of 12 N acts on a 3 kg body initially at rest for 5 s. The final speed of the body is",
+  "o": [
+   "4 m/s",
+   "15 m/s",
+   "20 m/s",
+   "60 m/s"
+  ],
+  "a": 2,
+  "e": "a = F/m = 4 m/s^2, so v = at = 4 x 5 = 20 m/s."
+ },
+ {
+  "q": "A gun of mass 2 kg fires a bullet of mass 0.02 kg with a speed of 300 m/s. The recoil speed of the gun is",
+  "o": [
+   "3 m/s",
+   "6 m/s",
+   "0.03 m/s",
+   "30 m/s"
+  ],
+  "a": 0,
+  "e": "Conservation of momentum: 2v = 0.02 x 300, so v = 6/2 = 3 m/s."
+ },
+ {
+  "q": "A 60 kg man stands on a weighing scale in a lift accelerating upwards at 2 m/s^2 (g = 10 m/s^2). The reading of the scale in newtons is",
+  "o": [
+   "600 N",
+   "720 N",
+   "480 N",
+   "120 N"
+  ],
+  "a": 1,
+  "e": "R - mg = ma, so R = m(g + a) = 60 x 12 = 720 N."
+ },
+ {
+  "q": "A 4 kg object falls freely from rest through a height of 20 m. Its kinetic energy just before hitting the ground (g = 10 m/s^2) is",
+  "o": [
+   "80 J",
+   "200 J",
+   "400 J",
+   "800 J"
+  ],
+  "a": 3,
+  "e": "KE = loss in PE = mgh = 4 x 10 x 20 = 800 J."
+ },
+ {
+  "q": "A pump raises 120 kg of water through a height of 10 m in 60 s. The power developed (g = 10 m/s^2) is",
+  "o": [
+   "20 W",
+   "120 W",
+   "200 W",
+   "1200 W"
+  ],
+  "a": 2,
+  "e": "P = mgh/t = (120 x 10 x 10)/60 = 200 W."
+ },
+ {
+  "q": "A machine has a velocity ratio of 5 and a mechanical advantage of 4. Its efficiency is",
+  "o": [
+   "80%",
+   "125%",
+   "20%",
+   "64%"
+  ],
+  "a": 0,
+  "e": "Efficiency = MA/VR x 100% = 4/5 x 100% = 80%."
+ },
+ {
+  "q": "A spring extends by 4 cm when a load of 10 N is hung on it. Within the elastic limit, its extension under a load of 25 N is",
+  "o": [
+   "8 cm",
+   "10 cm",
+   "12.5 cm",
+   "16 cm"
+  ],
+  "a": 1,
+  "e": "By Hooke's law, extension is proportional to load: e = 4 x 25/10 = 10 cm."
+ },
+ {
+  "q": "How much heat is required to change 0.5 kg of ice at 0 degrees C completely to water at 0 degrees C? (Specific latent heat of fusion of ice = 3.4 x 10^5 J/kg)",
+  "o": [
+   "3.4 x 10^5 J",
+   "6.8 x 10^5 J",
+   "1.7 x 10^4 J",
+   "1.7 x 10^5 J"
+  ],
+  "a": 3,
+  "e": "Q = mL = 0.5 x 3.4 x 10^5 = 1.7 x 10^5 J."
+ },
+ {
+  "q": "A 2 kW electric heater is used to heat 10 kg of water from 20 degrees C to 30 degrees C. Neglecting losses, the time taken is (specific heat capacity of water = 4200 J/kg K)",
+  "o": [
+   "21 s",
+   "105 s",
+   "210 s",
+   "420 s"
+  ],
+  "a": 2,
+  "e": "Q = mc(dT) = 10 x 4200 x 10 = 4.2 x 10^5 J; t = Q/P = 420000/2000 = 210 s."
+ },
+ {
+  "q": "A gas at a pressure of 3 atm occupies 4 litres. At constant temperature, its pressure when the volume becomes 6 litres is",
+  "o": [
+   "2 atm",
+   "4.5 atm",
+   "1.5 atm",
+   "18 atm"
+  ],
+  "a": 0,
+  "e": "Boyle's law: P2 = P1V1/V2 = 3 x 4/6 = 2 atm."
+ },
+ {
+  "q": "A gas of volume 200 cm^3 at 27 degrees C is heated at constant pressure to 127 degrees C. The new volume is approximately",
+  "o": [
+   "150 cm^3",
+   "267 cm^3",
+   "300 cm^3",
+   "941 cm^3"
+  ],
+  "a": 1,
+  "e": "Charles' law with kelvin temperatures: V2 = 200 x 400/300 = 266.7 cm^3."
+ },
+ {
+  "q": "A metal rod 2 m long has linear expansivity 2 x 10^-5 per K. Its increase in length when heated through 50 K is",
+  "o": [
+   "0.2 mm",
+   "1 mm",
+   "20 mm",
+   "2 mm"
+  ],
+  "a": 3,
+  "e": "dL = L x alpha x dT = 2 x 2 x 10^-5 x 50 = 2 x 10^-3 m = 2 mm."
+ },
+ {
+  "q": "An echo is heard 0.6 s after a shout is made. If the speed of sound in air is 340 m/s, the distance of the reflecting surface is",
+  "o": [
+   "204 m",
+   "51 m",
+   "102 m",
+   "340 m"
+  ],
+  "a": 2,
+  "e": "Sound travels to the wall and back: d = vt/2 = 340 x 0.6/2 = 102 m."
+ },
+ {
+  "q": "The fundamental frequency of a closed pipe 0.5 m long, if the speed of sound in air is 340 m/s, is",
+  "o": [
+   "170 Hz",
+   "340 Hz",
+   "680 Hz",
+   "85 Hz"
+  ],
+  "a": 0,
+  "e": "For a closed pipe, f = v/4L = 340/(4 x 0.5) = 170 Hz."
+ },
+ {
+  "q": "Light travels in air at 3 x 10^8 m/s and in a glass at 2 x 10^8 m/s. The refractive index of the glass is",
+  "o": [
+   "0.67",
+   "1.5",
+   "2.0",
+   "6.0"
+  ],
+  "a": 1,
+  "e": "n = c/v = (3 x 10^8)/(2 x 10^8) = 1.5."
+ },
+ {
+  "q": "An object is placed 30 cm in front of a concave mirror of focal length 10 cm. The image distance is",
+  "o": [
+   "7.5 cm",
+   "20 cm",
+   "30 cm",
+   "15 cm"
+  ],
+  "a": 3,
+  "e": "1/v = 1/f - 1/u = 1/10 - 1/30 = 2/30, so v = 15 cm."
+ },
+ {
+  "q": "The power of a converging lens of focal length 25 cm is",
+  "o": [
+   "0.25 D",
+   "2.5 D",
+   "4 D",
+   "25 D"
+  ],
+  "a": 2,
+  "e": "Power = 1/f in metres = 1/0.25 = 4 D."
+ },
+ {
+  "q": "A cell of e.m.f. 12 V and internal resistance 1 ohm is connected to an external resistor of 5 ohms. The current in the circuit is",
+  "o": [
+   "2 A",
+   "2.4 A",
+   "12 A",
+   "6 A"
+  ],
+  "a": 0,
+  "e": "I = E/(R + r) = 12/(5 + 1) = 2 A."
+ },
+ {
+  "q": "If electrical energy costs N50 per kWh, the cost of using a 100 W bulb for 5 hours is",
+  "o": [
+   "N10",
+   "N25",
+   "N50",
+   "N250"
+  ],
+  "a": 1,
+  "e": "Energy = 0.1 kW x 5 h = 0.5 kWh; cost = 0.5 x 50 = N25."
+ },
+ {
+  "q": "Three resistors of 2 ohms, 3 ohms and 6 ohms are connected in parallel. Their effective resistance is",
+  "o": [
+   "11 ohms",
+   "3 ohms",
+   "0.5 ohm",
+   "1 ohm"
+  ],
+  "a": 3,
+  "e": "1/R = 1/2 + 1/3 + 1/6 = 6/6 = 1, so R = 1 ohm."
+ },
+ {
+  "q": "The energy stored in a 4 microfarad capacitor charged to a p.d. of 50 V is",
+  "o": [
+   "2.5 x 10^-3 J",
+   "1.0 x 10^-2 J",
+   "5.0 x 10^-3 J",
+   "2.0 x 10^-4 J"
+  ],
+  "a": 2,
+  "e": "E = (1/2)CV^2 = 0.5 x 4 x 10^-6 x 2500 = 5 x 10^-3 J."
+ },
+ {
+  "q": "A transformer has 1200 turns in the primary coil and 60 turns in the secondary coil. If the primary is connected to a 240 V a.c. supply, the secondary voltage is",
+  "o": [
+   "12 V",
+   "48 V",
+   "4800 V",
+   "6 V"
+  ],
+  "a": 0,
+  "e": "Vs/Vp = Ns/Np, so Vs = 240 x 60/1200 = 12 V."
+ },
+ {
+  "q": "A straight conductor 0.5 m long carries a current of 3 A at right angles to a magnetic field of flux density 0.4 T. The force on the conductor is",
+  "o": [
+   "0.06 N",
+   "0.6 N",
+   "6 N",
+   "1.2 N"
+  ],
+  "a": 1,
+  "e": "F = BIL = 0.4 x 3 x 0.5 = 0.6 N."
+ },
+ {
+  "q": "When a nucleus of uranium-238 (atomic number 92) emits an alpha particle, the daughter nucleus has mass number and atomic number respectively of",
+  "o": [
+   "234 and 92",
+   "238 and 90",
+   "236 and 91",
+   "234 and 90"
+  ],
+  "a": 3,
+  "e": "An alpha particle carries away 4 nucleons and 2 protons: 238-4 = 234 and 92-2 = 90."
+ },
+ {
+  "q": "The count rate of a radioactive source falls from 800 counts/s to 100 counts/s in 12 s. Its half-life is",
+  "o": [
+   "4 s",
+   "3 s",
+   "6 s",
+   "12 s"
+  ],
+  "a": 0,
+  "e": "800 to 100 is 3 halvings (800, 400, 200, 100), so 3 half-lives = 12 s and half-life = 4 s."
+ },
+ {
+  "q": "The output of a single p-n junction diode used as a half-wave rectifier is",
+  "o": [
+   "a steady direct current",
+   "a pulsating direct current",
+   "an alternating current of twice the input frequency",
+   "an alternating current of the same amplitude"
+  ],
+  "a": 1,
+  "e": "The diode conducts only when forward biased, so only one half-cycle passes, giving pulsating d.c."
+ }
+]

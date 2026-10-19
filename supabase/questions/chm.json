@@ -1,0 +1,772 @@
+[
+ {
+  "q": "The atomic number of carbon is",
+  "o": [
+   "12",
+   "6",
+   "8",
+   "14"
+  ],
+  "a": 1,
+  "e": "Carbon has 6 protons, so its atomic number is 6."
+ },
+ {
+  "q": "Which gas turns lime water milky?",
+  "o": [
+   "oxygen",
+   "hydrogen",
+   "carbon dioxide",
+   "nitrogen"
+  ],
+  "a": 2,
+  "e": "CO₂ reacts with lime water to form milky calcium carbonate."
+ },
+ {
+  "q": "The pH of a neutral solution at 25°C is",
+  "o": [
+   "0",
+   "7",
+   "10",
+   "14"
+  ],
+  "a": 1,
+  "e": "A neutral solution has pH 7; below 7 is acidic, above is alkaline."
+ },
+ {
+  "q": "Which is a noble gas?",
+  "o": [
+   "chlorine",
+   "argon",
+   "sodium",
+   "nitrogen"
+  ],
+  "a": 1,
+  "e": "Argon is in Group 18, the noble gases."
+ },
+ {
+  "q": "The most electronegative element is",
+  "o": [
+   "oxygen",
+   "chlorine",
+   "fluorine",
+   "nitrogen"
+  ],
+  "a": 2,
+  "e": "Fluorine attracts electrons more strongly than any other element."
+ },
+ {
+  "q": "Moles in 36 g of water (H = 1, O = 16)",
+  "o": [
+   "1",
+   "2",
+   "3",
+   "18"
+  ],
+  "a": 1,
+  "e": "Moles = mass ÷ molar mass = 36 ÷ 18 = 2."
+ },
+ {
+  "q": "The chemical symbol for sodium is",
+  "o": [
+   "S",
+   "So",
+   "Na",
+   "Sn"
+  ],
+  "a": 2,
+  "e": "Na comes from the Latin name natrium."
+ },
+ {
+  "q": "An acid turns blue litmus paper",
+  "o": [
+   "green",
+   "red",
+   "colourless",
+   "yellow"
+  ],
+  "a": 1,
+  "e": "Acids turn blue litmus paper red."
+ },
+ {
+  "q": "A solid changing directly to a gas is called",
+  "o": [
+   "sublimation",
+   "evaporation",
+   "condensation",
+   "melting"
+  ],
+  "a": 0,
+  "e": "Sublimation is solid to gas without becoming liquid first."
+ },
+ {
+  "q": "Which of these is an alkali metal?",
+  "o": [
+   "calcium",
+   "potassium",
+   "iron",
+   "aluminium"
+  ],
+  "a": 1,
+  "e": "Potassium is in Group 1, the alkali metals."
+ },
+ {
+  "q": "Rusting of iron requires",
+  "o": [
+   "oxygen and water",
+   "hydrogen only",
+   "nitrogen and heat",
+   "carbon dioxide only"
+  ],
+  "a": 0,
+  "e": "Rust forms when iron meets oxygen and water."
+ },
+ {
+  "q": "The most abundant gas in air is",
+  "o": [
+   "oxygen",
+   "nitrogen",
+   "carbon dioxide",
+   "argon"
+  ],
+  "a": 1,
+  "e": "Air is about 78% nitrogen."
+ },
+ {
+  "q": "The chemical symbol for potassium is",
+  "o": [
+   "P",
+   "Po",
+   "K",
+   "Pt"
+  ],
+  "a": 2,
+  "e": "Potassium comes from the Latin kalium, so its symbol is K."
+ },
+ {
+  "q": "A neutral oxygen atom (atomic number 8) has how many electrons?",
+  "o": [
+   "6",
+   "8",
+   "16",
+   "2"
+  ],
+  "a": 1,
+  "e": "A neutral atom has as many electrons as protons, so 8."
+ },
+ {
+  "q": "The usual valency of Group 1 elements is",
+  "o": [
+   "1",
+   "2",
+   "3",
+   "0"
+  ],
+  "a": 0,
+  "e": "Group 1 atoms lose one electron, so their valency is 1."
+ },
+ {
+  "q": "Which gas is released when zinc reacts with dilute hydrochloric acid?",
+  "o": [
+   "oxygen",
+   "hydrogen",
+   "chlorine",
+   "carbon dioxide"
+  ],
+  "a": 1,
+  "e": "Zn + 2HCl → ZnCl₂ + H₂. Hydrogen burns with a pop."
+ },
+ {
+  "q": "The formula of sulphuric acid is",
+  "o": [
+   "HCl",
+   "H₂SO₄",
+   "HNO₃",
+   "H₂CO₃"
+  ],
+  "a": 1,
+  "e": "Sulphuric acid is H₂SO₄."
+ },
+ {
+  "q": "Which of these is an alkali?",
+  "o": [
+   "HCl",
+   "NaOH",
+   "H₂SO₄",
+   "NaCl"
+  ],
+  "a": 1,
+  "e": "NaOH (sodium hydroxide) is a soluble base, which is an alkali."
+ },
+ {
+  "q": "Rusting of iron needs",
+  "o": [
+   "oxygen only",
+   "water only",
+   "oxygen and water",
+   "nitrogen and water"
+  ],
+  "a": 2,
+  "e": "Iron rusts when both oxygen and water are present."
+ },
+ {
+  "q": "Salt is best obtained from salt solution by",
+  "o": [
+   "filtration",
+   "evaporation",
+   "sublimation",
+   "magnetism"
+  ],
+  "a": 1,
+  "e": "Evaporating the water leaves the salt behind."
+ },
+ {
+  "q": "Ammonium chloride can be separated from sand by",
+  "o": [
+   "filtration",
+   "sublimation",
+   "distillation",
+   "decantation"
+  ],
+  "a": 1,
+  "e": "Ammonium chloride sublimes when heated, but sand does not."
+ },
+ {
+  "q": "The general formula of the alkanes is",
+  "o": [
+   "CₙH₂ₙ",
+   "CₙH₂ₙ₊₂",
+   "CₙH₂ₙ₋₂",
+   "CₙHₙ"
+  ],
+  "a": 1,
+  "e": "Alkanes are saturated hydrocarbons with formula CₙH₂ₙ₊₂."
+ },
+ {
+  "q": "The simplest alkane is",
+  "o": [
+   "ethane",
+   "methane",
+   "propane",
+   "butane"
+  ],
+  "a": 1,
+  "e": "Methane (CH₄) has one carbon atom."
+ },
+ {
+  "q": "Alkenes contain a",
+  "o": [
+   "C≡C triple bond",
+   "C=C double bond",
+   "C–C single bond only",
+   "–OH group"
+  ],
+  "a": 1,
+  "e": "The C=C double bond is the functional group of alkenes."
+ },
+ {
+  "q": "How many atoms are in one molecule of ethane, C₂H₆?",
+  "o": [
+   "6",
+   "8",
+   "2",
+   "4"
+  ],
+  "a": 1,
+  "e": "2 carbon + 6 hydrogen = 8 atoms."
+ },
+ {
+  "q": "The relative molecular mass of CO₂ (C = 12, O = 16) is",
+  "o": [
+   "28",
+   "32",
+   "44",
+   "56"
+  ],
+  "a": 2,
+  "e": "12 + 2(16) = 44."
+ },
+ {
+  "q": "How many moles are in 36 g of water (H = 1, O = 16)?",
+  "o": [
+   "1",
+   "2",
+   "3",
+   "0.5"
+  ],
+  "a": 1,
+  "e": "Molar mass of H₂O is 18 g/mol, so 36 ÷ 18 = 2 moles."
+ },
+ {
+  "q": "Avogadro's number is about",
+  "o": [
+   "6.02 × 10²³",
+   "6.02 × 10³²",
+   "3.0 × 10⁸",
+   "1.6 × 10⁻¹⁹"
+  ],
+  "a": 0,
+  "e": "One mole contains about 6.02 × 10²³ particles."
+ },
+ {
+  "q": "Isotopes of an element have the same number of",
+  "o": [
+   "neutrons",
+   "protons",
+   "nucleons",
+   "mass numbers"
+  ],
+  "a": 1,
+  "e": "Isotopes have the same proton number but different neutron numbers."
+ },
+ {
+  "q": "The maximum number of electrons in the first shell is",
+  "o": [
+   "2",
+   "8",
+   "18",
+   "1"
+  ],
+  "a": 0,
+  "e": "The first shell holds up to 2 electrons."
+ },
+ {
+  "q": "A bond formed by the transfer of electrons is",
+  "o": [
+   "covalent",
+   "ionic",
+   "metallic",
+   "hydrogen"
+  ],
+  "a": 1,
+  "e": "Ionic bonding involves electron transfer, as in sodium chloride."
+ },
+ {
+  "q": "A covalent bond involves",
+  "o": [
+   "sharing of electrons",
+   "transfer of electrons",
+   "loss of protons",
+   "attraction between metal ions"
+  ],
+  "a": 0,
+  "e": "Atoms share pairs of electrons in covalent bonds."
+ },
+ {
+  "q": "The pH of a strong acid is closest to",
+  "o": [
+   "13",
+   "7",
+   "1",
+   "10"
+  ],
+  "a": 2,
+  "e": "Strong acids have a low pH, around 1."
+ },
+ {
+  "q": "Blue litmus paper turns ___ in acid.",
+  "o": [
+   "blue",
+   "red",
+   "green",
+   "colourless"
+  ],
+  "a": 1,
+  "e": "Acids turn blue litmus red."
+ },
+ {
+  "q": "A catalyst",
+  "o": [
+   "is used up in the reaction",
+   "slows down a reaction",
+   "speeds up a reaction and is not used up",
+   "changes the products"
+  ],
+  "a": 2,
+  "e": "A catalyst changes the rate without being consumed."
+ },
+ {
+  "q": "During electrolysis, positive ions move to the",
+  "o": [
+   "anode",
+   "cathode",
+   "salt bridge",
+   "both electrodes"
+  ],
+  "a": 1,
+  "e": "Positive ions (cations) move to the negative electrode, the cathode."
+ },
+ {
+  "q": "The Haber process makes ammonia from",
+  "o": [
+   "oxygen and hydrogen",
+   "nitrogen and hydrogen",
+   "nitrogen and oxygen",
+   "carbon and hydrogen"
+  ],
+  "a": 1,
+  "e": "N₂ + 3H₂ ⇌ 2NH₃."
+ },
+ {
+  "q": "At constant temperature, if the pressure on a gas is doubled, its volume",
+  "o": [
+   "doubles",
+   "halves",
+   "stays the same",
+   "quadruples"
+  ],
+  "a": 1,
+  "e": "Boyle's law: pressure and volume are inversely proportional."
+ },
+ {
+  "q": "Temporary and permanent hardness of water are caused by dissolved",
+  "o": [
+   "sodium chloride",
+   "calcium and magnesium salts",
+   "potassium nitrate",
+   "carbon"
+  ],
+  "a": 1,
+  "e": "Calcium and magnesium salts make water hard."
+ },
+ {
+  "q": "Oxidation is the",
+  "o": [
+   "gain of electrons",
+   "loss of electrons",
+   "gain of protons",
+   "loss of neutrons"
+  ],
+  "a": 1,
+  "e": "Remember OIL RIG: Oxidation Is Loss, Reduction Is Gain of electrons."
+ },
+ {
+  "q": "Mass of 0.25 mol of NaOH (Na = 23, O = 16, H = 1)",
+  "o": [
+   "10 g",
+   "5 g",
+   "20 g",
+   "40 g"
+  ],
+  "a": 0,
+  "e": "M(NaOH) = 40 g/mol, so 0.25 × 40 = 10 g."
+ },
+ {
+  "q": "Volume of CO₂ at s.t.p. produced from 11 g of CO₂ (C = 12, O = 16; molar volume 22.4 dm³)",
+  "o": [
+   "2.8 dm³",
+   "11.2 dm³",
+   "5.6 dm³",
+   "22.4 dm³"
+  ],
+  "a": 2,
+  "e": "11 g ÷ 44 g/mol = 0.25 mol, and 0.25 × 22.4 = 5.6 dm³."
+ },
+ {
+  "q": "Percentage by mass of magnesium in MgO (Mg = 24, O = 16)",
+  "o": [
+   "40%",
+   "60%",
+   "50%",
+   "75%"
+  ],
+  "a": 1,
+  "e": "24/40 × 100 = 60%."
+ },
+ {
+  "q": "Concentration of a solution containing 4.0 g of NaOH in 500 cm³ (Na = 23, O = 16, H = 1)",
+  "o": [
+   "0.1 mol/dm³",
+   "0.4 mol/dm³",
+   "0.8 mol/dm³",
+   "0.2 mol/dm³"
+  ],
+  "a": 3,
+  "e": "4/40 = 0.1 mol in 0.5 dm³, giving 0.2 mol/dm³."
+ },
+ {
+  "q": "A gas occupies 200 cm³ at 2 atm and constant temperature. Its volume at 4 atm is",
+  "o": [
+   "50 cm³",
+   "400 cm³",
+   "800 cm³",
+   "100 cm³"
+  ],
+  "a": 3,
+  "e": "Boyle's law: P₁V₁ = P₂V₂, so V₂ = 2 × 200 / 4 = 100 cm³."
+ },
+ {
+  "q": "A gas occupies 300 cm³ at 27°C. Its volume at 127°C and constant pressure is",
+  "o": [
+   "600 cm³",
+   "400 cm³",
+   "300 cm³",
+   "1350 cm³"
+  ],
+  "a": 1,
+  "e": "Charles's law with kelvin: 300 × 400/300 = 400 cm³."
+ },
+ {
+  "q": "The electronic configuration of the sodium ion, Na⁺ (atomic number 11), is",
+  "o": [
+   "1s² 2s² 2p⁶ 3s¹",
+   "1s² 2s² 2p⁵",
+   "1s² 2s² 2p⁶",
+   "1s² 2s² 2p⁶ 3s²"
+  ],
+  "a": 2,
+  "e": "Na loses its 3s electron, leaving 10 electrons as 1s² 2s² 2p⁶."
+ },
+ {
+  "q": "Across Period 3 from sodium to chlorine, the atomic radius generally",
+  "o": [
+   "decreases",
+   "increases",
+   "remains constant",
+   "increases then decreases"
+  ],
+  "a": 0,
+  "e": "Nuclear charge increases while shells stay the same, pulling electrons closer."
+ },
+ {
+  "q": "The shape of a water molecule is",
+  "o": [
+   "linear",
+   "tetrahedral",
+   "bent (angular)",
+   "trigonal planar"
+  ],
+  "a": 2,
+  "e": "Two bond pairs and two lone pairs on oxygen give a bent shape."
+ },
+ {
+  "q": "The bond formed when NH₃ combines with H⁺ to form NH₄⁺ is",
+  "o": [
+   "ionic",
+   "metallic",
+   "hydrogen bond only",
+   "dative (coordinate) covalent"
+  ],
+  "a": 3,
+  "e": "Nitrogen donates its lone pair to H⁺, forming a coordinate covalent bond."
+ },
+ {
+  "q": "The oxidation number of manganese in KMnO₄ is",
+  "o": [
+   "+7",
+   "+5",
+   "+4",
+   "+2"
+  ],
+  "a": 0,
+  "e": "K = +1, four O = −8, so Mn = +7."
+ },
+ {
+  "q": "The oxidation number of chromium in K₂Cr₂O₇ is",
+  "o": [
+   "+3",
+   "+6",
+   "+7",
+   "+12"
+  ],
+  "a": 1,
+  "e": "2(+1) + 2x + 7(−2) = 0 gives x = +6."
+ },
+ {
+  "q": "During electrolysis of concentrated brine using inert electrodes, the product at the cathode is",
+  "o": [
+   "sodium",
+   "hydrogen",
+   "chlorine",
+   "oxygen"
+  ],
+  "a": 1,
+  "e": "H⁺ is preferentially discharged over Na⁺, giving hydrogen gas."
+ },
+ {
+  "q": "Mass of copper deposited when 2 A flows for 965 s through CuSO₄ solution (Cu = 64, F = 96500 C)",
+  "o": [
+   "1.28 g",
+   "0.32 g",
+   "6.4 g",
+   "0.64 g"
+  ],
+  "a": 3,
+  "e": "Q = 1930 C = 0.02 mol e⁻; Cu²⁺ needs 2 e⁻, so 0.01 mol × 64 = 0.64 g."
+ },
+ {
+  "q": "A reaction with a negative enthalpy change (ΔH) is",
+  "o": [
+   "exothermic",
+   "endothermic",
+   "non-spontaneous always",
+   "a physical change only"
+  ],
+  "a": 0,
+  "e": "Negative ΔH means heat is released to the surroundings."
+ },
+ {
+  "q": "For N₂ + 3H₂ ⇌ 2NH₃ (ΔH negative), increasing the temperature will",
+  "o": [
+   "shift the equilibrium to the right",
+   "have no effect",
+   "shift the equilibrium to the left",
+   "increase the yield of NH₃"
+  ],
+  "a": 2,
+  "e": "Heat favours the endothermic (reverse) direction, lowering NH₃ yield."
+ },
+ {
+  "q": "Which change increases the rate of reaction between marble chips and dilute HCl?",
+  "o": [
+   "Lowering the temperature",
+   "Diluting the acid",
+   "Using larger chips",
+   "Crushing the chips into powder"
+  ],
+  "a": 3,
+  "e": "Powdering increases surface area, so more collisions occur."
+ },
+ {
+  "q": "The pH of 0.01 mol/dm³ hydrochloric acid is",
+  "o": [
+   "1",
+   "2",
+   "12",
+   "0.01"
+  ],
+  "a": 1,
+  "e": "[H⁺] = 10⁻² mol/dm³, so pH = 2."
+ },
+ {
+  "q": "25 cm³ of NaOH solution is neutralised by 20 cm³ of 0.1 mol/dm³ HCl. The concentration of the NaOH is",
+  "o": [
+   "0.125 mol/dm³",
+   "0.10 mol/dm³",
+   "0.08 mol/dm³",
+   "0.02 mol/dm³"
+  ],
+  "a": 2,
+  "e": "Moles HCl = 0.002 = moles NaOH; 0.002/0.025 = 0.08 mol/dm³."
+ },
+ {
+  "q": "NaHSO₄ is classified as",
+  "o": [
+   "an acid salt",
+   "a normal salt",
+   "a basic salt",
+   "a double salt"
+  ],
+  "a": 0,
+  "e": "It still contains a replaceable hydrogen ion."
+ },
+ {
+  "q": "When concentrated H₂SO₄ is added to sugar, the sugar turns black because the acid acts as",
+  "o": [
+   "a dehydrating agent",
+   "an oxidising agent only",
+   "a reducing agent",
+   "a catalyst only"
+  ],
+  "a": 0,
+  "e": "The acid removes water from sugar, leaving carbon."
+ },
+ {
+  "q": "The allotrope of carbon that conducts electricity is",
+  "o": [
+   "diamond",
+   "sulphur",
+   "graphite",
+   "quartz"
+  ],
+  "a": 2,
+  "e": "Graphite has delocalised electrons between its layers."
+ },
+ {
+  "q": "Addition of AgNO₃ solution to a solution of a chloride gives a white precipitate that",
+  "o": [
+   "is insoluble in ammonia solution",
+   "turns yellow on standing",
+   "dissolves in dilute nitric acid",
+   "dissolves in dilute ammonia solution"
+  ],
+  "a": 3,
+  "e": "AgCl dissolves in dilute NH₃ by forming a soluble complex."
+ },
+ {
+  "q": "Brass is an alloy of",
+  "o": [
+   "copper and tin",
+   "copper and zinc",
+   "iron and carbon",
+   "lead and tin"
+  ],
+  "a": 1,
+  "e": "Brass is copper and zinc; bronze is copper and tin."
+ },
+ {
+  "q": "In the extraction of aluminium, alumina is dissolved in molten",
+  "o": [
+   "bauxite",
+   "cryolite",
+   "limestone",
+   "haematite"
+  ],
+  "a": 1,
+  "e": "Cryolite lowers the melting point of alumina for electrolysis."
+ },
+ {
+  "q": "The IUPAC name of CH₃CH₂CH₂OH is",
+  "o": [
+   "ethanol",
+   "propanal",
+   "propan-2-ol",
+   "propan-1-ol"
+  ],
+  "a": 3,
+  "e": "Three carbons with -OH on carbon 1 give propan-1-ol."
+ },
+ {
+  "q": "The characteristic reaction of alkenes is",
+  "o": [
+   "addition",
+   "substitution",
+   "esterification",
+   "saponification"
+  ],
+  "a": 0,
+  "e": "The C=C double bond opens to add other atoms."
+ },
+ {
+  "q": "The enzyme in yeast that converts glucose to ethanol and carbon dioxide is",
+  "o": [
+   "amylase",
+   "lipase",
+   "zymase",
+   "pepsin"
+  ],
+  "a": 2,
+  "e": "Zymase catalyses alcoholic fermentation."
+ },
+ {
+  "q": "Acid rain is mainly caused by atmospheric",
+  "o": [
+   "CO and CH₄",
+   "N₂ and O₂",
+   "SO₂ and NO₂",
+   "CO₂ and He"
+  ],
+  "a": 2,
+  "e": "SO₂ and NO₂ dissolve in rain to form H₂SO₄ and HNO₃."
+ },
+ {
+  "q": "A compound contains 40% C, 6.7% H and 53.3% O by mass (C = 12, H = 1, O = 16). Its empirical formula is",
+  "o": [
+   "CHO",
+   "CH₂O",
+   "C₂H₄O",
+   "CH₄O"
+  ],
+  "a": 1,
+  "e": "Mole ratio 3.33 : 6.7 : 3.33 simplifies to 1 : 2 : 1."
+ }
+]

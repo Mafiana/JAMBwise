@@ -1,0 +1,783 @@
+[
+ {
+  "q": "Trade between two countries is called",
+  "o": [
+   "home trade",
+   "foreign trade",
+   "retail trade",
+   "barter"
+  ],
+  "a": 1,
+  "e": "Trade between countries is foreign trade."
+ },
+ {
+  "q": "A document sent by a seller listing goods and amounts due is an",
+  "o": [
+   "receipt",
+   "invoice",
+   "cheque",
+   "waybill"
+  ],
+  "a": 1,
+  "e": "An invoice lists the goods supplied and the amount due."
+ },
+ {
+  "q": "Which insurance principle requires full disclosure of facts?",
+  "o": [
+   "indemnity",
+   "utmost good faith",
+   "subrogation",
+   "contribution"
+  ],
+  "a": 1,
+  "e": "Utmost good faith means full disclosure of material facts."
+ },
+ {
+  "q": "The bank that issues currency in Nigeria is the",
+  "o": [
+   "commercial bank",
+   "Central Bank",
+   "merchant bank",
+   "microfinance bank"
+  ],
+  "a": 1,
+  "e": "The Central Bank of Nigeria issues the currency."
+ },
+ {
+  "q": "Who buys in bulk from manufacturers and sells to retailers?",
+  "o": [
+   "retailer",
+   "wholesaler",
+   "consumer",
+   "hawker"
+  ],
+  "a": 1,
+  "e": "Wholesalers buy in bulk and sell to retailers."
+ },
+ {
+  "q": "A business owned and run by one person is a",
+  "o": [
+   "partnership",
+   "sole proprietorship",
+   "cooperative",
+   "public company"
+  ],
+  "a": 1,
+  "e": "A sole proprietor owns and runs the business alone."
+ },
+ {
+  "q": "Which of these is a source of long-term finance?",
+  "o": [
+   "trade credit",
+   "debentures",
+   "overdraft",
+   "petty cash"
+  ],
+  "a": 1,
+  "e": "Debentures are long-term loans to a company."
+ },
+ {
+  "q": "Goods held for sale in a shop are called",
+  "o": [
+   "stock",
+   "liabilities",
+   "capital",
+   "wages"
+  ],
+  "a": 0,
+  "e": "Stock is goods kept for sale."
+ },
+ {
+  "q": "The cheapest way to move bulky goods over long distances is by",
+  "o": [
+   "air",
+   "water",
+   "road",
+   "motorcycle"
+  ],
+  "a": 1,
+  "e": "Water transport is cheapest for bulky, non-urgent goods."
+ },
+ {
+  "q": "The main aim of advertising is to",
+  "o": [
+   "inform and persuade buyers",
+   "reduce prices",
+   "store goods",
+   "collect taxes"
+  ],
+  "a": 0,
+  "e": "Advertising informs and persuades buyers."
+ },
+ {
+  "q": "A cheque is an instrument of",
+  "o": [
+   "payment",
+   "insurance",
+   "transport",
+   "warehousing"
+  ],
+  "a": 0,
+  "e": "A cheque is an order to a bank to pay money."
+ },
+ {
+  "q": "Shares are bought and sold on the",
+  "o": [
+   "stock exchange",
+   "post office",
+   "customs",
+   "chamber of commerce"
+  ],
+  "a": 0,
+  "e": "Shares are traded on the stock exchange."
+ },
+ {
+  "q": "Retail trade is the selling of goods",
+  "o": [
+   "to consumers in small quantities",
+   "to wholesalers only",
+   "to other countries only",
+   "to the government only"
+  ],
+  "a": 0,
+  "e": "Retailers sell directly to final consumers."
+ },
+ {
+  "q": "A wholesaler",
+  "o": [
+   "sells to final consumers",
+   "buys in bulk and sells to retailers",
+   "manufactures goods",
+   "insures goods"
+  ],
+  "a": 1,
+  "e": "Wholesalers link producers and retailers."
+ },
+ {
+  "q": "The usual chain of distribution is",
+  "o": [
+   "Manufacturer, retailer, wholesaler, consumer",
+   "Manufacturer, wholesaler, retailer, consumer",
+   "Wholesaler, manufacturer, consumer, retailer",
+   "Consumer, retailer, manufacturer, wholesaler"
+  ],
+  "a": 1,
+  "e": "Goods normally pass from manufacturer to wholesaler to retailer to consumer."
+ },
+ {
+  "q": "A sole proprietorship is a business owned by",
+  "o": [
+   "one person",
+   "the government",
+   "shareholders only",
+   "its members equally"
+  ],
+  "a": 0,
+  "e": "One person owns and usually runs it."
+ },
+ {
+  "q": "Limited liability means shareholders' loss is limited to",
+  "o": [
+   "their entire personal wealth",
+   "the amount unpaid on their shares",
+   "nothing at all",
+   "the company's profits"
+  ],
+  "a": 1,
+  "e": "Shareholders cannot lose more than they invested."
+ },
+ {
+  "q": "Shares of a public limited company are traded on the",
+  "o": [
+   "stock exchange",
+   "post office",
+   "customs office",
+   "cooperative society"
+  ],
+  "a": 0,
+  "e": "Public companies can list shares on the stock exchange."
+ },
+ {
+  "q": "A guiding principle of co-operative societies is",
+  "o": [
+   "one share, one vote",
+   "one member, one vote",
+   "the richest member decides",
+   "the owner decides"
+  ],
+  "a": 1,
+  "e": "Each member has one vote regardless of shares held."
+ },
+ {
+  "q": "A document sent by a buyer asking a seller to supply goods is a",
+  "o": [
+   "invoice",
+   "purchase order",
+   "receipt",
+   "waybill"
+  ],
+  "a": 1,
+  "e": "The buyer sends an order for the goods wanted."
+ },
+ {
+  "q": "A credit note is issued when",
+  "o": [
+   "goods are returned or the buyer was overcharged",
+   "goods are ordered",
+   "payment is made in cash",
+   "goods are insured"
+  ],
+  "a": 0,
+  "e": "It reduces the amount the buyer owes."
+ },
+ {
+  "q": "A receipt is",
+  "o": [
+   "evidence of payment",
+   "an order for goods",
+   "a request for a quotation",
+   "a list of goods shipped"
+  ],
+  "a": 0,
+  "e": "A receipt proves payment was made."
+ },
+ {
+  "q": "A bill of lading is issued by the",
+  "o": [
+   "buyer",
+   "carrier, acknowledging goods loaded for shipment",
+   "bank",
+   "insurance company"
+  ],
+  "a": 1,
+  "e": "It is a receipt and contract of carriage for goods being shipped."
+ },
+ {
+  "q": "The right to insure something arises from having",
+  "o": [
+   "insurable interest",
+   "a bank account",
+   "a licence",
+   "a warehouse"
+  ],
+  "a": 0,
+  "e": "You can only insure what you would suffer a loss from."
+ },
+ {
+  "q": "A premium is",
+  "o": [
+   "the payment made to an insurer for cover",
+   "money paid out on a claim",
+   "a tax on insurance",
+   "bank interest"
+  ],
+  "a": 0,
+  "e": "The insured pays premiums to the insurer."
+ },
+ {
+  "q": "The principle of indemnity means the insured is",
+  "o": [
+   "made richer by the loss",
+   "restored to the position before the loss",
+   "paid double",
+   "refunded the premium"
+  ],
+  "a": 1,
+  "e": "Insurance compensates for loss but should not give a profit."
+ },
+ {
+  "q": "A crossed cheque",
+  "o": [
+   "can be cashed over the counter",
+   "must be paid into a bank account",
+   "is not valid",
+   "is a cash cheque"
+  ],
+  "a": 1,
+  "e": "Crossing makes the cheque payable only through a bank account."
+ },
+ {
+  "q": "An overdraft allows a customer to",
+  "o": [
+   "save more",
+   "withdraw more than the account balance",
+   "buy shares",
+   "buy insurance"
+  ],
+  "a": 1,
+  "e": "Banks may allow current account holders to go overdrawn."
+ },
+ {
+  "q": "A current account is mainly operated by",
+  "o": [
+   "fixed deposits",
+   "cheques",
+   "shares",
+   "bills of lading"
+  ],
+  "a": 1,
+  "e": "Current accounts are operated by cheques and are meant for frequent transactions."
+ },
+ {
+  "q": "The fastest means of transport is",
+  "o": [
+   "road",
+   "rail",
+   "air",
+   "water"
+  ],
+  "a": 2,
+  "e": "Air transport is the fastest."
+ },
+ {
+  "q": "The main purpose of advertising is to",
+  "o": [
+   "inform and persuade buyers",
+   "hide products",
+   "print money",
+   "collect taxes"
+  ],
+  "a": 0,
+  "e": "Advertising informs customers and persuades them to buy."
+ },
+ {
+  "q": "A tariff is a",
+  "o": [
+   "tax on imports",
+   "tax on income",
+   "bank fee",
+   "insurance cost"
+  ],
+  "a": 0,
+  "e": "Tariffs are duties placed on imported goods."
+ },
+ {
+  "q": "An embargo is a",
+  "o": [
+   "ban on trade with a country",
+   "tax cut",
+   "subsidy",
+   "free trade zone"
+  ],
+  "a": 0,
+  "e": "An embargo officially bans trade."
+ },
+ {
+  "q": "Entrepôt trade is",
+  "o": [
+   "export of locally made goods",
+   "importing goods in order to re-export them",
+   "local retail trade",
+   "barter"
+  ],
+  "a": 1,
+  "e": "Goods are imported and then re-exported."
+ },
+ {
+  "q": "The stock exchange is a market for",
+  "o": [
+   "second-hand cars",
+   "buying and selling shares and bonds",
+   "food items",
+   "foreign exchange only"
+  ],
+  "a": 1,
+  "e": "It trades securities such as shares and bonds."
+ },
+ {
+  "q": "A dividend is",
+  "o": [
+   "interest on a loan",
+   "a share of profit paid to shareholders",
+   "a tax paid",
+   "a salary"
+  ],
+  "a": 1,
+  "e": "Companies pay dividends out of profit."
+ },
+ {
+  "q": "A debenture is",
+  "o": [
+   "an ordinary share",
+   "a loan to a company with fixed interest",
+   "a bank overdraft",
+   "a dividend"
+  ],
+  "a": 1,
+  "e": "Debenture holders are creditors, not owners."
+ },
+ {
+  "q": "The Nigerian agency that regulates food and drugs is",
+  "o": [
+   "SON",
+   "NAFDAC",
+   "CBN",
+   "NNPC"
+  ],
+  "a": 1,
+  "e": "NAFDAC is the National Agency for Food and Drug Administration and Control."
+ },
+ {
+  "q": "The Standards Organisation of Nigeria (SON) is mainly concerned with",
+  "o": [
+   "setting and enforcing product standards",
+   "printing money",
+   "collecting taxes",
+   "running elections"
+  ],
+  "a": 0,
+  "e": "SON sets standards for goods."
+ },
+ {
+  "q": "A trade association is a",
+  "o": [
+   "group of firms or traders with common interests",
+   "government agency",
+   "bank",
+   "court"
+  ],
+  "a": 0,
+  "e": "Traders form associations to protect shared interests."
+ },
+ {
+  "q": "Warehousing helps trade mainly by",
+  "o": [
+   "storing goods until they are needed",
+   "printing money",
+   "insuring buyers",
+   "setting prices"
+  ],
+  "a": 0,
+  "e": "Warehouses store goods and so bridge the gap between production and sale."
+ },
+ {
+  "q": "A trader buys goods for N80,000 and adds a mark-up of 25% on cost. The selling price is",
+  "o": [
+   "N100,000",
+   "N90,000",
+   "N105,000",
+   "N120,000"
+  ],
+  "a": 0,
+  "e": "25% of 80,000 is 20,000, so selling price is 100,000."
+ },
+ {
+  "q": "A retailer gives 10% trade discount on goods listed at N20,000. The amount payable is",
+  "o": [
+   "N20,000",
+   "N18,000",
+   "N16,000",
+   "N19,000"
+  ],
+  "a": 1,
+  "e": "10% of 20,000 is 2,000, so the buyer pays 18,000."
+ },
+ {
+  "q": "Sales are N500,000 and returns inwards are N20,000. The net turnover is",
+  "o": [
+   "N520,000",
+   "N500,000",
+   "N480,000",
+   "N460,000"
+  ],
+  "a": 2,
+  "e": "Net turnover equals sales less returns inwards: 480,000."
+ },
+ {
+  "q": "A building worth N5m is insured fully for N5m and a fire causes N2m damage. Under indemnity the insurer pays",
+  "o": [
+   "N5m",
+   "N3m",
+   "N7m",
+   "N2m"
+  ],
+  "a": 3,
+  "e": "Indemnity restores the actual loss only, which is N2m."
+ },
+ {
+  "q": "A trader has sales of N300,000 and cost of goods sold of N220,000. The gross profit is",
+  "o": [
+   "N80,000",
+   "N520,000",
+   "N220,000",
+   "N300,000"
+  ],
+  "a": 0,
+  "e": "Gross profit equals sales less cost of goods sold: 80,000."
+ },
+ {
+  "q": "Cost of goods sold is N600,000 and average stock is N100,000. The rate of stock turnover is",
+  "o": [
+   "600 times",
+   "6 times",
+   "5 times",
+   "7 times"
+  ],
+  "a": 1,
+  "e": "Rate of stock turnover is cost of goods sold divided by average stock: 6 times."
+ },
+ {
+  "q": "Goods cost N60,000 and sell for N75,000. The mark-up on cost is",
+  "o": [
+   "20%",
+   "15%",
+   "25%",
+   "30%"
+  ],
+  "a": 2,
+  "e": "Profit 15,000 divided by cost 60,000 is 25%."
+ },
+ {
+  "q": "A property worth N10m is insured for N5m under an average clause and suffers a N4m partial loss. The insurer pays",
+  "o": [
+   "N4m",
+   "N5m",
+   "N1m",
+   "N2m"
+  ],
+  "a": 3,
+  "e": "Payment is 5/10 of 4m, which is N2m."
+ },
+ {
+  "q": "The first step of the chain of distribution in the home trade is usually the",
+  "o": [
+   "Manufacturer",
+   "Retailer",
+   "Consumer",
+   "Wholesaler"
+  ],
+  "a": 0,
+  "e": "Goods originate with the producer or manufacturer."
+ },
+ {
+  "q": "The practice of one insurer passing part of a risk to another insurer is",
+  "o": [
+   "subrogation",
+   "reinsurance",
+   "contribution",
+   "co-insurance"
+  ],
+  "a": 1,
+  "e": "Reinsurance spreads a large risk by ceding part to another insurer."
+ },
+ {
+  "q": "The principle that an insurer who pays a claim takes over the insured's rights against a third party is",
+  "o": [
+   "contribution",
+   "proximate cause",
+   "subrogation",
+   "utmost good faith"
+  ],
+  "a": 2,
+  "e": "Subrogation lets the insurer recover from the party responsible for the loss."
+ },
+ {
+  "q": "In a partnership, a partner who contributes capital but takes no part in management is a",
+  "o": [
+   "nominal partner",
+   "general partner",
+   "managing partner",
+   "sleeping partner"
+  ],
+  "a": 3,
+  "e": "A sleeping (dormant) partner invests but does not take part in running the business."
+ },
+ {
+  "q": "The document that sets out the rules governing the internal affairs of a company is the",
+  "o": [
+   "Articles of Association",
+   "Memorandum of Association",
+   "Certificate of Incorporation",
+   "Prospectus"
+  ],
+  "a": 0,
+  "e": "Articles of Association regulate internal management of the company."
+ },
+ {
+  "q": "The document that states a company's objects and relationship with outsiders is the",
+  "o": [
+   "Articles of Association",
+   "Memorandum of Association",
+   "Prospectus",
+   "Share certificate"
+  ],
+  "a": 1,
+  "e": "The Memorandum defines the company's name, objects and capital."
+ },
+ {
+  "q": "A document inviting the public to buy shares in a company is a",
+  "o": [
+   "invoice",
+   "debit note",
+   "prospectus",
+   "waybill"
+  ],
+  "a": 2,
+  "e": "A prospectus invites the public to subscribe for shares or debentures."
+ },
+ {
+  "q": "Which of these is a feature of a public enterprise?",
+  "o": [
+   "Profit as sole aim",
+   "Ownership by one person",
+   "Control by shareholders only",
+   "Ownership by government"
+  ],
+  "a": 3,
+  "e": "Public enterprises are owned or controlled by government."
+ },
+ {
+  "q": "The process of transferring government-owned enterprises to private ownership is",
+  "o": [
+   "privatisation",
+   "nationalisation",
+   "indigenisation",
+   "commercialisation"
+  ],
+  "a": 0,
+  "e": "Privatisation moves ownership from the state to private investors."
+ },
+ {
+  "q": "Bank notes in Nigeria are legal tender because they are",
+  "o": [
+   "made of paper",
+   "backed by law",
+   "issued by commercial banks",
+   "backed by gold"
+  ],
+  "a": 1,
+  "e": "Legal tender must be accepted by law in settlement of debts."
+ },
+ {
+  "q": "The bank that holds the reserves of commercial banks and acts as lender of last resort is the",
+  "o": [
+   "merchant bank",
+   "mortgage bank",
+   "central bank",
+   "micro-finance bank"
+  ],
+  "a": 2,
+  "e": "The central bank lends to banks in distress as lender of last resort."
+ },
+ {
+  "q": "A money order and postal order are services of the",
+  "o": [
+   "stock exchange",
+   "insurance company",
+   "chamber of commerce",
+   "post office"
+  ],
+  "a": 3,
+  "e": "The postal service provides these money transfer instruments."
+ },
+ {
+  "q": "A cheque returned unpaid because the drawer's account has insufficient funds is said to be",
+  "o": [
+   "dishonoured",
+   "endorsed",
+   "crossed",
+   "stale"
+  ],
+  "a": 0,
+  "e": "A cheque refused by the bank is dishonoured."
+ },
+ {
+  "q": "Which of these is a disadvantage of road transport?",
+  "o": [
+   "Door-to-door service",
+   "High risk of accidents",
+   "Flexibility",
+   "Suitability for short distances"
+  ],
+  "a": 1,
+  "e": "Road transport suffers from frequent accidents compared with other modes."
+ },
+ {
+  "q": "The document prepared by an air carrier acknowledging receipt of goods for air transport is the",
+  "o": [
+   "bill of lading",
+   "consignment note",
+   "air waybill",
+   "bill of exchange"
+  ],
+  "a": 2,
+  "e": "An air waybill is the consignment document for air freight."
+ },
+ {
+  "q": "The advertising medium that combines sight, sound and motion is",
+  "o": [
+   "newspaper",
+   "handbill",
+   "billboard",
+   "television"
+  ],
+  "a": 3,
+  "e": "Television uses visual, audio and movement together."
+ },
+ {
+  "q": "Persuading a customer to buy by explaining a product's benefits is known as",
+  "o": [
+   "personal selling",
+   "sales promotion",
+   "packaging",
+   "branding"
+  ],
+  "a": 0,
+  "e": "Personal selling is direct face-to-face persuasion by a salesman."
+ },
+ {
+  "q": "Which of these is a function of the Nigerian Stock Exchange?",
+  "o": [
+   "Printing currency",
+   "Providing a market for existing securities",
+   "Issuing bank notes",
+   "Fixing import duties"
+  ],
+  "a": 1,
+  "e": "It provides a secondary market for trading existing shares and bonds."
+ },
+ {
+  "q": "Consumer protection is mainly aimed at",
+  "o": [
+   "increasing prices",
+   "reducing imports",
+   "safeguarding buyers from unfair practices",
+   "raising taxes"
+  ],
+  "a": 2,
+  "e": "Consumer protection shields buyers from fraud, poor quality and unsafe goods."
+ },
+ {
+  "q": "The organisation that regulates the export of Nigerian goods through promotion is the",
+  "o": [
+   "Nigerian Ports Authority",
+   "Corporate Affairs Commission",
+   "Nigerian Customs Service",
+   "Nigerian Export Promotion Council"
+  ],
+  "a": 3,
+  "e": "NEPC promotes non-oil exports."
+ },
+ {
+  "q": "The regional body that promotes economic integration among West African states is",
+  "o": [
+   "ECOWAS",
+   "OPEC",
+   "WTO",
+   "IMF"
+  ],
+  "a": 0,
+  "e": "ECOWAS aims at free movement and trade among West African members."
+ },
+ {
+  "q": "The international organisation that lends to member countries with balance of payments problems is the",
+  "o": [
+   "ECOWAS",
+   "IMF",
+   "OPEC",
+   "NAFDAC"
+  ],
+  "a": 1,
+  "e": "The IMF provides short-term balance-of-payments support."
+ }
+]

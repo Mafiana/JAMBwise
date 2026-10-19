@@ -1,0 +1,772 @@
+[
+ {
+  "q": "The powerhouse of the cell is the",
+  "o": [
+   "nucleus",
+   "ribosome",
+   "mitochondrion",
+   "vacuole"
+  ],
+  "a": 2,
+  "e": "Mitochondria release energy from food during respiration."
+ },
+ {
+  "q": "Plants make food by",
+  "o": [
+   "respiration",
+   "photosynthesis",
+   "digestion",
+   "excretion"
+  ],
+  "a": 1,
+  "e": "Plants make food by photosynthesis, using light, water and carbon dioxide."
+ },
+ {
+  "q": "The universal blood donor group is",
+  "o": [
+   "A",
+   "B",
+   "AB",
+   "O"
+  ],
+  "a": 3,
+  "e": "Group O has no A or B antigens, so it is the universal donor."
+ },
+ {
+  "q": "The basic unit of heredity is the",
+  "o": [
+   "gene",
+   "cell",
+   "tissue",
+   "organ"
+  ],
+  "a": 0,
+  "e": "A gene is the unit of inheritance."
+ },
+ {
+  "q": "Insulin is produced by the",
+  "o": [
+   "liver",
+   "pancreas",
+   "kidney",
+   "stomach"
+  ],
+  "a": 1,
+  "e": "The pancreas makes insulin, which controls blood sugar."
+ },
+ {
+  "q": "Scurvy is caused by lack of vitamin",
+  "o": [
+   "A",
+   "B",
+   "C",
+   "D"
+  ],
+  "a": 2,
+  "e": "Lack of vitamin C causes scurvy."
+ },
+ {
+  "q": "The organ for gaseous exchange in humans is the",
+  "o": [
+   "heart",
+   "lung",
+   "kidney",
+   "liver"
+  ],
+  "a": 1,
+  "e": "The lungs exchange oxygen and carbon dioxide."
+ },
+ {
+  "q": "Which blood cells fight infection?",
+  "o": [
+   "red blood cells",
+   "white blood cells",
+   "platelets",
+   "plasma"
+  ],
+  "a": 1,
+  "e": "White blood cells defend the body against infection."
+ },
+ {
+  "q": "The green pigment in plants is",
+  "o": [
+   "chlorophyll",
+   "haemoglobin",
+   "melanin",
+   "carotene"
+  ],
+  "a": 0,
+  "e": "Chlorophyll is the green pigment that traps light."
+ },
+ {
+  "q": "Malaria is caused by a",
+  "o": [
+   "virus",
+   "bacterium",
+   "protozoan",
+   "fungus"
+  ],
+  "a": 2,
+  "e": "Malaria is caused by Plasmodium, a protozoan."
+ },
+ {
+  "q": "The vector of malaria is the female",
+  "o": [
+   "housefly",
+   "Anopheles mosquito",
+   "tsetse fly",
+   "tick"
+  ],
+  "a": 1,
+  "e": "The female Anopheles mosquito spreads malaria."
+ },
+ {
+  "q": "Which part of the cell controls its activities?",
+  "o": [
+   "cell wall",
+   "nucleus",
+   "vacuole",
+   "cytoplasm"
+  ],
+  "a": 1,
+  "e": "The nucleus controls the cell's activities."
+ },
+ {
+  "q": "The basic unit of life is the",
+  "o": [
+   "tissue",
+   "cell",
+   "organ",
+   "organism"
+  ],
+  "a": 1,
+  "e": "All living things are made of cells."
+ },
+ {
+  "q": "Proteins are made in the",
+  "o": [
+   "ribosome",
+   "vacuole",
+   "nucleus",
+   "lysosome"
+  ],
+  "a": 0,
+  "e": "Ribosomes are the sites of protein synthesis."
+ },
+ {
+  "q": "Chlorophyll is found in the",
+  "o": [
+   "mitochondria",
+   "chloroplast",
+   "nucleus",
+   "ribosome"
+  ],
+  "a": 1,
+  "e": "Chloroplasts contain chlorophyll and carry out photosynthesis."
+ },
+ {
+  "q": "The movement of water through a semi-permeable membrane is",
+  "o": [
+   "diffusion",
+   "osmosis",
+   "transpiration",
+   "respiration"
+  ],
+  "a": 1,
+  "e": "Osmosis is the diffusion of water across a semi-permeable membrane."
+ },
+ {
+  "q": "The loss of water vapour from plant leaves is called",
+  "o": [
+   "transpiration",
+   "respiration",
+   "excretion",
+   "germination"
+  ],
+  "a": 0,
+  "e": "Transpiration happens mainly through stomata."
+ },
+ {
+  "q": "Enzymes are",
+  "o": [
+   "carbohydrates",
+   "biological catalysts",
+   "hormones",
+   "vitamins"
+  ],
+  "a": 1,
+  "e": "Enzymes are protein catalysts that speed up reactions in living cells."
+ },
+ {
+  "q": "Lack of vitamin C causes",
+  "o": [
+   "rickets",
+   "scurvy",
+   "beriberi",
+   "night blindness"
+  ],
+  "a": 1,
+  "e": "Scurvy results from vitamin C deficiency."
+ },
+ {
+  "q": "Rickets is caused by a lack of",
+  "o": [
+   "vitamin A",
+   "vitamin C",
+   "vitamin D",
+   "vitamin K"
+  ],
+  "a": 2,
+  "e": "Vitamin D helps the body use calcium for strong bones."
+ },
+ {
+  "q": "Kwashiorkor is caused by a lack of",
+  "o": [
+   "protein",
+   "iron",
+   "iodine",
+   "vitamin A"
+  ],
+  "a": 0,
+  "e": "Kwashiorkor is a protein deficiency disease."
+ },
+ {
+  "q": "Haemoglobin in red blood cells carries",
+  "o": [
+   "glucose",
+   "oxygen",
+   "urea",
+   "hormones"
+  ],
+  "a": 1,
+  "e": "Haemoglobin binds oxygen for transport around the body."
+ },
+ {
+  "q": "Gaseous exchange in mammals takes place in the",
+  "o": [
+   "trachea",
+   "alveoli of the lungs",
+   "liver",
+   "kidney"
+  ],
+  "a": 1,
+  "e": "Oxygen and carbon dioxide are exchanged across the alveoli."
+ },
+ {
+  "q": "The main nitrogenous waste of humans is",
+  "o": [
+   "ammonia",
+   "urea",
+   "uric acid",
+   "glucose"
+  ],
+  "a": 1,
+  "e": "Urea is made in the liver and removed by the kidneys."
+ },
+ {
+  "q": "Bile is produced by the",
+  "o": [
+   "gall bladder",
+   "liver",
+   "pancreas",
+   "stomach"
+  ],
+  "a": 1,
+  "e": "The liver makes bile; the gall bladder only stores it."
+ },
+ {
+  "q": "The hormone that lowers blood sugar is",
+  "o": [
+   "adrenaline",
+   "insulin",
+   "thyroxine",
+   "oestrogen"
+  ],
+  "a": 1,
+  "e": "Insulin from the pancreas lowers blood glucose."
+ },
+ {
+  "q": "Gregor Mendel did his experiments on",
+  "o": [
+   "fruit flies",
+   "pea plants",
+   "maize",
+   "mice"
+  ],
+  "a": 1,
+  "e": "Mendel studied inheritance in garden pea plants."
+ },
+ {
+  "q": "A cross between two heterozygous tall plants (Tt × Tt) gives tall to short in the ratio",
+  "o": [
+   "1 : 1",
+   "3 : 1",
+   "1 : 2 : 1",
+   "9 : 3 : 3 : 1"
+  ],
+  "a": 1,
+  "e": "TT, Tt, Tt are tall and tt is short, giving 3 : 1."
+ },
+ {
+  "q": "A normal human body cell has how many chromosomes?",
+  "o": [
+   "23",
+   "44",
+   "46",
+   "48"
+  ],
+  "a": 2,
+  "e": "Humans have 46 chromosomes (23 pairs) in body cells."
+ },
+ {
+  "q": "Gametes are produced by",
+  "o": [
+   "mitosis",
+   "meiosis",
+   "binary fission",
+   "budding"
+  ],
+  "a": 1,
+  "e": "Meiosis halves the chromosome number to make gametes."
+ },
+ {
+  "q": "Every food chain begins with",
+  "o": [
+   "herbivores",
+   "carnivores",
+   "decomposers",
+   "producers"
+  ],
+  "a": 3,
+  "e": "Producers (green plants) make food by photosynthesis."
+ },
+ {
+  "q": "Fungi that feed on dead organic matter are called",
+  "o": [
+   "parasites",
+   "saprophytes",
+   "predators",
+   "autotrophs"
+  ],
+  "a": 1,
+  "e": "Saprophytes feed on dead and decaying matter."
+ },
+ {
+  "q": "A relationship in which both organisms benefit is",
+  "o": [
+   "parasitism",
+   "commensalism",
+   "mutualism",
+   "predation"
+  ],
+  "a": 2,
+  "e": "Mutualism benefits both partners."
+ },
+ {
+  "q": "Malaria is transmitted by the",
+  "o": [
+   "male Aedes mosquito",
+   "female Anopheles mosquito",
+   "tsetse fly",
+   "housefly"
+  ],
+  "a": 1,
+  "e": "The female Anopheles mosquito carries the Plasmodium parasite."
+ },
+ {
+  "q": "Sleeping sickness is spread by the",
+  "o": [
+   "housefly",
+   "tsetse fly",
+   "tick",
+   "flea"
+  ],
+  "a": 1,
+  "e": "The tsetse fly transmits the trypanosome parasite."
+ },
+ {
+  "q": "The fusion of a male gamete and a female gamete is called",
+  "o": [
+   "pollination",
+   "fertilisation",
+   "germination",
+   "respiration"
+  ],
+  "a": 1,
+  "e": "Fertilisation forms a zygote."
+ },
+ {
+  "q": "After fertilisation, the ovary of a flower develops into the",
+  "o": [
+   "seed",
+   "fruit",
+   "petal",
+   "anther"
+  ],
+  "a": 1,
+  "e": "The ovary becomes the fruit and the ovules become seeds."
+ },
+ {
+  "q": "Seeds with wing-like structures are mainly dispersed by",
+  "o": [
+   "animals",
+   "wind",
+   "water",
+   "explosion"
+  ],
+  "a": 1,
+  "e": "Wings help seeds drift on the wind."
+ },
+ {
+  "q": "Seeds need which conditions to germinate?",
+  "o": [
+   "light only",
+   "water, oxygen and a suitable temperature",
+   "carbon dioxide",
+   "soil nutrients only"
+  ],
+  "a": 1,
+  "e": "Germination needs water, oxygen and a suitable temperature."
+ },
+ {
+  "q": "The oxygen released in photosynthesis comes from",
+  "o": [
+   "carbon dioxide",
+   "water",
+   "glucose",
+   "chlorophyll"
+  ],
+  "a": 1,
+  "e": "Light splits water molecules, releasing oxygen."
+ },
+ {
+  "q": "The Golgi apparatus is mainly concerned with",
+  "o": [
+   "packaging and secretion of cell products",
+   "protein synthesis",
+   "release of energy",
+   "storage of genetic material"
+  ],
+  "a": 0,
+  "e": "The Golgi apparatus modifies, packages and secretes substances made in the cell."
+ },
+ {
+  "q": "Which of the following organisms is prokaryotic?",
+  "o": [
+   "Amoeba",
+   "Escherichia coli",
+   "Spirogyra",
+   "Yeast"
+  ],
+  "a": 1,
+  "e": "Bacteria such as E. coli lack a membrane-bound nucleus."
+ },
+ {
+  "q": "Which of these organisms belongs to the kingdom Fungi?",
+  "o": [
+   "Spirogyra",
+   "Euglena",
+   "Mucor",
+   "Paramecium"
+  ],
+  "a": 2,
+  "e": "Mucor (bread mould) is a fungus; the others are algae or protozoans."
+ },
+ {
+  "q": "An arthropod with three pairs of legs and a body divided into head, thorax and abdomen belongs to the class",
+  "o": [
+   "Arachnida",
+   "Crustacea",
+   "Myriapoda",
+   "Insecta"
+  ],
+  "a": 3,
+  "e": "Insects have six legs and three body regions."
+ },
+ {
+  "q": "Salivary amylase begins the digestion of",
+  "o": [
+   "starch",
+   "protein",
+   "fat",
+   "cellulose"
+  ],
+  "a": 0,
+  "e": "Salivary amylase breaks starch down to maltose in the mouth."
+ },
+ {
+  "q": "Most absorption of digested food in humans occurs in the",
+  "o": [
+   "stomach",
+   "ileum",
+   "colon",
+   "oesophagus"
+  ],
+  "a": 1,
+  "e": "The ileum has villi that give a large surface area for absorption."
+ },
+ {
+  "q": "The xylem vessels of a plant mainly transport",
+  "o": [
+   "manufactured food downwards",
+   "amino acids to the roots",
+   "water and mineral salts upwards",
+   "oxygen to the leaves"
+  ],
+  "a": 2,
+  "e": "Xylem carries water and dissolved mineral salts from roots to leaves."
+ },
+ {
+  "q": "The blood vessel that carries oxygenated blood from the lungs to the heart is the",
+  "o": [
+   "pulmonary artery",
+   "vena cava",
+   "aorta",
+   "pulmonary vein"
+  ],
+  "a": 3,
+  "e": "The pulmonary vein returns oxygenated blood to the left atrium."
+ },
+ {
+  "q": "Anaerobic respiration in yeast produces",
+  "o": [
+   "ethanol and carbon dioxide",
+   "lactic acid only",
+   "water and carbon dioxide",
+   "glucose and oxygen"
+  ],
+  "a": 0,
+  "e": "Yeast ferments glucose to ethanol and carbon dioxide."
+ },
+ {
+  "q": "The functional unit of the mammalian kidney is the",
+  "o": [
+   "neurone",
+   "nephron",
+   "alveolus",
+   "villus"
+  ],
+  "a": 1,
+  "e": "Each nephron filters blood and forms urine."
+ },
+ {
+  "q": "The hormone that regulates water reabsorption in the kidney tubules is",
+  "o": [
+   "insulin",
+   "glucagon",
+   "ADH",
+   "adrenaline"
+  ],
+  "a": 2,
+  "e": "Antidiuretic hormone (ADH) increases water reabsorption in the kidney."
+ },
+ {
+  "q": "In a reflex arc, the impulse passes from the sensory neurone to the",
+  "o": [
+   "relay neurone",
+   "receptor",
+   "effector",
+   "sense organ"
+  ],
+  "a": 0,
+  "e": "The sequence is receptor, sensory neurone, relay neurone, motor neurone, effector."
+ },
+ {
+  "q": "The part of the brain that coordinates balance and body movement is the",
+  "o": [
+   "cerebrum",
+   "cerebellum",
+   "medulla oblongata",
+   "hypothalamus"
+  ],
+  "a": 1,
+  "e": "The cerebellum controls balance, posture and muscular coordination."
+ },
+ {
+  "q": "Nitrogen-fixing bacteria living in the root nodules of legumes belong to the genus",
+  "o": [
+   "Nitrosomonas",
+   "Nitrobacter",
+   "Rhizobium",
+   "Pseudomonas"
+  ],
+  "a": 2,
+  "e": "Rhizobium fixes atmospheric nitrogen in legume root nodules."
+ },
+ {
+  "q": "Which Nigerian vegetation zone is characterised by plants with stilt (prop) roots?",
+  "o": [
+   "Sahel savanna",
+   "Guinea savanna",
+   "Montane forest",
+   "Mangrove swamp"
+  ],
+  "a": 3,
+  "e": "Mangroves of the coastal swamps have stilt roots and pneumatophores."
+ },
+ {
+  "q": "About what percentage of energy is passed from one trophic level to the next in a food chain?",
+  "o": [
+   "10%",
+   "50%",
+   "75%",
+   "90%"
+  ],
+  "a": 0,
+  "e": "Only about 10% of energy is transferred; the rest is lost as heat and waste."
+ },
+ {
+  "q": "A heterozygous tall plant (Tt) is crossed with a short plant (tt). The ratio of tall to short offspring is",
+  "o": [
+   "3 : 1",
+   "1 : 1",
+   "1 : 2 : 1",
+   "all tall"
+  ],
+  "a": 1,
+  "e": "Tt × tt gives Tt and tt in equal numbers, so 1 : 1."
+ },
+ {
+  "q": "A carrier woman (XHXh) marries a normal man (XHY). What fraction of all their children is expected to be haemophiliac sons?",
+  "o": [
+   "1/2",
+   "1/3",
+   "1/4",
+   "1/8"
+  ],
+  "a": 2,
+  "e": "Offspring are XHXH, XHXh, XHY and XhY in equal numbers, so 1/4 are haemophiliac sons."
+ },
+ {
+  "q": "In a dihybrid cross between two double heterozygotes (AaBb × AaBb) producing 160 offspring, how many are expected to be double recessive (aabb)?",
+  "o": [
+   "30",
+   "90",
+   "20",
+   "10"
+  ],
+  "a": 3,
+  "e": "The double recessive class is 1/16 of 160 = 10."
+ },
+ {
+  "q": "Two parents are both carriers of sickle cell (AS × AS). Out of 200 children, how many are expected to have sickle cell anaemia (SS)?",
+  "o": [
+   "25",
+   "50",
+   "100",
+   "150"
+  ],
+  "a": 1,
+  "e": "One quarter of the children are SS, and 1/4 of 200 = 50."
+ },
+ {
+  "q": "A man of blood group AB marries a woman of blood group O. Their children can only be of group",
+  "o": [
+   "A or B",
+   "AB",
+   "O",
+   "A, B, AB or O"
+  ],
+  "a": 0,
+  "e": "IAIB × ii gives IAi (A) and IBi (B) only."
+ },
+ {
+  "q": "The theory that characters acquired during an organism's lifetime can be inherited was proposed by",
+  "o": [
+   "Darwin",
+   "Mendel",
+   "Lamarck",
+   "Pasteur"
+  ],
+  "a": 2,
+  "e": "Lamarck proposed the inheritance of acquired characters."
+ },
+ {
+  "q": "Parallel venation in leaves is typical of",
+  "o": [
+   "dicotyledons",
+   "gymnosperms",
+   "ferns",
+   "monocotyledons"
+  ],
+  "a": 3,
+  "e": "Monocot leaves such as maize and grass have parallel veins."
+ },
+ {
+  "q": "The plant hormone responsible for phototropism is",
+  "o": [
+   "auxin",
+   "ethylene",
+   "abscisic acid",
+   "insulin"
+  ],
+  "a": 0,
+  "e": "Unequal distribution of auxin makes shoots bend towards light."
+ },
+ {
+  "q": "The main function of the placenta in a pregnant woman is to",
+  "o": [
+   "produce eggs",
+   "exchange materials between mother and foetus",
+   "store amniotic fluid",
+   "produce sperm"
+  ],
+  "a": 1,
+  "e": "The placenta passes oxygen and nutrients to the foetus and removes its wastes."
+ },
+ {
+  "q": "The hormone that maintains the uterine lining during pregnancy is",
+  "o": [
+   "testosterone",
+   "thyroxine",
+   "progesterone",
+   "insulin"
+  ],
+  "a": 2,
+  "e": "Progesterone maintains the thickened uterine wall and pregnancy."
+ },
+ {
+  "q": "Which of the following is an excretory product of plants?",
+  "o": [
+   "Starch",
+   "Glucose",
+   "Chlorophyll",
+   "Latex"
+  ],
+  "a": 3,
+  "e": "Latex, resins, gums and tannins are plant excretory products."
+ },
+ {
+  "q": "Which reagent is used to test for protein in a food sample?",
+  "o": [
+   "Biuret reagent",
+   "Benedict's solution",
+   "Iodine solution",
+   "Sudan III"
+  ],
+  "a": 0,
+  "e": "Biuret reagent turns violet or purple in the presence of protein."
+ },
+ {
+  "q": "Which of the following is an abiotic factor in an ecosystem?",
+  "o": [
+   "Decomposers",
+   "Predators",
+   "Producers",
+   "Light intensity"
+  ],
+  "a": 3,
+  "e": "Light intensity is a non-living (abiotic) factor."
+ },
+ {
+  "q": "Which of the following diseases is caused by a virus?",
+  "o": [
+   "Tuberculosis",
+   "Cholera",
+   "Typhoid fever",
+   "Poliomyelitis"
+  ],
+  "a": 3,
+  "e": "Poliomyelitis is caused by the polio virus; the others are bacterial."
+ }
+]

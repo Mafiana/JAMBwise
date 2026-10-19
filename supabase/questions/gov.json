@@ -1,0 +1,772 @@
+[
+ {
+  "q": "Nigeria became independent on",
+  "o": [
+   "1 October 1960",
+   "1 January 1914",
+   "29 May 1999",
+   "12 June 1993"
+  ],
+  "a": 0,
+  "e": "Nigeria gained independence on 1 October 1960."
+ },
+ {
+  "q": "Who heads the judiciary at the federal level in Nigeria?",
+  "o": [
+   "The President",
+   "Senate President",
+   "Chief Justice of Nigeria",
+   "Attorney-General"
+  ],
+  "a": 2,
+  "e": "The Chief Justice of Nigeria heads the judiciary."
+ },
+ {
+  "q": "The theory of separation of powers is associated with",
+  "o": [
+   "Karl Marx",
+   "Montesquieu",
+   "Plato",
+   "Lenin"
+  ],
+  "a": 1,
+  "e": "Montesquieu proposed separating legislative, executive and judicial powers."
+ },
+ {
+  "q": "A system that shares power between central and regional governments is",
+  "o": [
+   "unitary",
+   "federal",
+   "monarchical",
+   "oligarchic"
+  ],
+  "a": 1,
+  "e": "Federalism divides power between central and regional governments."
+ },
+ {
+  "q": "The main function of the legislature is to",
+  "o": [
+   "enforce laws",
+   "interpret laws",
+   "make laws",
+   "try offenders"
+  ],
+  "a": 2,
+  "e": "The legislature makes laws."
+ },
+ {
+  "q": "ECOWAS was formed in",
+  "o": [
+   "1960",
+   "1975",
+   "1963",
+   "1999"
+  ],
+  "a": 1,
+  "e": "ECOWAS was founded in 1975 through the Treaty of Lagos."
+ },
+ {
+  "q": "The first Executive President of Nigeria was",
+  "o": [
+   "Nnamdi Azikiwe",
+   "Shehu Shagari",
+   "Olusegun Obasanjo",
+   "Ahmadu Bello"
+  ],
+  "a": 1,
+  "e": "Shehu Shagari became Executive President in 1979."
+ },
+ {
+  "q": "The federal legislature of Nigeria is called the",
+  "o": [
+   "National Assembly",
+   "Federal Council",
+   "Senate only",
+   "Supreme Council"
+  ],
+  "a": 0,
+  "e": "The National Assembly (Senate plus House of Representatives) is the federal legislature."
+ },
+ {
+  "q": "Government by the people is",
+  "o": [
+   "democracy",
+   "autocracy",
+   "theocracy",
+   "aristocracy"
+  ],
+  "a": 0,
+  "e": "Democracy means rule by the people."
+ },
+ {
+  "q": "The right of citizens to vote is called",
+  "o": [
+   "suffrage",
+   "franchise tax",
+   "citizenship",
+   "naturalisation"
+  ],
+  "a": 0,
+  "e": "Suffrage is the right to vote."
+ },
+ {
+  "q": "The organ of government that interprets laws is the",
+  "o": [
+   "legislature",
+   "executive",
+   "judiciary",
+   "civil service"
+  ],
+  "a": 2,
+  "e": "The judiciary interprets laws in the courts."
+ },
+ {
+  "q": "Nigeria's present constitution came into effect in",
+  "o": [
+   "1979",
+   "1989",
+   "1999",
+   "2007"
+  ],
+  "a": 2,
+  "e": "The 1999 Constitution took effect on 29 May 1999."
+ },
+ {
+  "q": "Nigeria's first Prime Minister was",
+  "o": [
+   "Nnamdi Azikiwe",
+   "Abubakar Tafawa Balewa",
+   "Obafemi Awolowo",
+   "Ahmadu Bello"
+  ],
+  "a": 1,
+  "e": "Sir Abubakar Tafawa Balewa led the government at independence."
+ },
+ {
+  "q": "The first President of Nigeria was",
+  "o": [
+   "Tafawa Balewa",
+   "Nnamdi Azikiwe",
+   "Aguiyi-Ironsi",
+   "Yakubu Gowon"
+  ],
+  "a": 1,
+  "e": "Nnamdi Azikiwe became the first President when Nigeria became a republic."
+ },
+ {
+  "q": "Nigeria became a republic in",
+  "o": [
+   "1960",
+   "1963",
+   "1966",
+   "1979"
+  ],
+  "a": 1,
+  "e": "Nigeria became a republic on 1 October 1963."
+ },
+ {
+  "q": "The Northern and Southern Protectorates were amalgamated in",
+  "o": [
+   "1900",
+   "1914",
+   "1922",
+   "1946"
+  ],
+  "a": 1,
+  "e": "Lord Lugard amalgamated them in 1914."
+ },
+ {
+  "q": "Indirect rule in Nigeria is associated with",
+  "o": [
+   "Sir Hugh Clifford",
+   "Lord Lugard",
+   "Sir Arthur Richards",
+   "Sir Bernard Bourdillon"
+  ],
+  "a": 1,
+  "e": "Lord Lugard used traditional rulers to govern for the British."
+ },
+ {
+  "q": "The seat of government officially moved from Lagos to Abuja in",
+  "o": [
+   "1976",
+   "1991",
+   "1999",
+   "1960"
+  ],
+  "a": 1,
+  "e": "The move took place in December 1991."
+ },
+ {
+  "q": "How many states does Nigeria have (not counting the FCT)?",
+  "o": [
+   "30",
+   "36",
+   "37",
+   "774"
+  ],
+  "a": 1,
+  "e": "Nigeria has 36 states plus the Federal Capital Territory."
+ },
+ {
+  "q": "How many local government areas does Nigeria have?",
+  "o": [
+   "744",
+   "774",
+   "776",
+   "700"
+  ],
+  "a": 1,
+  "e": "Nigeria has 774 local government areas."
+ },
+ {
+  "q": "The legislature at the federal level in Nigeria is the",
+  "o": [
+   "National Assembly",
+   "Federal Executive Council",
+   "Supreme Court",
+   "Council of State"
+  ],
+  "a": 0,
+  "e": "The National Assembly is made up of the Senate and the House of Representatives."
+ },
+ {
+  "q": "How many senators does Nigeria have?",
+  "o": [
+   "109",
+   "100",
+   "360",
+   "108"
+  ],
+  "a": 0,
+  "e": "Three per state (36 × 3 = 108) plus one for the FCT makes 109."
+ },
+ {
+  "q": "How many members are in the House of Representatives?",
+  "o": [
+   "109",
+   "360",
+   "469",
+   "400"
+  ],
+  "a": 1,
+  "e": "The House of Representatives has 360 members."
+ },
+ {
+  "q": "The organ of government that interprets the law is the",
+  "o": [
+   "legislature",
+   "executive",
+   "judiciary",
+   "civil service"
+  ],
+  "a": 2,
+  "e": "The judiciary (the courts) interprets and applies the law."
+ },
+ {
+  "q": "The organ of government that makes laws is the",
+  "o": [
+   "legislature",
+   "executive",
+   "judiciary",
+   "police"
+  ],
+  "a": 0,
+  "e": "The legislature makes laws."
+ },
+ {
+  "q": "The body that conducts elections in Nigeria is",
+  "o": [
+   "EFCC",
+   "INEC",
+   "ICPC",
+   "NJC"
+  ],
+  "a": 1,
+  "e": "INEC is the Independent National Electoral Commission."
+ },
+ {
+  "q": "EFCC stands for",
+  "o": [
+   "Economic and Financial Crimes Commission",
+   "Electoral and Federal Crimes Council",
+   "Economic Fund Control Commission",
+   "Executive Finance and Crime Committee"
+  ],
+  "a": 0,
+  "e": "EFCC is the Economic and Financial Crimes Commission."
+ },
+ {
+  "q": "ECOWAS was established in",
+  "o": [
+   "1960",
+   "1963",
+   "1975",
+   "1999"
+  ],
+  "a": 2,
+  "e": "ECOWAS was formed by the Treaty of Lagos in 1975."
+ },
+ {
+  "q": "The headquarters of the African Union is in",
+  "o": [
+   "Abuja",
+   "Addis Ababa",
+   "Nairobi",
+   "Accra"
+  ],
+  "a": 1,
+  "e": "The African Union is headquartered in Addis Ababa, Ethiopia."
+ },
+ {
+  "q": "The headquarters of OPEC is in",
+  "o": [
+   "Vienna",
+   "Geneva",
+   "Abuja",
+   "New York"
+  ],
+  "a": 0,
+  "e": "OPEC has its headquarters in Vienna, Austria."
+ },
+ {
+  "q": "The United Nations was founded in",
+  "o": [
+   "1919",
+   "1945",
+   "1960",
+   "1963"
+  ],
+  "a": 1,
+  "e": "The UN was founded in 1945."
+ },
+ {
+  "q": "Universal adult suffrage means",
+  "o": [
+   "only men may vote",
+   "all qualified adults have the right to vote",
+   "only the rich may vote",
+   "voting is compulsory"
+  ],
+  "a": 1,
+  "e": "Every qualified adult citizen has the right to vote."
+ },
+ {
+  "q": "A political system in which only one party is allowed to rule is a",
+  "o": [
+   "multi-party system",
+   "one-party system",
+   "two-party system",
+   "federal system"
+  ],
+  "a": 1,
+  "e": "This is a one-party system."
+ },
+ {
+  "q": "A bill becomes law after",
+  "o": [
+   "it is rejected",
+   "the President gives assent",
+   "a court judges it",
+   "the civil service approves it"
+  ],
+  "a": 1,
+  "e": "After passing the legislature, a bill needs presidential assent."
+ },
+ {
+  "q": "The rule of law means that",
+  "o": [
+   "only the poor obey the law",
+   "everyone, including leaders, is subject to the law",
+   "the military makes the laws",
+   "laws change daily"
+  ],
+  "a": 1,
+  "e": "No one is above the law."
+ },
+ {
+  "q": "A state headed by a hereditary ruler is a",
+  "o": [
+   "republic",
+   "monarchy",
+   "federation",
+   "oligarchy"
+  ],
+  "a": 1,
+  "e": "A monarchy is headed by a king or queen who inherits the position."
+ },
+ {
+  "q": "In a unitary system, power is",
+  "o": [
+   "shared equally with regions",
+   "concentrated in the central government",
+   "held by each state alone",
+   "held by the courts"
+  ],
+  "a": 1,
+  "e": "Unitary governments keep power at the centre."
+ },
+ {
+  "q": "Fundamental human rights are contained in which chapter of the 1999 Constitution?",
+  "o": [
+   "Chapter II",
+   "Chapter IV",
+   "Chapter V",
+   "Chapter VII"
+  ],
+  "a": 1,
+  "e": "Chapter IV covers fundamental rights."
+ },
+ {
+  "q": "The first military coup in Nigeria took place in",
+  "o": [
+   "1960",
+   "January 1966",
+   "1975",
+   "1983"
+  ],
+  "a": 1,
+  "e": "The first coup happened in January 1966."
+ },
+ {
+  "q": "The Nigerian Civil War was fought between",
+  "o": [
+   "1960 and 1963",
+   "1967 and 1970",
+   "1975 and 1979",
+   "1983 and 1985"
+  ],
+  "a": 1,
+  "e": "The civil war lasted from 1967 to 1970."
+ },
+ {
+  "q": "The supreme and ultimate power of a state to make and enforce laws within its territory is known as",
+  "o": [
+   "sovereignty",
+   "legitimacy",
+   "federalism",
+   "franchise"
+  ],
+  "a": 0,
+  "e": "Sovereignty is the supreme, independent power of a state over its territory and people."
+ },
+ {
+  "q": "Power that is generally accepted by the people as rightful is described as",
+  "o": [
+   "coercion",
+   "authority",
+   "influence",
+   "propaganda"
+  ],
+  "a": 1,
+  "e": "Authority is legitimate power, accepted by those over whom it is exercised."
+ },
+ {
+  "q": "A constitution that is difficult to amend because of a special procedure is said to be",
+  "o": [
+   "unwritten",
+   "flexible",
+   "rigid",
+   "unitary"
+  ],
+  "a": 2,
+  "e": "A rigid constitution requires a special, usually demanding, amendment procedure."
+ },
+ {
+  "q": "Which of the following countries is a well-known example of one with an unwritten constitution?",
+  "o": [
+   "Nigeria",
+   "United States",
+   "Ghana",
+   "Britain"
+  ],
+  "a": 3,
+  "e": "Britain's constitution is not contained in a single written document."
+ },
+ {
+  "q": "The fusion of the executive and legislative branches is a feature of a",
+  "o": [
+   "parliamentary system",
+   "presidential system",
+   "military regime",
+   "confederation"
+  ],
+  "a": 0,
+  "e": "In a parliamentary system, ministers are also members of the legislature."
+ },
+ {
+  "q": "Senate confirmation of ministerial nominees made by the President is an example of",
+  "o": [
+   "fusion of powers",
+   "checks and balances",
+   "judicial review",
+   "delegated legislation"
+  ],
+  "a": 1,
+  "e": "It shows the legislature checking the executive's appointment power."
+ },
+ {
+  "q": "An electoral system in which parties win seats in proportion to the votes they receive is",
+  "o": [
+   "simple majority system",
+   "second ballot system",
+   "proportional representation",
+   "indirect election"
+  ],
+  "a": 2,
+  "e": "Proportional representation allocates seats according to each party's share of votes."
+ },
+ {
+  "q": "Which of the following is an example of a pressure group in Nigeria?",
+  "o": [
+   "Peoples Democratic Party",
+   "Independent National Electoral Commission",
+   "Nigerian Army",
+   "Nigeria Labour Congress"
+  ],
+  "a": 3,
+  "e": "The NLC seeks to influence government policy without seeking to govern, unlike a political party."
+ },
+ {
+  "q": "A by-election is held when",
+  "o": [
+   "a seat in the legislature becomes vacant between general elections",
+   "a new constitution is adopted",
+   "the results of an election are cancelled nationwide",
+   "a party changes its leader"
+  ],
+  "a": 0,
+  "e": "By-elections fill vacancies that occur between general elections."
+ },
+ {
+  "q": "In a federation such as Nigeria, powers not assigned to the central government are called",
+  "o": [
+   "exclusive powers",
+   "residual powers",
+   "concurrent powers",
+   "emergency powers"
+  ],
+  "a": 1,
+  "e": "Residual powers are those not listed for the centre and are left to the component units."
+ },
+ {
+  "q": "The Clifford Constitution of 1922 introduced the elective principle in",
+  "o": [
+   "Kano and Sokoto",
+   "Enugu and Port Harcourt",
+   "Lagos and Calabar",
+   "Ibadan and Kaduna"
+  ],
+  "a": 2,
+  "e": "Elections to the Legislative Council were held in Lagos and Calabar."
+ },
+ {
+  "q": "The Richards Constitution of 1946 divided Nigeria into",
+  "o": [
+   "two regions",
+   "four regions",
+   "twelve states",
+   "three regions"
+  ],
+  "a": 3,
+  "e": "It created the Northern, Western and Eastern regions."
+ },
+ {
+  "q": "The constitution that formally introduced a federal structure in Nigeria was the",
+  "o": [
+   "Lyttelton Constitution of 1954",
+   "Clifford Constitution of 1922",
+   "Richards Constitution of 1946",
+   "Independence Constitution of 1960"
+  ],
+  "a": 0,
+  "e": "The 1954 Lyttelton Constitution established Nigeria as a federation."
+ },
+ {
+  "q": "The Nigerian National Democratic Party, formed in 1923, was founded by",
+  "o": [
+   "Nnamdi Azikiwe",
+   "Herbert Macaulay",
+   "Obafemi Awolowo",
+   "Ahmadu Bello"
+  ],
+  "a": 1,
+  "e": "Herbert Macaulay founded the NNDP, the first Nigerian political party, after the Clifford Constitution."
+ },
+ {
+  "q": "The National Council of Nigeria and the Cameroons (NCNC) was formed in",
+  "o": [
+   "1923",
+   "1951",
+   "1944",
+   "1960"
+  ],
+  "a": 2,
+  "e": "The NCNC was formed in 1944 with Herbert Macaulay as president and Nnamdi Azikiwe as secretary."
+ },
+ {
+  "q": "The warrant chief system was a feature of British colonial rule in",
+  "o": [
+   "Sokoto Caliphate",
+   "Western Nigeria",
+   "Borno",
+   "South-eastern Nigeria"
+  ],
+  "a": 3,
+  "e": "The British appointed warrant chiefs in Igbo areas that lacked centralised chiefs."
+ },
+ {
+  "q": "The Sokoto Caliphate was established in the early nineteenth century by",
+  "o": [
+   "Usman dan Fodio",
+   "Lord Lugard",
+   "Ahmadu Bello",
+   "Muhammadu Kanta"
+  ],
+  "a": 0,
+  "e": "Usman dan Fodio led the Fulani jihad that began in 1804 and founded the Caliphate."
+ },
+ {
+  "q": "In the pre-colonial Oyo Empire, the council that checked the powers of the Alaafin was the",
+  "o": [
+   "Ogboni",
+   "Oyomesi",
+   "Emirs' Council",
+   "Council of Elders"
+  ],
+  "a": 1,
+  "e": "The Oyomesi, headed by the Bashorun, could check the Alaafin."
+ },
+ {
+  "q": "Nigeria's 12 states were created in 1967 by the government of",
+  "o": [
+   "Murtala Mohammed",
+   "Aguiyi-Ironsi",
+   "Yakubu Gowon",
+   "Ibrahim Babangida"
+  ],
+  "a": 2,
+  "e": "General Yakubu Gowon created twelve states in May 1967."
+ },
+ {
+  "q": "The 1976 Local Government Reform made local government a",
+  "o": [
+   "department of the civil service",
+   "branch of the judiciary",
+   "unit of the police",
+   "third tier of government"
+  ],
+  "a": 3,
+  "e": "The reform established local government as the third tier of government."
+ },
+ {
+  "q": "The Fundamental Objectives and Directive Principles of State Policy are contained in which chapter of the 1999 Constitution?",
+  "o": [
+   "Chapter II",
+   "Chapter III",
+   "Chapter IV",
+   "Chapter VI"
+  ],
+  "a": 0,
+  "e": "Chapter II contains the Fundamental Objectives and Directive Principles of State Policy."
+ },
+ {
+  "q": "The Organisation of African Unity (OAU) was founded in",
+  "o": [
+   "1960",
+   "1963",
+   "1975",
+   "1999"
+  ],
+  "a": 1,
+  "e": "The OAU was founded in Addis Ababa in 1963."
+ },
+ {
+  "q": "The African Union replaced the Organisation of African Unity in",
+  "o": [
+   "1991",
+   "1999",
+   "2002",
+   "2010"
+  ],
+  "a": 2,
+  "e": "The AU was launched in 2002 as successor to the OAU."
+ },
+ {
+  "q": "The Organisation of the Petroleum Exporting Countries (OPEC) was formed in",
+  "o": [
+   "1945",
+   "1963",
+   "1975",
+   "1960"
+  ],
+  "a": 3,
+  "e": "OPEC was founded in Baghdad in 1960; Nigeria joined later, in 1971."
+ },
+ {
+  "q": "Nigeria became a member of the Commonwealth of Nations in",
+  "o": [
+   "1960",
+   "1914",
+   "1975",
+   "1999"
+  ],
+  "a": 0,
+  "e": "Nigeria joined the Commonwealth at independence in 1960."
+ },
+ {
+  "q": "The first Governor-General of Nigeria after the 1914 amalgamation was",
+  "o": [
+   "Sir Hugh Clifford",
+   "Lord Lugard",
+   "Sir Arthur Richards",
+   "Sir John Macpherson"
+  ],
+  "a": 1,
+  "e": "Lord Lugard became Governor-General of the amalgamated Nigeria in 1914."
+ },
+ {
+  "q": "The presidential system adopted in Nigeria's 1979 Constitution was modelled on that of the",
+  "o": [
+   "United Kingdom",
+   "Soviet Union",
+   "United States",
+   "France"
+  ],
+  "a": 2,
+  "e": "The 1979 Constitution copied the American presidential system."
+ },
+ {
+  "q": "One major function of political parties is to",
+  "o": [
+   "interpret the constitution",
+   "command the armed forces",
+   "collect taxes",
+   "aggregate the interests of citizens and contest elections"
+  ],
+  "a": 3,
+  "e": "Parties bring together interests and seek power by contesting elections."
+ },
+ {
+  "q": "Government by a small privileged group is called",
+  "o": [
+   "oligarchy",
+   "democracy",
+   "republic",
+   "federation"
+  ],
+  "a": 0,
+  "e": "Oligarchy means rule by a few people."
+ },
+ {
+  "q": "The process through which a foreigner legally becomes a citizen of a country is",
+  "o": [
+   "extradition",
+   "naturalisation",
+   "deportation",
+   "suffrage"
+  ],
+  "a": 1,
+  "e": "Naturalisation grants citizenship to a foreigner who meets legal requirements."
+ }
+]

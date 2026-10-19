@@ -1,0 +1,761 @@
+[
+ {
+  "q": "The basic economic problem is",
+  "o": [
+   "inflation",
+   "scarcity",
+   "unemployment",
+   "taxation"
+  ],
+  "a": 1,
+  "e": "Wants are unlimited but resources are limited. That is scarcity."
+ },
+ {
+  "q": "When the price of a normal good rises, other things equal, quantity demanded",
+  "o": [
+   "rises",
+   "falls",
+   "stays the same",
+   "doubles"
+  ],
+  "a": 1,
+  "e": "The law of demand: a higher price lowers quantity demanded."
+ },
+ {
+  "q": "GDP stands for",
+  "o": [
+   "Gross Domestic Product",
+   "General Domestic Price",
+   "Gross Daily Profit",
+   "Great Domestic Product"
+  ],
+  "a": 0,
+  "e": "GDP is Gross Domestic Product, the total output of a country."
+ },
+ {
+  "q": "A sustained rise in the general price level is",
+  "o": [
+   "deflation",
+   "inflation",
+   "recession",
+   "devaluation"
+  ],
+  "a": 1,
+  "e": "Inflation is a sustained rise in the general price level."
+ },
+ {
+  "q": "Opportunity cost is",
+  "o": [
+   "the money price",
+   "the next best alternative forgone",
+   "total cost",
+   "fixed cost"
+  ],
+  "a": 1,
+  "e": "Opportunity cost is the next best option you give up."
+ },
+ {
+  "q": "A market with a single seller is a",
+  "o": [
+   "oligopoly",
+   "monopoly",
+   "duopoly",
+   "perfect market"
+  ],
+  "a": 1,
+  "e": "One seller controlling the market is a monopoly."
+ },
+ {
+  "q": "The study of the economy as a whole is",
+  "o": [
+   "microeconomics",
+   "macroeconomics",
+   "econometrics",
+   "accounting"
+  ],
+  "a": 1,
+  "e": "Macroeconomics studies the whole economy."
+ },
+ {
+  "q": "Which of these is a factor of production?",
+  "o": [
+   "land",
+   "tax",
+   "inflation",
+   "profit"
+  ],
+  "a": 0,
+  "e": "Land, labour, capital and enterprise are the factors of production."
+ },
+ {
+  "q": "Money serves as a medium of",
+  "o": [
+   "exchange",
+   "production",
+   "taxation",
+   "transport"
+  ],
+  "a": 0,
+  "e": "Money is accepted in exchange for goods and services."
+ },
+ {
+  "q": "A tax that takes a larger percentage from higher incomes is",
+  "o": [
+   "regressive",
+   "proportional",
+   "progressive",
+   "indirect"
+  ],
+  "a": 2,
+  "e": "A progressive tax takes a bigger share as income rises."
+ },
+ {
+  "q": "Demand for a good that rises as income rises is for a",
+  "o": [
+   "inferior good",
+   "normal good",
+   "free good",
+   "public good"
+  ],
+  "a": 1,
+  "e": "Demand for a normal good rises as income rises."
+ },
+ {
+  "q": "Unemployment caused by a fall in total demand is",
+  "o": [
+   "frictional",
+   "cyclical",
+   "seasonal",
+   "structural"
+  ],
+  "a": 1,
+  "e": "Cyclical unemployment comes from falling demand in a downturn."
+ },
+ {
+  "q": "If supply increases and demand stays the same, price will",
+  "o": [
+   "rise",
+   "fall",
+   "stay the same",
+   "double"
+  ],
+  "a": 1,
+  "e": "More supply against the same demand pushes price down."
+ },
+ {
+  "q": "Equilibrium price is reached when",
+  "o": [
+   "demand exceeds supply",
+   "demand equals supply",
+   "supply is zero",
+   "price is zero"
+  ],
+  "a": 1,
+  "e": "At equilibrium, quantity demanded equals quantity supplied."
+ },
+ {
+  "q": "Demand is price elastic when the price elasticity of demand is",
+  "o": [
+   "less than 1",
+   "greater than 1",
+   "zero",
+   "negative only"
+  ],
+  "a": 1,
+  "e": "If elasticity is more than 1, quantity responds strongly to price changes."
+ },
+ {
+  "q": "The reward for labour is",
+  "o": [
+   "rent",
+   "interest",
+   "wages",
+   "profit"
+  ],
+  "a": 2,
+  "e": "Labour earns wages."
+ },
+ {
+  "q": "The reward for land is",
+  "o": [
+   "rent",
+   "wages",
+   "interest",
+   "profit"
+  ],
+  "a": 0,
+  "e": "Land earns rent."
+ },
+ {
+  "q": "The reward for capital is",
+  "o": [
+   "rent",
+   "wages",
+   "interest",
+   "dividend only"
+  ],
+  "a": 2,
+  "e": "Capital earns interest."
+ },
+ {
+  "q": "A market with only one seller is a",
+  "o": [
+   "monopoly",
+   "oligopoly",
+   "perfect competition",
+   "duopoly"
+  ],
+  "a": 0,
+  "e": "A single seller of a product with no close substitutes is a monopoly."
+ },
+ {
+  "q": "A market with a few large sellers is an",
+  "o": [
+   "monopoly",
+   "oligopoly",
+   "perfect competition",
+   "monopsony"
+  ],
+  "a": 1,
+  "e": "Oligopoly means a few sellers dominate the market."
+ },
+ {
+  "q": "GNP differs from GDP by",
+  "o": [
+   "net income from abroad",
+   "taxes",
+   "population",
+   "exports minus imports"
+  ],
+  "a": 0,
+  "e": "GNP = GDP + net income from abroad."
+ },
+ {
+  "q": "Per capita income is",
+  "o": [
+   "total income × population",
+   "national income ÷ population",
+   "exports ÷ imports",
+   "GDP − inflation"
+  ],
+  "a": 1,
+  "e": "It is the average income per person."
+ },
+ {
+  "q": "The central bank acts as the",
+  "o": [
+   "lender of last resort to banks",
+   "main bank of the public",
+   "tax collector",
+   "stock exchange"
+  ],
+  "a": 0,
+  "e": "Commercial banks can borrow from the central bank when in difficulty."
+ },
+ {
+  "q": "A main function of commercial banks is",
+  "o": [
+   "printing currency",
+   "accepting deposits and granting loans",
+   "setting taxes",
+   "regulating the stock exchange"
+  ],
+  "a": 1,
+  "e": "Banks take deposits and lend to customers."
+ },
+ {
+  "q": "A progressive tax is one where",
+  "o": [
+   "everyone pays the same rate",
+   "the rate rises as income rises",
+   "the rate falls as income rises",
+   "tax is paid only on goods"
+  ],
+  "a": 1,
+  "e": "Higher incomes pay a higher percentage."
+ },
+ {
+  "q": "Value Added Tax (VAT) is an example of an",
+  "o": [
+   "direct tax",
+   "indirect tax",
+   "income tax",
+   "property tax"
+  ],
+  "a": 1,
+  "e": "VAT is charged on goods and services, so it is an indirect tax."
+ },
+ {
+  "q": "Deflation is",
+  "o": [
+   "a general rise in prices",
+   "a general fall in prices",
+   "a rise in output",
+   "a fall in imports"
+  ],
+  "a": 1,
+  "e": "Deflation is a sustained fall in the general price level."
+ },
+ {
+  "q": "A country's balance of payments records",
+  "o": [
+   "its transactions with the rest of the world",
+   "government income and spending",
+   "bank savings",
+   "company profits"
+  ],
+  "a": 0,
+  "e": "It summarises all payments in and out of the country."
+ },
+ {
+  "q": "The balance of trade is the difference between",
+  "o": [
+   "exports and imports of goods",
+   "income and spending",
+   "savings and investment",
+   "taxes and subsidies"
+  ],
+  "a": 0,
+  "e": "It compares the value of visible exports and imports."
+ },
+ {
+  "q": "Devaluation is",
+  "o": [
+   "a rise in the value of a currency",
+   "a deliberate fall in the value of a currency against others",
+   "printing more money",
+   "a cut in taxes"
+  ],
+  "a": 1,
+  "e": "It is an official lowering of a currency's exchange rate."
+ },
+ {
+  "q": "The law of diminishing returns states that",
+  "o": [
+   "output always rises equally",
+   "adding more of a variable factor eventually gives smaller extra output",
+   "costs fall forever",
+   "all factors can be changed at once"
+  ],
+  "a": 1,
+  "e": "Extra units of one input, with others fixed, eventually add less."
+ },
+ {
+  "q": "Which of these is a fixed cost in the short run?",
+  "o": [
+   "raw materials",
+   "rent of a factory",
+   "wages for casual workers",
+   "electricity per unit"
+  ],
+  "a": 1,
+  "e": "Rent does not change with the level of output."
+ },
+ {
+  "q": "Total cost equals",
+  "o": [
+   "fixed cost − variable cost",
+   "fixed cost + variable cost",
+   "fixed cost × variable cost",
+   "variable cost ÷ fixed cost"
+  ],
+  "a": 1,
+  "e": "TC = FC + VC."
+ },
+ {
+  "q": "Which of these is a public good?",
+  "o": [
+   "bread",
+   "street lighting",
+   "mobile phones",
+   "cars"
+  ],
+  "a": 1,
+  "e": "Street lighting benefits everyone and no one can be excluded."
+ },
+ {
+  "q": "Division of labour means",
+  "o": [
+   "each worker specialises in one task",
+   "everyone does every task",
+   "profits are shared equally",
+   "workers pay taxes"
+  ],
+  "a": 0,
+  "e": "Specialisation raises productivity."
+ },
+ {
+  "q": "A mixed economy has",
+  "o": [
+   "only private firms",
+   "both private and public sectors",
+   "only government firms",
+   "only barter"
+  ],
+  "a": 1,
+  "e": "A mixed economy combines private enterprise and government."
+ },
+ {
+  "q": "Optimum population is the population that gives",
+  "o": [
+   "the largest number of people",
+   "the maximum output per head",
+   "the fewest births",
+   "a fixed size"
+  ],
+  "a": 1,
+  "e": "It is the size at which output per person is highest."
+ },
+ {
+  "q": "Cost-push inflation is caused mainly by",
+  "o": [
+   "excess demand",
+   "rising costs of production",
+   "too many exports",
+   "falling wages"
+  ],
+  "a": 1,
+  "e": "When production costs rise, firms raise prices."
+ },
+ {
+  "q": "A subsidy is",
+  "o": [
+   "a tax on producers",
+   "a payment by government to producers to lower costs",
+   "an import duty",
+   "a fine"
+  ],
+  "a": 1,
+  "e": "Subsidies reduce the cost of production or price to consumers."
+ },
+ {
+  "q": "If a 10% rise in price causes quantity demanded to fall by 20%, price elasticity of demand (ignoring sign) is",
+  "o": [
+   "2",
+   "0.5",
+   "1",
+   "10"
+  ],
+  "a": 0,
+  "e": "PED = 20% ÷ 10% = 2, so demand is elastic."
+ },
+ {
+  "q": "In an economy, C = N400m, I = N100m, G = N150m, X = N80m and M = N60m. GDP at market prices (expenditure approach) is",
+  "o": [
+   "N730m",
+   "N670m",
+   "N590m",
+   "N790m"
+  ],
+  "a": 1,
+  "e": "GDP = C + I + G + (X − M) = 400 + 100 + 150 + 20 = 670."
+ },
+ {
+  "q": "If the marginal propensity to consume is 0.75, the value of the investment multiplier is",
+  "o": [
+   "0.25",
+   "3",
+   "4",
+   "7.5"
+  ],
+  "a": 2,
+  "e": "k = 1 ÷ (1 − MPC) = 1 ÷ 0.25 = 4."
+ },
+ {
+  "q": "A firm's total cost is N1,200 for 10 units and N1,500 for 11 units. The marginal cost of the 11th unit is",
+  "o": [
+   "N150",
+   "N1,500",
+   "N136",
+   "N300"
+  ],
+  "a": 3,
+  "e": "MC = change in TC ÷ change in output = 300 ÷ 1."
+ },
+ {
+  "q": "A positive cross elasticity of demand between two goods shows that they are",
+  "o": [
+   "complements",
+   "substitutes",
+   "inferior goods",
+   "unrelated"
+  ],
+  "a": 1,
+  "e": "If a rise in the price of one raises demand for the other, they are substitutes."
+ },
+ {
+  "q": "A negative income elasticity of demand indicates that the good is",
+  "o": [
+   "a luxury",
+   "a necessity",
+   "inferior",
+   "a public good"
+  ],
+  "a": 2,
+  "e": "Demand for an inferior good falls as income rises."
+ },
+ {
+  "q": "Five workers produce 100 units of output and six workers produce 114 units. The marginal product of the sixth worker is",
+  "o": [
+   "19",
+   "20",
+   "114",
+   "14"
+  ],
+  "a": 3,
+  "e": "MP = 114 − 100 = 14 units."
+ },
+ {
+  "q": "If GDP is N900bn and net income from abroad is −N50bn, GNP is",
+  "o": [
+   "N850bn",
+   "N950bn",
+   "N900bn",
+   "N45bn"
+  ],
+  "a": 0,
+  "e": "GNP = GDP + net factor income from abroad = 900 − 50."
+ },
+ {
+  "q": "Given Qd = 100 − 2P and Qs = 20 + 2P, the equilibrium price is",
+  "o": [
+   "N10",
+   "N30",
+   "N20",
+   "N40"
+  ],
+  "a": 2,
+  "e": "Set 100 − 2P = 20 + 2P, so 4P = 80 and P = 20."
+ },
+ {
+  "q": "Which feature is typical of perfect competition?",
+  "o": [
+   "a single seller",
+   "a homogeneous product",
+   "price set by one firm",
+   "barriers to entry"
+  ],
+  "a": 1,
+  "e": "Many sellers sell identical products and are price takers."
+ },
+ {
+  "q": "A profit-maximising firm produces the output at which",
+  "o": [
+   "average cost is lowest",
+   "total revenue is highest",
+   "fixed cost is zero",
+   "marginal cost equals marginal revenue"
+  ],
+  "a": 3,
+  "e": "Profit is greatest where MC = MR."
+ },
+ {
+  "q": "If banks keep a 20% cash reserve ratio, an initial deposit of N1,000 can at most support total deposits of",
+  "o": [
+   "N5,000",
+   "N200",
+   "N1,200",
+   "N800"
+  ],
+  "a": 0,
+  "e": "Credit multiplier = 1 ÷ 0.20 = 5, so 5 × 1,000 = 5,000."
+ },
+ {
+  "q": "When a central bank sells government securities in the open market, the money supply",
+  "o": [
+   "rises",
+   "falls",
+   "is unchanged",
+   "doubles"
+  ],
+  "a": 1,
+  "e": "Buyers pay with bank deposits, which reduces banks' reserves and credit."
+ },
+ {
+  "q": "A budget deficit occurs when",
+  "o": [
+   "revenue exceeds expenditure",
+   "exports exceed imports",
+   "savings exceed investment",
+   "government expenditure exceeds revenue"
+  ],
+  "a": 3,
+  "e": "A deficit means government spends more than it earns."
+ },
+ {
+  "q": "The Economic Community of West African States (ECOWAS) was established in",
+  "o": [
+   "1960",
+   "1963",
+   "1975",
+   "1990"
+  ],
+  "a": 2,
+  "e": "ECOWAS was formed by the Treaty of Lagos in 1975."
+ },
+ {
+  "q": "A major objective of OPEC is to",
+  "o": [
+   "coordinate petroleum policies of member countries",
+   "control world food prices",
+   "regulate tariffs on all goods",
+   "finance African trade"
+  ],
+  "a": 0,
+  "e": "OPEC coordinates oil output and pricing policies of its members."
+ },
+ {
+  "q": "The World Trade Organization (WTO) replaced the",
+  "o": [
+   "IMF",
+   "ECOWAS",
+   "GATT",
+   "UNCTAD"
+  ],
+  "a": 2,
+  "e": "The General Agreement on Tariffs and Trade became the WTO in 1995."
+ },
+ {
+  "q": "A country has a comparative advantage in a good when it",
+  "o": [
+   "produces it with the most workers",
+   "produces it at a lower opportunity cost than others",
+   "exports no other good",
+   "has the highest tariffs"
+  ],
+  "a": 1,
+  "e": "Lower opportunity cost, not absolute output, defines comparative advantage."
+ },
+ {
+  "q": "If the export price index is 120 and the import price index is 80, the terms of trade are",
+  "o": [
+   "40",
+   "96",
+   "67",
+   "150"
+  ],
+  "a": 3,
+  "e": "Terms of trade = (120 ÷ 80) × 100 = 150."
+ },
+ {
+  "q": "If 40 people in a population are dependants and 80 are in the working population, the dependency ratio is",
+  "o": [
+   "50%",
+   "200%",
+   "33%",
+   "40%"
+  ],
+  "a": 0,
+  "e": "40 ÷ 80 × 100 = 50%."
+ },
+ {
+  "q": "Which of the following is a major problem of Nigerian agriculture?",
+  "o": [
+   "excess capital",
+   "use of rudimentary tools and land fragmentation",
+   "shortage of land in every region",
+   "over-mechanisation"
+  ],
+  "a": 1,
+  "e": "Small, scattered farms and simple tools keep productivity low."
+ },
+ {
+  "q": "Crude oil's chief importance to the Nigerian economy is that it",
+  "o": [
+   "employs most of the labour force",
+   "supplies most food",
+   "is the main source of foreign exchange earnings",
+   "is the largest tax on individuals"
+  ],
+  "a": 2,
+  "e": "Oil exports earn most of Nigeria's foreign exchange and government revenue."
+ },
+ {
+  "q": "Economic development differs from economic growth in that development",
+  "o": [
+   "only measures GDP",
+   "excludes the poor",
+   "is a fall in output",
+   "includes improvements in living standards and welfare"
+  ],
+  "a": 3,
+  "e": "Growth is a rise in output, while development also covers welfare and structural change."
+ },
+ {
+  "q": "A tax imposed on imported goods is called a",
+  "o": [
+   "tariff",
+   "subsidy",
+   "quota",
+   "royalty"
+  ],
+  "a": 0,
+  "e": "A tariff is a customs duty on imports."
+ },
+ {
+  "q": "A price ceiling set below the equilibrium price will lead to",
+  "o": [
+   "a surplus",
+   "a shortage",
+   "no change",
+   "a fall in demand to zero"
+  ],
+  "a": 1,
+  "e": "At the lower price, quantity demanded exceeds quantity supplied."
+ },
+ {
+  "q": "The main disadvantage of a sole proprietorship is",
+  "o": [
+   "too many owners",
+   "double taxation",
+   "unlimited liability of the owner",
+   "legal separation from the owner"
+  ],
+  "a": 2,
+  "e": "The owner's personal assets can be used to pay business debts."
+ },
+ {
+  "q": "If a 5% rise in price leads to a 10% rise in quantity supplied, price elasticity of supply is",
+  "o": [
+   "0.5",
+   "5",
+   "50",
+   "2"
+  ],
+  "a": 3,
+  "e": "PES = 10% ÷ 5% = 2, so supply is elastic."
+ },
+ {
+  "q": "A firm's fixed cost is N2,000. At an output of 50 units, average fixed cost is",
+  "o": [
+   "N40",
+   "N100",
+   "N2,050",
+   "N25"
+  ],
+  "a": 0,
+  "e": "AFC = TFC ÷ output = 2,000 ÷ 50."
+ },
+ {
+  "q": "If nominal GDP is N1,200bn and the price index is 120 (base 100), real GDP is",
+  "o": [
+   "N1,440bn",
+   "N1,000bn",
+   "N1,080bn",
+   "N120bn"
+  ],
+  "a": 1,
+  "e": "Real GDP = nominal ÷ price index × 100 = 1,200 ÷ 120 × 100."
+ },
+ {
+  "q": "A rise in the price of a good leads to a movement along the supply curve. This is called",
+  "o": [
+   "an increase in supply",
+   "a decrease in demand",
+   "an extension of supply",
+   "a shift of the demand curve"
+  ],
+  "a": 2,
+  "e": "A price change moves along the curve; non-price factors shift it."
+ }
+]

@@ -1,0 +1,761 @@
+[
+ {
+  "q": "Choose the word nearest in meaning to 'ubiquitous'",
+  "o": [
+   "rare",
+   "everywhere",
+   "hidden",
+   "ancient"
+  ],
+  "a": 1,
+  "e": "Ubiquitous means present everywhere."
+ },
+ {
+  "q": "Neither of the boys ___ present.",
+  "o": [
+   "were",
+   "are",
+   "was",
+   "have been"
+  ],
+  "a": 2,
+  "e": "'Neither' takes a singular verb, so use 'was'."
+ },
+ {
+  "q": "Choose the opposite of 'benevolent'",
+  "o": [
+   "kind",
+   "malevolent",
+   "generous",
+   "gentle"
+  ],
+  "a": 1,
+  "e": "Malevolent means wishing harm; benevolent means kind."
+ },
+ {
+  "q": "He has lived here ___ 2015.",
+  "o": [
+   "for",
+   "since",
+   "from",
+   "at"
+  ],
+  "a": 1,
+  "e": "'Since' goes with a point in time; 'for' with a length of time."
+ },
+ {
+  "q": "'The wind whispered through the trees' is an example of",
+  "o": [
+   "simile",
+   "irony",
+   "personification",
+   "hyperbole"
+  ],
+  "a": 2,
+  "e": "Giving human actions to a non-human thing is personification."
+ },
+ {
+  "q": "The plural of 'criterion' is",
+  "o": [
+   "criterions",
+   "criteria",
+   "criterias",
+   "criterium"
+  ],
+  "a": 1,
+  "e": "Criterion comes from Greek; its plural is criteria."
+ },
+ {
+  "q": "Choose the correctly spelt word",
+  "o": [
+   "accomodation",
+   "accommodation",
+   "acommodation",
+   "accomodasion"
+  ],
+  "a": 1,
+  "e": "Accommodation has a double c and a double m."
+ },
+ {
+  "q": "She is good ___ mathematics.",
+  "o": [
+   "in",
+   "at",
+   "on",
+   "with"
+  ],
+  "a": 1,
+  "e": "We say 'good at' a subject."
+ },
+ {
+  "q": "The synonym of 'candid' is",
+  "o": [
+   "frank",
+   "secretive",
+   "rude",
+   "shy"
+  ],
+  "a": 0,
+  "e": "Candid means open and honest, which is frank."
+ },
+ {
+  "q": "He ___ his homework before the teacher arrived.",
+  "o": [
+   "finishes",
+   "has finished",
+   "had finished",
+   "will finish"
+  ],
+  "a": 2,
+  "e": "The past perfect shows an action finished before another past action."
+ },
+ {
+  "q": "'Break a leg' is an example of",
+  "o": [
+   "a proverb",
+   "an idiom",
+   "a simile",
+   "a pun"
+  ],
+  "a": 1,
+  "e": "An idiom is not literal; 'break a leg' means good luck."
+ },
+ {
+  "q": "The antonym of 'scarce' is",
+  "o": [
+   "rare",
+   "plentiful",
+   "costly",
+   "small"
+  ],
+  "a": 1,
+  "e": "Scarce means in short supply; plentiful is the opposite."
+ },
+ {
+  "q": "Choose the word nearest in meaning to 'diligent'",
+  "o": [
+   "lazy",
+   "hardworking",
+   "careless",
+   "clever"
+  ],
+  "a": 1,
+  "e": "Diligent means careful and hardworking."
+ },
+ {
+  "q": "Choose the word opposite in meaning to 'transparent'",
+  "o": [
+   "clear",
+   "opaque",
+   "thin",
+   "bright"
+  ],
+  "a": 1,
+  "e": "Opaque means not able to be seen through; transparent means clear."
+ },
+ {
+  "q": "The committee ___ yet to reach a decision.",
+  "o": [
+   "have",
+   "has",
+   "are",
+   "were"
+  ],
+  "a": 1,
+  "e": "'Committee' is treated as one body here, so use the singular 'has'."
+ },
+ {
+  "q": "Each of the students ___ a certificate.",
+  "o": [
+   "receive",
+   "were receiving",
+   "received",
+   "have received"
+  ],
+  "a": 2,
+  "e": "'Each' is singular; 'received' agrees with it and fits the past meaning."
+ },
+ {
+  "q": "She apologised ___ being late.",
+  "o": [
+   "for",
+   "about",
+   "at",
+   "on"
+  ],
+  "a": 0,
+  "e": "We apologise 'for' something."
+ },
+ {
+  "q": "The meeting was called ___ because of the rain.",
+  "o": [
+   "off",
+   "out",
+   "away",
+   "down"
+  ],
+  "a": 0,
+  "e": "'Called off' means cancelled."
+ },
+ {
+  "q": "Choose the correctly spelt word.",
+  "o": [
+   "necesary",
+   "neccessary",
+   "necessary",
+   "nesessary"
+  ],
+  "a": 2,
+  "e": "Necessary has one c and two s's."
+ },
+ {
+  "q": "'He is as strong as an ox' is an example of",
+  "o": [
+   "metaphor",
+   "simile",
+   "irony",
+   "pun"
+  ],
+  "a": 1,
+  "e": "A simile compares two things using 'as' or 'like'."
+ },
+ {
+  "q": "'Time is a thief' is an example of",
+  "o": [
+   "simile",
+   "metaphor",
+   "hyperbole",
+   "onomatopoeia"
+  ],
+  "a": 1,
+  "e": "A metaphor states one thing is another without 'as' or 'like'."
+ },
+ {
+  "q": "'I have told you a million times' is an example of",
+  "o": [
+   "hyperbole",
+   "litotes",
+   "irony",
+   "apostrophe"
+  ],
+  "a": 0,
+  "e": "Hyperbole is deliberate exaggeration for effect."
+ },
+ {
+  "q": "'Buzz' and 'hiss' are examples of",
+  "o": [
+   "alliteration",
+   "onomatopoeia",
+   "paradox",
+   "oxymoron"
+  ],
+  "a": 1,
+  "e": "Onomatopoeia is a word that imitates a sound."
+ },
+ {
+  "q": "The idiom 'to let the cat out of the bag' means to",
+  "o": [
+   "lose a pet",
+   "reveal a secret",
+   "cause trouble",
+   "feel afraid"
+  ],
+  "a": 1,
+  "e": "It means to reveal a secret by accident."
+ },
+ {
+  "q": "The idiom 'a blessing in disguise' means",
+  "o": [
+   "a hidden gift",
+   "something good that seemed bad at first",
+   "a religious act",
+   "a false friend"
+  ],
+  "a": 1,
+  "e": "It describes something that looks bad but turns out well."
+ },
+ {
+  "q": "Choose the option that best completes: 'If I ___ you, I would apologise.'",
+  "o": [
+   "am",
+   "was",
+   "were",
+   "be"
+  ],
+  "a": 2,
+  "e": "The subjunctive 'were' is used in unreal conditions."
+ },
+ {
+  "q": "By the time we arrived, the film ___.",
+  "o": [
+   "already started",
+   "has already started",
+   "had already started",
+   "is already starting"
+  ],
+  "a": 2,
+  "e": "The past perfect shows an action completed before another past action."
+ },
+ {
+  "q": "He insisted ___ paying the bill.",
+  "o": [
+   "in",
+   "on",
+   "for",
+   "at"
+  ],
+  "a": 1,
+  "e": "We insist 'on' doing something."
+ },
+ {
+  "q": "The plural of 'phenomenon' is",
+  "o": [
+   "phenomenons",
+   "phenomena",
+   "phenomenas",
+   "phenomenes"
+  ],
+  "a": 1,
+  "e": "Phenomenon comes from Greek; its plural is phenomena."
+ },
+ {
+  "q": "Choose the word that is a noun: 'happy', 'happily', 'happiness', 'happier'",
+  "o": [
+   "happy",
+   "happily",
+   "happiness",
+   "happier"
+  ],
+  "a": 2,
+  "e": "Happiness names a state, so it is a noun."
+ },
+ {
+  "q": "Identify the adverb: 'She sang beautifully.'",
+  "o": [
+   "She",
+   "sang",
+   "beautifully",
+   "None of these"
+  ],
+  "a": 2,
+  "e": "'Beautifully' describes how she sang, so it is an adverb."
+ },
+ {
+  "q": "A word that stands in place of a noun is a",
+  "o": [
+   "verb",
+   "pronoun",
+   "adjective",
+   "preposition"
+  ],
+  "a": 1,
+  "e": "A pronoun replaces a noun, for example 'he' or 'they'."
+ },
+ {
+  "q": "Choose the sentence that is correct.",
+  "o": [
+   "Me and him went home.",
+   "He and I went home.",
+   "Him and I went home.",
+   "I and him went home."
+  ],
+  "a": 1,
+  "e": "'He and I' uses the subject pronouns correctly."
+ },
+ {
+  "q": "The synonym of 'abundant' is",
+  "o": [
+   "scarce",
+   "plentiful",
+   "tiny",
+   "empty"
+  ],
+  "a": 1,
+  "e": "Abundant means existing in large quantities."
+ },
+ {
+  "q": "The antonym of 'expand' is",
+  "o": [
+   "grow",
+   "stretch",
+   "contract",
+   "spread"
+  ],
+  "a": 2,
+  "e": "Contract means to become smaller; expand means to become larger."
+ },
+ {
+  "q": "A person who writes poems is a",
+  "o": [
+   "novelist",
+   "poet",
+   "dramatist",
+   "editor"
+  ],
+  "a": 1,
+  "e": "A poet writes poems."
+ },
+ {
+  "q": "Which of these is a compound sentence?",
+  "o": [
+   "I ran.",
+   "I ran, and she walked.",
+   "Running fast, I won.",
+   "Because I ran, I won."
+  ],
+  "a": 1,
+  "e": "A compound sentence joins two main clauses with a conjunction such as 'and'."
+ },
+ {
+  "q": "'The Nigerian ___ is rich in culture.' Choose the correct word.",
+  "o": [
+   "peoples",
+   "people's",
+   "peoples'",
+   "peopel"
+  ],
+  "a": 0,
+  "e": "'Peoples' as a plural noun here means different nations or ethnic groups; the sentence needs the plain plural."
+ },
+ {
+  "q": "Choose the option closest in meaning to 'reluctant'",
+  "o": [
+   "eager",
+   "unwilling",
+   "joyful",
+   "brave"
+  ],
+  "a": 1,
+  "e": "Reluctant means unwilling or hesitant."
+ },
+ {
+  "q": "Choose the word opposite in meaning to 'frugal'",
+  "o": [
+   "thrifty",
+   "careful",
+   "extravagant",
+   "poor"
+  ],
+  "a": 2,
+  "e": "Frugal means careful with money; extravagant means wasteful."
+ },
+ {
+  "q": "Choose the word nearest in meaning to 'meticulous'",
+  "o": [
+   "careful",
+   "careless",
+   "hasty",
+   "noisy"
+  ],
+  "a": 0,
+  "e": "Meticulous means showing great attention to detail."
+ },
+ {
+  "q": "The news about the strike ___ shocking to everyone.",
+  "o": [
+   "were",
+   "are",
+   "have been",
+   "was"
+  ],
+  "a": 3,
+  "e": "'News' is uncountable and singular, so it takes 'was'."
+ },
+ {
+  "q": "The teacher congratulated him ___ his success.",
+  "o": [
+   "for",
+   "on",
+   "at",
+   "with"
+  ],
+  "a": 1,
+  "e": "We congratulate someone 'on' an achievement."
+ },
+ {
+  "q": "Choose the word that has the same vowel sound as the one in 'seat'.",
+  "o": [
+   "bit",
+   "believe",
+   "bet",
+   "bat"
+  ],
+  "a": 1,
+  "e": "'Believe' has the long 'ee' sound, as in 'seat'."
+ },
+ {
+  "q": "Choose the word that rhymes with 'night'.",
+  "o": [
+   "beat",
+   "bet",
+   "bout",
+   "bite"
+  ],
+  "a": 3,
+  "e": "'Bite' ends with the same sound as 'night'."
+ },
+ {
+  "q": "In which of these words is the letter 'k' silent?",
+  "o": [
+   "knowledge",
+   "kitchen",
+   "bake",
+   "kept"
+  ],
+  "a": 0,
+  "e": "The 'k' in 'knowledge' is not pronounced."
+ },
+ {
+  "q": "'He passed away last night' uses a figure of speech called",
+  "o": [
+   "hyperbole",
+   "simile",
+   "euphemism",
+   "pun"
+  ],
+  "a": 2,
+  "e": "A euphemism is a gentler way of saying something unpleasant, here 'died'."
+ },
+ {
+  "q": "'A deafening silence' is an example of",
+  "o": [
+   "alliteration",
+   "simile",
+   "oxymoron",
+   "onomatopoeia"
+  ],
+  "a": 2,
+  "e": "An oxymoron joins two contradictory words."
+ },
+ {
+  "q": "'The fat frog fled fast' is an example of",
+  "o": [
+   "metaphor",
+   "alliteration",
+   "irony",
+   "personification"
+  ],
+  "a": 1,
+  "e": "Repeating the same initial consonant sound is alliteration."
+ },
+ {
+  "q": "The idiom 'to bury the hatchet' means to",
+  "o": [
+   "start a fight",
+   "hide a weapon",
+   "dig a grave",
+   "make peace"
+  ],
+  "a": 3,
+  "e": "It means to end a quarrel and become friends again."
+ },
+ {
+  "q": "The idiom 'to kick the bucket' means to",
+  "o": [
+   "die",
+   "fail",
+   "quit a job",
+   "play football"
+  ],
+  "a": 0,
+  "e": "It is an informal idiom meaning to die."
+ },
+ {
+  "q": "'Once in a blue moon' means",
+  "o": [
+   "every month",
+   "very rarely",
+   "at night",
+   "suddenly"
+  ],
+  "a": 1,
+  "e": "The idiom describes something that happens very seldom."
+ },
+ {
+  "q": "She ___ in Lagos for ten years before she moved to Abuja.",
+  "o": [
+   "has lived",
+   "lives",
+   "had lived",
+   "is living"
+  ],
+  "a": 2,
+  "e": "The past perfect fits an action completed before another past action."
+ },
+ {
+  "q": "I ___ the news when the phone rang.",
+  "o": [
+   "watch",
+   "have watched",
+   "am watching",
+   "was watching"
+  ],
+  "a": 3,
+  "e": "The past continuous shows an action in progress when another one interrupted."
+ },
+ {
+  "q": "The number of applicants ___ increased this year.",
+  "o": [
+   "has",
+   "have",
+   "are",
+   "were"
+  ],
+  "a": 0,
+  "e": "'The number of' takes a singular verb, so 'has'."
+ },
+ {
+  "q": "Neither the principal nor the teachers ___ aware of the change.",
+  "o": [
+   "was",
+   "is",
+   "has been",
+   "were"
+  ],
+  "a": 3,
+  "e": "The verb agrees with the nearer subject, 'teachers', so 'were'."
+ },
+ {
+  "q": "Which of these words is correctly spelt?",
+  "o": [
+   "embarassment",
+   "embarrasment",
+   "embarrassment",
+   "embarrasement"
+  ],
+  "a": 2,
+  "e": "Embarrassment has double r and double s."
+ },
+ {
+  "q": "Pick the option with the correct spelling.",
+  "o": [
+   "occurence",
+   "occurrence",
+   "occurrance",
+   "ocurrence"
+  ],
+  "a": 1,
+  "e": "Occurrence has double c and double r."
+ },
+ {
+  "q": "'Ngozi is not as tall as her sister.' This means that",
+  "o": [
+   "Ngozi's sister is taller than Ngozi",
+   "Ngozi is taller than her sister",
+   "they are equal in height",
+   "Ngozi has no sister"
+  ],
+  "a": 0,
+  "e": "'Not as tall as' means shorter, so the sister is taller."
+ },
+ {
+  "q": "'Only the manager can sign the document.' This means that",
+  "o": [
+   "the manager cannot sign it",
+   "everyone but the manager can sign it",
+   "nobody except the manager can sign it",
+   "the manager signs only some documents"
+  ],
+  "a": 2,
+  "e": "'Only' limits the right to sign to the manager alone."
+ },
+ {
+  "q": "Complete the question tag: 'Tola can swim, ___?'",
+  "o": [
+   "isn't she",
+   "doesn't she",
+   "can she",
+   "can't she"
+  ],
+  "a": 3,
+  "e": "A positive statement takes a negative tag with the same auxiliary."
+ },
+ {
+  "q": "Choose the correctly punctuated sentence.",
+  "o": [
+   "Its a pity that the dog lost it's collar.",
+   "It's a pity that the dog lost its collar.",
+   "It's a pity that the dog lost it's collar.",
+   "Its' a pity that the dog lost its collar."
+  ],
+  "a": 1,
+  "e": "'It's' is short for 'it is', while 'its' shows possession."
+ },
+ {
+  "q": "A place where bees are kept is called an",
+  "o": [
+   "apiary",
+   "aviary",
+   "aquarium",
+   "orchard"
+  ],
+  "a": 0,
+  "e": "An apiary is a place where bees are kept."
+ },
+ {
+  "q": "Choose the word nearest in meaning to 'obsolete'",
+  "o": [
+   "modern",
+   "useful",
+   "fragile",
+   "outdated"
+  ],
+  "a": 3,
+  "e": "Obsolete means no longer in use or out of date."
+ },
+ {
+  "q": "Choose the word opposite in meaning to 'verbose'",
+  "o": [
+   "wordy",
+   "concise",
+   "talkative",
+   "loud"
+  ],
+  "a": 1,
+  "e": "Verbose means using too many words; concise means brief."
+ },
+ {
+  "q": "The minister, together with his aides, ___ arrived.",
+  "o": [
+   "have",
+   "are",
+   "has",
+   "were"
+  ],
+  "a": 2,
+  "e": "The subject is 'minister'; 'together with his aides' does not change the verb's number."
+ },
+ {
+  "q": "The thief was accused ___ stealing the phone.",
+  "o": [
+   "of",
+   "for",
+   "with",
+   "about"
+  ],
+  "a": 0,
+  "e": "We accuse someone 'of' a wrongdoing."
+ },
+ {
+  "q": "Choose the correct reported form: She said, \"I am tired.\" becomes 'She said that she ___ tired.'",
+  "o": [
+   "is",
+   "were",
+   "was",
+   "has been"
+  ],
+  "a": 2,
+  "e": "In reported speech the present tense 'am' changes to the past 'was'."
+ },
+ {
+  "q": "Choose the passive form of 'The cook prepared the meal.'",
+  "o": [
+   "The meal is prepared by the cook.",
+   "The meal had been prepared by the cook.",
+   "The cook was prepared by the meal.",
+   "The meal was prepared by the cook."
+  ],
+  "a": 3,
+  "e": "The simple past passive is 'was prepared by'."
+ }
+]
