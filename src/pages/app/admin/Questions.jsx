@@ -5,6 +5,8 @@ import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
 import { SUBJECTS, SUBJECT_KEYS } from '../../../lib/constants.js'
 import { Empty, Pagination, useLoad, TabLoader } from './shared.jsx'
+import ImportQuestions from './ImportQuestions.jsx'
+import Icon from '../../../components/Icons.jsx'
 
 const blank = (subject) => ({ subject, body: '', options: ['', '', '', ''], answer: 0, explanation: '' })
 
@@ -49,6 +51,7 @@ export default function Questions() {
   const [subject, setSubject] = useState('eng')
   const [q, setQ] = useState('')
   const [editing, setEditing] = useState(null)
+  const [importing, setImporting] = useState(false)
   const fetchQ = useCallback(() => api.adminQuestions(subject), [subject])
   const { data, error, loading, reload } = useLoad(fetchQ)
   const act = useAction()
@@ -68,8 +71,10 @@ export default function Questions() {
           {SUBJECT_KEYS.map((k) => <option key={k} value={k}>{SUBJECTS[k].name}</option>)}
         </select>
         <input aria-label="Search questions" placeholder="Search this subject" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button className="btn" onClick={() => setEditing(blank(subject))}>Add question</button>
+        <button className="btn ghost" onClick={() => { setImporting(true); setEditing(null) }}><Icon name="upload" size={16} /> Import</button>
+        <button className="btn" onClick={() => { setEditing(blank(subject)); setImporting(false) }}>Add question</button>
       </div>
+      {importing && <ImportQuestions onCancel={() => setImporting(false)} onDone={() => { setImporting(false); reload() }} />}
       {editing && <Editor key={editing.id || 'new'} q={editing} onDone={(saved) => { setEditing(null); if (saved) reload() }} />}
       <ErrorLine>{act.error || error}</ErrorLine>
       {loading ? <TabLoader /> : (

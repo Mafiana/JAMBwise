@@ -1,18 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo, ThemeToggle } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
+import Captcha from '../components/Captcha.jsx'
 import * as api from '../lib/api.js'
 import { useAction } from '../hooks.js'
 
 const TOPICS = [['general', 'General question'], ['pin', 'Access PIN problem'], ['payment', 'Payment or plan'], ['bug', 'Something is broken'], ['other', 'Other']]
 
 export default function Contact() {
-  const { session, profile } = useAuth()
+  const { session, profile, booting } = useAuth()
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({ name: profile?.full_name || '', email: profile?.email || '', topic: 'general', body: '', website: '' })
   const [sent, setSent] = useState(false)
+  // a signed-in student who opens this page directly: fill their details in as soon as the profile has loaded
+  useEffect(() => { if (profile) setF((x) => ({ ...x, name: x.name || profile.full_name || '', email: x.email || profile.email || '' })) }, [profile])
+  const [captcha, setCaptcha] = useState(null)
+  const [captchaKey, setCaptchaKey] = useState(0)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const submit = (e) => {
     e.preventDefault()
@@ -20,9 +25,15 @@ export default function Contact() {
     if (!f.name.trim()) return setError('Please enter your name.')
     if (!/^[^@\s]+@[^@\s]+$/.test(f.email.trim())) return setError('Please enter a valid email address so we can reply.')
     if (f.body.trim().length < 5) return setError('Please write a few words about what you need.')
-    run(async () => {
-      await api.sendMessage({ ...f, user_id: session?.user?.id })
-      setSent(true)
+    if (!session && !captcha) return setError('Please answer the quick check below, so we know you are not a robot.')
+    return run(async () => {
+      try {
+        await api.sendMessage({ ...f, user_id: session?.user?.id, captcha })
+        setSent(true)
+      } catch (err) {
+        if (err.captcha) { setCaptcha(null); setCaptchaKey((k) => k + 1) }   // the check was refused: show a new one
+        throw err
+      }
     })
   }
   return (
@@ -57,6 +68,7 @@ export default function Contact() {
                 <textarea id="cm" rows={6} value={f.body} onChange={set('body')} maxLength={2000} />
                 <p className="sm" style={{ textAlign: 'right', margin: '2px 0 0' }}>{f.body.length}/2000</p>
                 <div className="hp" aria-hidden="true"><label htmlFor="cw">Leave this empty</label><input id="cw" tabIndex={-1} autoComplete="off" value={f.website} onChange={set('website')} /></div>
+                {!booting && !session && <Captcha onChange={setCaptcha} resetKey={captchaKey} />}
                 <ErrorLine>{error}</ErrorLine>
                 <button className="btn lg" disabled={busy} style={{ width: '100%', marginTop: 8 }}>{busy ? 'Sending…' : 'Send message'}</button>
               </form>

@@ -98,6 +98,7 @@ export function AuthProvider({ children }) {
       setRecovering(false)
     },
     async signOut() {
+      api.clearLocalStudentData()
       await supabase.auth.signOut()
     },
   }), [session, profile, booting, profileLoading, profileError, recovering, uid, loadProfile])

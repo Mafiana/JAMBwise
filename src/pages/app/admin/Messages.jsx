@@ -7,7 +7,7 @@ import { useAction } from '../../../hooks.js'
 import { TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
 import { Empty, fmtDateTime, TabLoader, useLoad } from './shared.jsx'
 
-const TOPIC = { general: 'General', payment: 'Payment', pin: 'Access PIN', bug: 'Bug', other: 'Other' }
+const TOPIC = { general: 'General', payment: 'Payment', pin: 'Access PIN', bug: 'Bug', question: 'Question report', other: 'Other' }
 const chip = (s) => 'tag' + (s === 'new' ? ' bad' : s === 'answered' ? ' ok' : s === 'resolved' ? ' muted' : '')
 
 export default function Messages() {
@@ -21,7 +21,7 @@ export default function Messages() {
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const needle = q.trim().toLowerCase()
   const shown = data.filter((m) =>
-    (filter === 'open' ? m.status === 'new' || m.status === 'read' : filter === 'all' || m.status === filter) &&
+    (filter === 'open' ? m.status === 'new' || m.status === 'read' : filter === 'reports' ? m.topic === 'question' : filter === 'all' || m.status === filter) &&
     (!needle || [m.name, m.email, m.subject, m.body, ticketNo(m.id)].some((v) => String(v || '').toLowerCase().includes(needle))))
   const count = (s) => data.filter((m) => m.status === s).length
   const setStatus = (m, status) => act.run(async () => { await api.adminSetMessageStatus(m.id, status); await reload() })
@@ -35,7 +35,7 @@ export default function Messages() {
       </div>
       <div className="adm-filters">
         <select aria-label="Filter tickets" value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="open">Needs attention</option><option value="answered">Answered</option><option value="resolved">Resolved</option><option value="all">All tickets</option>
+          <option value="open">Needs attention</option><option value="reports">Question reports</option><option value="answered">Answered</option><option value="resolved">Resolved</option><option value="all">All tickets</option>
         </select>
         <input aria-label="Search tickets" placeholder="Search name, email, subject or ticket number" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>

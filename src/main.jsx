@@ -12,3 +12,9 @@ initBackend().then(() => {
     </StrictMode>,
   )
 })
+
+// Offline support: the service worker (public/sw.js) keeps the app on the device. Only in a real build, so
+// `npm run dev` never serves stale files.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => { /* private mode etc.: the app simply works online only */ }) })
+}

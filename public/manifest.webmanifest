@@ -1,0 +1,24 @@
+{
+  "name": "JAMBwise: JAMB / UTME practice and CBT mocks",
+  "short_name": "JAMBwise",
+  "description": "JAMB / UTME practice questions, timed CBT mocks, score calculator and study planner. Works on weak data.",
+  "id": "/",
+  "start_url": "/app/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b7a43",
+  "theme_color": "#0b7a43",
+  "lang": "en-NG",
+  "categories": ["education"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Practice", "url": "/app/practice", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "CBT Mock", "url": "/app/mock", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

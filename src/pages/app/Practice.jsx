@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import Icon from '../../components/Icons.jsx'
+import ReportQuestion from '../../components/ReportQuestion.jsx'
 import { ErrorLine } from '../../components/ui.jsx'
 import { PRACTICE_SIZE, SUBJECTS, SUBJECT_KEYS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
@@ -27,6 +28,7 @@ function Question({ s }) {
       ))}
       {answered && s.sel !== q.answer && q.explanation && <p className="ex">💡 {q.explanation}</p>}
       {answered && <button className="btn" onClick={nextQuestion}>{s.i + 1 < s.qs.length ? 'Next question' : 'See result'}</button>}
+      <div className="report-row"><ReportQuestion key={q.id} q={q} /></div>
     </div>
   )
 }
@@ -71,7 +73,8 @@ export default function Practice() {
         <h2>correct</h2>
         <p className="mut">{pct >= 0.7 ? 'Great work!' : 'Review the ones you missed and try again.'}</p>
         {practice.saved === 'saving' && <p className="sm">Saving your result…</p>}
-        {practice.saved && practice.saved !== 'saving' && practice.saved !== 'ok' && <ErrorLine>{practice.saved}</ErrorLine>}
+        {practice.saved === 'queued' && <p className="notice" role="status"><Icon name="offline" size={16} /> You are offline. Your result is saved on this phone and will sync when you are back online.</p>}
+        {practice.saved && !['saving', 'ok', 'queued'].includes(practice.saved) && <ErrorLine>{practice.saved}</ErrorLine>}
         <ErrorLine>{error}</ErrorLine>
         <button className="btn" disabled={busy} onClick={() => run(() => startPractice(practice.subject))}>Try again</button>{' '}
         <button className="btn ghost" onClick={endPractice}>Choose subject</button>
