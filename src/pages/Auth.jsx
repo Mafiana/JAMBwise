@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo } from '../components/ui.jsx'
 import { useAction } from '../hooks.js'
 import { demoMode } from '../lib/supabase.js'
-import { DEMO_ADMIN, DEMO_STUDENT } from '../lib/demo/accounts.js'
+import { DEMO_ADMIN, DEMO_STUDENT, DEMO_TEACHER } from '../lib/demo/accounts.js'
 
 const MIN_PASSWORD = 8
 
@@ -65,6 +65,7 @@ export default function Auth() {
             <b>Demo mode.</b> Log in with one click:
             <div className="row">
               <button type="button" className="btn sm" onClick={() => { setDest('/app/admin'); run(() => signIn(DEMO_ADMIN.email, DEMO_ADMIN.password)) }}>Admin</button>
+              <button type="button" className="btn ghost sm" onClick={() => { setDest('/app/admin'); run(() => signIn(DEMO_TEACHER.email, DEMO_TEACHER.password)) }}>Teacher</button>
               <button type="button" className="btn ghost sm" onClick={() => { setDest('/app/dashboard'); run(() => signIn(DEMO_STUDENT.email, DEMO_STUDENT.password)) }}>Student</button>
             </div>
           </div>

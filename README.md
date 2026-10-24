@@ -94,11 +94,58 @@ Share > Add to Home Screen). Once installed it opens like an app from the home s
 ### CBT mock: student photo and calculator
 The mock exam header shows the student's profile photo as a passport-style portrait (a silhouette if no photo is set; students add one under My Profile). On a computer (screen at least 900px wide with a mouse) a calculator pops up by itself when the mock starts, laid out like the one in the real JAMB CBT: 7 8 9 / C, 4 5 6 x root, 1 2 3 - x squared, 0 . + =. It can be dragged by its title bar, closed with the red X, and opened again with the Calculator button; the keyboard works too (digits, + - * /, Enter, Backspace, C). On phones it stays closed until the student taps Calculator. The logic is in `src/lib/calc.js`.
 
-### The CBT mock can be written once, and the Scoresheet
-- When a student submits, a **"Successfully submitted"** box appears and stays until they press *View my result*. After that the mock cannot be started again: the CBT Mock page shows "You have already submitted your CBT mock" with their score. This is enforced in the database (a trigger refuses a second scored mock, and students cannot delete a submitted mock, not even with Settings > Reset progress), not just on the screen. A result earned offline counts as submitted straight away and syncs later.
-- **Admin > Scoresheet** lists every student's mock score, best first (equal scores share a rank), with the subject breakdown, average, highest score and a search box. **Download PDF** saves it as an A4 landscape PDF (the search filter applies). The PDF is made in the browser by `src/lib/pdf.js`; no extra library is needed.
-- If a student really needs another go (for example a power cut), press **Allow retake** on their row. It removes only their mock result, keeps their practice history, and is written to Admin > Activity.
-- Database already running? Run `supabase/migrate-mock-lock.sql` once in the Supabase SQL Editor (safe to repeat). New projects get it from `schema.sql`.
+### CBT Mock, ExamHall and the Scoresheet
+There are two timed exams in the student menu. They are the same exam (English plus 3 subjects, 40 seconds a question, question palette, calculator, passport photo), and each can be written **once** per student. The difference is who sees the result:
+
+| | CBT Mock | ExamHall |
+|---|---|---|
+| Student sees their score | Yes: "View my result" after submitting, the score on the Dashboard and My Progress | **No.** The student only sees that it was submitted and when |
+| Admin sees it | Admin > Scoresheet > CBT Mock | Admin > Scoresheet > ExamHall |
+
+- On submit a **"Successfully submitted"** box appears and cannot be skipped. CBT Mock offers *View my result* and a red **Exit CBT MOCK Lab**; ExamHall has only a red **Exit ExamHall**. Afterwards the exam page says it was already submitted and there is no Start button.
+- This is enforced in the database, not only on screen: a trigger refuses a second scored attempt of the same exam; students cannot delete a submitted exam (not even with Settings > Reset progress); and students can read only their own practice and CBT Mock rows, so an ExamHall score cannot be fetched even with developer tools (the student can only ask `my_exam_status('hall')` whether and when they submitted). A result earned offline counts as submitted straight away and syncs later.
+- **Admin > Scoresheet** has a **CBT Mock / ExamHall** switch. Each lists every student's score, best first (equal scores share a rank), with the subject breakdown, average, highest score and a search box. **Download PDF** saves the exam you are looking at as an A4 landscape PDF (the search filter applies). The PDF is made in the browser by `src/lib/pdf.js`; no extra library is needed.
+- If a student really needs another go (for example a power cut), press **Allow retake** on their row. It removes only that exam's result, keeps their other exam and practice history, and is written to Admin > Activity.
+- Database already running? Run `supabase/migrate-mock-lock.sql` once in the Supabase SQL Editor (safe to repeat, and safe if you already ran the earlier version). New projects get it from `schema.sql`.
+
+### Subjects
+
+There are 14: Use of English, Mathematics, Physics, Chemistry, Biology, Government, Economics, Commerce, Agricultural Science and (new) **Accounts, Marketing, Literature in English, Islamic Religious Knowledge, Christian Religious Knowledge**. English and Mathematics are free; the rest need a Student or Pro plan. Each subject has its questions in `supabase/questions/<code>.json` (codes: `acc`, `mkt`, `lit`, `irk`, `crk`). The new subjects start with 38 to 40 questions each, enough for a 20-question mock and practice, so add more through **Admin > Questions > Import**. Existing database? Run `supabase/migrate-subjects.sql`, then `supabase/seed-questions.sql` (both safe to repeat).
+
+### ExamHall controls: schedule, warnings, shuffling, resume
+
+- **Schedule.** Admin > Scoresheet > ExamHall has a schedule card: an opening time, a closing time and the number of warnings. Students can only start inside that window, and their exam ends at the closing time at the latest. The window is checked against the **server's clock**, and the database refuses an ExamHall submit before the opening time. Leave both times empty for "open any time".
+- **Guards (ExamHall only).** On a computer the exam opens in full screen. Switching tab or window, or leaving full screen, shows a warning, is recorded in `exam_events`, and appears on the Scoresheet in a **Left screen** column (click the count for the times). After the chosen number of warnings (default 3, `0` = warn only) the exam is submitted automatically. Students who were flagged but never submitted are listed under the table. The timer auto-submits when it reaches zero, also if the student is on another page. A browser cannot be made tamper-proof: these guards deter and document, they do not replace a supervisor.
+- **Shuffling.** Each student gets a random draw from the question pool (different questions and a different order) and shuffled answer options, so neighbours do not see the same paper.
+- **Resume.** The exam in progress (questions, answers, position, warnings and the end time) is kept on the device. After a refresh or power cut the student sees **Welcome back** and carries on; the clock does not pause, and if time ran out meanwhile the exam is submitted at once. A reload is not counted as leaving.
+- **Exam log per student.** Admin > Students has a **Logs** button on every row. It shows a student's CBT Mock and ExamHall history: when they started, each time they left the exam screen ("Warning 1 of 3"), when they came back to a restored exam, and how they submitted (by themselves, time ran out, or too many warnings).
+- **Exam pages have no menu.** CBT Mock and ExamHall use the full width with no sidebar; the picker has a *Back to dashboard* link, and if a student navigates elsewhere during an exam a banner offers *Return to exam*.
+- Database already running? Run `supabase/migrate-exam-controls.sql` once after `migrate-mock-lock.sql` (safe to repeat; also safe if you ran the first version of it, because it upgrades the log). New projects get it from `schema.sql`.
+
+### Release ExamHall results, and the teacher role
+
+- **Results are hidden by default.** After an ExamHall sitting, students only see the date they took it. In **Admin > Scoresheet > ExamHall**, use the **Release** card to show results; once released, students see their score and subject breakdown on the ExamHall page and in My Progress. You can hide them again at any time.
+- **Teacher role.** A teacher can view students, scores and exam logs, add and edit questions (including import) and answer support tickets. A teacher cannot see payments, PINs, prices or the activity log, cannot delete anything, and cannot schedule, release or reset ExamHall. Only an admin sets roles: **Students > student > Manage > Role**. In demo mode use the **Teacher** button on the login page (`teacher@demo.com`, password `demo1234`).
+- Database already running? Run `supabase/migrate-roles.sql` once, after `migrate-exam-controls.sql` (safe to repeat). New projects get it from `schema.sql`.
+
+### Add students and teachers, the notification bell, and admin-teacher chat
+
+- **Add student** (Admin > Students) and **Add teacher** (Admin > Teachers) create real accounts. You type the name and email and choose a password (or press Generate). The login details are shown once so you can copy them. Students can also be given a plan and days of access. Both go through the `admin-create-user` Edge Function, so the account exists in Supabase Auth and in the `profiles` table.
+- **Teachers** (admin sidebar): add, edit name/subject/school, set a new password, suspend or restore, remove the teacher role, delete, and chat. Passwords are changed through the `admin-set-password` Edge Function.
+- **Notification bell** (top of the sidebar, for everyone): shows an unread count. When an admin releases ExamHall results, every student who sat it is notified and the notification opens their result. New chat messages notify the other side too. Mark one or all as read.
+- **Chat**: admins open a teacher's chat from Admin > Teachers > Chat. Teachers use **Chat with admin** in their sidebar. One thread per teacher, shared by all admins; it refreshes every few seconds.
+- Deploy the two new functions: `supabase functions deploy admin-create-user` and `supabase functions deploy admin-set-password`.
+- Database already running? Run `supabase/migrate-notify.sql` once, after `migrate-roles.sql` (safe to repeat). New projects get it from `schema.sql`.
+
+### Parent access
+
+Parents can see how a student is doing, without ever logging in as the student.
+
+1. The student opens **Settings > Parent access** and taps **Make a parent code**. The code (like `K7M2-9QXP`) lasts 7 days. The student can renew it, or **Switch off**, at any time, and sees **who has looked** and gets a bell message on every sign-in.
+2. The parent opens the **For parents** box on the home page (or `/parent`), types the Student ID, the code and their own name, and passes the quick check. They get a read-only report for 60 minutes: questions and accuracy, subjects that need work, mock results, ExamHall (only after you release results), recent sessions and the last 14 days of practice. Never the email, messages or anything editable.
+3. **Admin > Parent access** shows every sign-in and failed try (parent name, relationship, student, result, device, time), with search, filters, dates, pages, CSV export, and a **Switch off** button per student.
+
+Safeguards: 5 wrong tries per student ID per 15 minutes, 20 per device per hour (counted whether or not the ID exists, so nothing is revealed); one vague error message; the same CAPTCHA as the contact form; codes expire; only a short browser description is kept (no IP address). Database: run `supabase/migrate-parent.sql` once, after `migrate-notify.sql`. Deploy the two functions: `supabase functions deploy parent-login` and `supabase functions deploy parent-report`. In demo mode, use ID `JW-2026-000002` and code `DEMO-2468` (shown in the demo banner).
 
 ### Spam protection
 - **Rate limits** are enforced by the database, so they cannot be skipped from the browser. A student can open 5 tickets an hour (10 question reports an hour)
@@ -127,6 +174,10 @@ supabase functions deploy pin-activate
 supabase functions deploy paystack-init
 supabase functions deploy delete-account
 supabase functions deploy admin-delete-user
+supabase functions deploy admin-create-user
+supabase functions deploy admin-set-password
+supabase functions deploy parent-login
+supabase functions deploy parent-report
 supabase functions deploy contact-submit
 supabase functions deploy contact-challenge
 supabase functions deploy paystack-webhook --no-verify-jwt
@@ -180,10 +231,10 @@ Please have a teacher check any questions you add: students trust the answer key
 
 ```
 src/lib/        supabase.js (real or demo backend), api.js (all server calls, offline cache), utils.js, importQuestions.js, calc.js, scoresheet.js and pdf.js (tested logic), constants.js, demo/ (demo mode)
-src/context/    Auth, Theme, Exam (practice and mock state)
+src/context/    Auth, Theme, Exam (practice and exam state)
 src/pages/      Landing, Auth, Legal, and app/* screens
 public/         sw.js (offline), manifest.webmanifest, icons
-supabase/       schema.sql, migrate-admin-panel.sql, migrate-mock-lock.sql, seed-questions.sql, questions/*.json, functions/*
+supabase/       schema.sql, migrate-admin-panel.sql, migrate-mock-lock.sql, migrate-exam-controls.sql, migrate-roles.sql, migrate-notify.sql, migrate-parent.sql, migrate-subjects.sql, seed-questions.sql, questions/*.json, functions/*
 tests/          unit tests and database security tests
 ```
 

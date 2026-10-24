@@ -1,0 +1,431 @@
+[
+ {
+  "q": "The three main genres of literature are",
+  "o": [
+   "prose, comedy and satire",
+   "prose, poetry and drama",
+   "poetry, tragedy and epic",
+   "drama, ballad and novel"
+  ],
+  "a": 1,
+  "e": "Every literary work belongs to one of these three forms."
+ },
+ {
+  "q": "A comparison that uses 'like' or 'as' is a",
+  "o": [
+   "simile",
+   "metaphor",
+   "irony",
+   "pun"
+  ],
+  "a": 0,
+  "e": "Example: 'She is as brave as a lion.'"
+ },
+ {
+  "q": "A direct comparison without 'like' or 'as' is a",
+  "o": [
+   "simile",
+   "alliteration",
+   "hyperbole",
+   "metaphor"
+  ],
+  "a": 3,
+  "e": "Example: 'Time is a thief.'"
+ },
+ {
+  "q": "Giving human qualities to non-human things is",
+  "o": [
+   "onomatopoeia",
+   "irony",
+   "personification",
+   "satire"
+  ],
+  "a": 2,
+  "e": "Example: 'The wind whispered.'"
+ },
+ {
+  "q": "Deliberate exaggeration for effect is",
+  "o": [
+   "understatement",
+   "hyperbole",
+   "simile",
+   "pun"
+  ],
+  "a": 1,
+  "e": "Example: 'I have told you a million times.'"
+ },
+ {
+  "q": "The repetition of the same consonant sound at the beginning of words is",
+  "o": [
+   "alliteration",
+   "assonance",
+   "rhyme",
+   "irony"
+  ],
+  "a": 0,
+  "e": "Example: 'Peter picked a peck of pickled peppers.'"
+ },
+ {
+  "q": "A word whose sound imitates its meaning, such as 'buzz', is an example of",
+  "o": [
+   "alliteration",
+   "metaphor",
+   "paradox",
+   "onomatopoeia"
+  ],
+  "a": 3,
+  "e": "The sound suggests the sense."
+ },
+ {
+  "q": "A speech in which a character speaks their thoughts aloud while alone on stage is a",
+  "o": [
+   "dialogue",
+   "aside",
+   "soliloquy",
+   "prologue"
+  ],
+  "a": 2,
+  "e": "It lets the audience know the character's inner thoughts."
+ },
+ {
+  "q": "A short remark made by a character to the audience, unheard by others on stage, is an",
+  "o": [
+   "soliloquy",
+   "aside",
+   "epilogue",
+   "monologue"
+  ],
+  "a": 1,
+  "e": "Other characters are supposed not to hear it."
+ },
+ {
+  "q": "A play that ends with the downfall of the main character is a",
+  "o": [
+   "tragedy",
+   "comedy",
+   "farce",
+   "satire"
+  ],
+  "a": 0,
+  "e": "The hero often falls through a flaw or fate."
+ },
+ {
+  "q": "A play with a happy ending that is meant to amuse is a",
+  "o": [
+   "tragedy",
+   "elegy",
+   "epic",
+   "comedy"
+  ],
+  "a": 3,
+  "e": "Comedies usually end with problems solved."
+ },
+ {
+  "q": "The main character in a story is the",
+  "o": [
+   "antagonist",
+   "narrator",
+   "protagonist",
+   "chorus"
+  ],
+  "a": 2,
+  "e": "The story centres on this character."
+ },
+ {
+  "q": "The character who opposes the main character is the",
+  "o": [
+   "protagonist",
+   "antagonist",
+   "narrator",
+   "confidant"
+  ],
+  "a": 1,
+  "e": "The antagonist creates the conflict."
+ },
+ {
+  "q": "A sonnet has",
+  "o": [
+   "fourteen lines",
+   "ten lines",
+   "twelve lines",
+   "sixteen lines"
+  ],
+  "a": 0,
+  "e": "Shakespearean and Petrarchan sonnets both have 14 lines."
+ },
+ {
+  "q": "A poem written to mourn the dead is an",
+  "o": [
+   "ode",
+   "ballad",
+   "lyric",
+   "elegy"
+  ],
+  "a": 3,
+  "e": "It expresses grief and loss."
+ },
+ {
+  "q": "A poem written in praise of a person, object or idea is an",
+  "o": [
+   "elegy",
+   "limerick",
+   "ode",
+   "ballad"
+  ],
+  "a": 2,
+  "e": "Odes are usually serious and elevated in tone."
+ },
+ {
+  "q": "A narrative poem that tells a story and is often sung is a",
+  "o": [
+   "sonnet",
+   "ballad",
+   "elegy",
+   "ode"
+  ],
+  "a": 1,
+  "e": "Ballads are often written in short stanzas."
+ },
+ {
+  "q": "A group of lines forming a unit in a poem is a",
+  "o": [
+   "stanza",
+   "chapter",
+   "scene",
+   "act"
+  ],
+  "a": 0,
+  "e": "Stanzas are separated by spaces."
+ },
+ {
+  "q": "Two successive lines of poetry that rhyme form a",
+  "o": [
+   "quatrain",
+   "tercet",
+   "sestet",
+   "couplet"
+  ],
+  "a": 3,
+  "e": "Example: 'night / light'."
+ },
+ {
+  "q": "The series of events in a story is its",
+  "o": [
+   "theme",
+   "setting",
+   "plot",
+   "tone"
+  ],
+  "a": 2,
+  "e": "It follows a beginning, a middle and an end."
+ },
+ {
+  "q": "The time and place in which a story happens is its",
+  "o": [
+   "plot",
+   "setting",
+   "theme",
+   "style"
+  ],
+  "a": 1,
+  "e": "It creates the background of the action."
+ },
+ {
+  "q": "A scene that goes back to an earlier time in a story is a",
+  "o": [
+   "flashback",
+   "foreshadowing",
+   "climax",
+   "epilogue"
+  ],
+  "a": 0,
+  "e": "It tells what happened before the present events."
+ },
+ {
+  "q": "Hints about what will happen later in a story are",
+  "o": [
+   "flashback",
+   "irony",
+   "suspense",
+   "foreshadowing"
+  ],
+  "a": 3,
+  "e": "They prepare the reader for coming events."
+ },
+ {
+  "q": "The central idea or message of a literary work is its",
+  "o": [
+   "plot",
+   "setting",
+   "theme",
+   "stanza"
+  ],
+  "a": 2,
+  "e": "Examples are love, power and justice."
+ },
+ {
+  "q": "A story told by a character using 'I' is written from the",
+  "o": [
+   "third-person point of view",
+   "first-person point of view",
+   "omniscient point of view",
+   "second-person point of view"
+  ],
+  "a": 1,
+  "e": "The narrator takes part in the story."
+ },
+ {
+  "q": "A long narrative poem about the heroic deeds of a great figure is an",
+  "o": [
+   "epic",
+   "elegy",
+   "sonnet",
+   "lyric"
+  ],
+  "a": 0,
+  "e": "Examples include 'The Iliad'."
+ },
+ {
+  "q": "A play on words that uses a word with two meanings is a",
+  "o": [
+   "simile",
+   "proverb",
+   "irony",
+   "pun"
+  ],
+  "a": 3,
+  "e": "It is often used for humour."
+ },
+ {
+  "q": "The phrase 'deafening silence' is an example of",
+  "o": [
+   "simile",
+   "alliteration",
+   "oxymoron",
+   "onomatopoeia"
+  ],
+  "a": 2,
+  "e": "Two opposite ideas are placed together."
+ },
+ {
+  "q": "A work that uses humour or ridicule to criticise human faults is",
+  "o": [
+   "elegy",
+   "satire",
+   "epic",
+   "tragedy"
+  ],
+  "a": 1,
+  "e": "It aims to correct through mockery."
+ },
+ {
+  "q": "The turning point of greatest tension in a plot is the",
+  "o": [
+   "climax",
+   "exposition",
+   "resolution",
+   "prologue"
+  ],
+  "a": 0,
+  "e": "After it, the action moves towards the end."
+ },
+ {
+  "q": "When the audience knows something that a character does not, it is",
+  "o": [
+   "verbal irony",
+   "paradox",
+   "simile",
+   "dramatic irony"
+  ],
+  "a": 3,
+  "e": "The audience sees the danger the character cannot."
+ },
+ {
+  "q": "'Things Fall Apart' was written by",
+  "o": [
+   "Wole Soyinka",
+   "Chimamanda Adichie",
+   "Chinua Achebe",
+   "Ngugi wa Thiong'o"
+  ],
+  "a": 2,
+  "e": "It was first published in 1958."
+ },
+ {
+  "q": "'Romeo and Juliet' was written by",
+  "o": [
+   "John Milton",
+   "William Shakespeare",
+   "Charles Dickens",
+   "George Orwell"
+  ],
+  "a": 1,
+  "e": "It is a tragedy about two young lovers."
+ },
+ {
+  "q": "The first African to win the Nobel Prize in Literature, in 1986, was",
+  "o": [
+   "Wole Soyinka",
+   "Chinua Achebe",
+   "Ben Okri",
+   "Nadine Gordimer"
+  ],
+  "a": 0,
+  "e": "He was honoured for his plays, poems and essays."
+ },
+ {
+  "q": "'Death and the King's Horseman' was written by",
+  "o": [
+   "Chinua Achebe",
+   "J. P. Clark",
+   "Ola Rotimi",
+   "Wole Soyinka"
+  ],
+  "a": 3,
+  "e": "It is a play set in Oyo during the colonial period."
+ },
+ {
+  "q": "'Hamlet' is a",
+  "o": [
+   "comedy by Shakespeare",
+   "novel by Dickens",
+   "tragedy by Shakespeare",
+   "epic by Homer"
+  ],
+  "a": 2,
+  "e": "The Prince of Denmark seeks revenge for his father's death."
+ },
+ {
+  "q": "'Paradise Lost' is an epic poem by",
+  "o": [
+   "William Wordsworth",
+   "John Milton",
+   "John Keats",
+   "Alfred Tennyson"
+  ],
+  "a": 1,
+  "e": "It tells of the fall of Adam and Eve."
+ },
+ {
+  "q": "A pattern of rhyme in a poem is called the",
+  "o": [
+   "rhyme scheme",
+   "metre",
+   "stanza form",
+   "diction"
+  ],
+  "a": 0,
+  "e": "It is shown with letters such as ABAB."
+ },
+ {
+  "q": "Unrhymed lines of iambic pentameter are called",
+  "o": [
+   "free verse",
+   "a couplet",
+   "a ballad",
+   "blank verse"
+  ],
+  "a": 3,
+  "e": "Shakespeare used blank verse in many of his plays."
+ }
+]

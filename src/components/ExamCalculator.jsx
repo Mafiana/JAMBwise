@@ -49,7 +49,7 @@ export default function ExamCalculator({ onClose }) {
   const endDrag = () => { drag.current = null }
 
   return (
-    <div ref={box} className="calc" role="dialog" aria-label="Calculator" style={pos ? { left: pos.x, top: pos.y, right: 'auto' } : undefined}>
+    <div ref={box} className="calc" role="dialog" aria-label="Calculator" style={pos ? { left: pos.x, top: pos.y, right: 'auto', bottom: 'auto' } : undefined}>
       <div className="calc-title" onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
         <span>Calculator</span>
         <button type="button" className="calc-x" onClick={onClose} aria-label="Close calculator">X</button>

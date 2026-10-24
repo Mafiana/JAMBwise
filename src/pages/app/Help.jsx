@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import FaqList from '../../components/FaqList.jsx'
 import Icon from '../../components/Icons.jsx'
 import TicketThread from '../../components/TicketThread.jsx'
 import { ErrorLine } from '../../components/ui.jsx'
@@ -74,9 +73,6 @@ export default function Help() {
           {open === t.id && <TicketThread ticket={t} onChange={load} />}
         </div>
       ))}
-
-      <h3>Frequently asked questions</h3>
-      <FaqList compact />
     </>
   )
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { build, validate } from '../scripts/build-seed.mjs'
 
-const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr']
+const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk']
 
 test('every question file is valid and has a healthy number of questions', () => {
   for (const s of SUBJECTS) {

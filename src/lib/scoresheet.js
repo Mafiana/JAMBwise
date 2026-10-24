@@ -1,11 +1,16 @@
-// Builds the admin Scoresheet from students and their mock attempts. Pure functions, covered by `npm test`.
+// Builds the admin Scoresheet (CBT Mock or ExamHall) from students and their exam attempts. Pure functions, covered by `npm test`.
 // A mock is saved as one row per subject; the row that carries mock_score (out of 400) is the one that counts.
 
 const WINDOW_MS = 60 * 1000 // rows of one mock are saved together, so they are seconds apart at most
 
-/** Returns [{ user_id, total, date, subjects: [{ subject, correct, total }] }]: the newest mock of each student. */
-export function latestMocks(attempts) {
-  const mocks = (attempts || []).filter((a) => a.kind === 'mock')
+export const EXAMS = {
+  mock: { label: 'CBT Mock' },
+  hall: { label: 'ExamHall' },
+}
+
+/** Returns [{ user_id, total, date, subjects: [{ subject, correct, total }] }]: the newest exam of that kind for each student. */
+export function latestMocks(attempts, kind = 'mock') {
+  const mocks = (attempts || []).filter((a) => a.kind === kind)
   const byUser = new Map()
   for (const a of mocks) (byUser.get(a.user_id) || byUser.set(a.user_id, []).get(a.user_id)).push(a)
   const out = []
@@ -27,9 +32,9 @@ export function latestMocks(attempts) {
  * Rows for the table and the PDF, best score first. Equal scores share a rank (1, 2, 2, 4).
  * `students` are the admin_students() rows; students who have not written the mock are left out.
  */
-export function buildScoresheet(students, attempts) {
+export function buildScoresheet(students, attempts, kind = 'mock') {
   const who = new Map((students || []).map((s) => [s.id, s]))
-  const rows = latestMocks(attempts)
+  const rows = latestMocks(attempts, kind)
     .filter((m) => who.has(m.user_id))
     .map((m) => {
       const s = who.get(m.user_id)

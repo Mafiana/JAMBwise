@@ -1,0 +1,442 @@
+[
+ {
+  "q": "The five pillars of Islam are",
+  "o": [
+   "Shahadah, Salat, Zakat, Jihad and Hajj",
+   "Shahadah, Salat, Zakat, Sawm and Hajj",
+   "Salat, Sawm, Hijrah, Zakat and Hajj",
+   "Shahadah, Wudu, Zakat, Sawm and Hajj"
+  ],
+  "a": 1,
+  "e": "They are the basic acts of worship for every Muslim."
+ },
+ {
+  "q": "The holy book of Muslims is the",
+  "o": [
+   "Qur'an",
+   "Torah",
+   "Bible",
+   "Zabur"
+  ],
+  "a": 0,
+  "e": "Muslims believe it is the word of Allah revealed to Prophet Muhammad (SAW)."
+ },
+ {
+  "q": "Prophet Muhammad (SAW) was born in",
+  "o": [
+   "Madinah",
+   "Jerusalem",
+   "Taif",
+   "Makkah"
+  ],
+  "a": 3,
+  "e": "He was born around 570 CE."
+ },
+ {
+  "q": "The Hijrah was the migration of the Prophet (SAW) from",
+  "o": [
+   "Madinah to Makkah",
+   "Makkah to Taif",
+   "Makkah to Madinah",
+   "Makkah to Abyssinia"
+  ],
+  "a": 2,
+  "e": "It marks the start of the Islamic calendar."
+ },
+ {
+  "q": "The number of compulsory daily prayers is",
+  "o": [
+   "three",
+   "five",
+   "four",
+   "six"
+  ],
+  "a": 1,
+  "e": "They are Fajr, Zuhr, Asr, Maghrib and Isha."
+ },
+ {
+  "q": "The month of fasting for Muslims is",
+  "o": [
+   "Ramadan",
+   "Shawwal",
+   "Rajab",
+   "Muharram"
+  ],
+  "a": 0,
+  "e": "Fasting from dawn to sunset is compulsory on those able."
+ },
+ {
+  "q": "Zakat is",
+  "o": [
+   "a voluntary gift",
+   "the pilgrimage to Makkah",
+   "the daily prayer",
+   "compulsory charity paid on wealth that reaches the nisab"
+  ],
+  "a": 3,
+  "e": "It is paid to the poor and others who qualify."
+ },
+ {
+  "q": "Hajj is performed in the month of",
+  "o": [
+   "Ramadan",
+   "Rajab",
+   "Dhul-Hijjah",
+   "Safar"
+  ],
+  "a": 2,
+  "e": "It is the twelfth month of the Islamic calendar."
+ },
+ {
+  "q": "Eid al-Fitr marks the end of",
+  "o": [
+   "Hajj",
+   "Ramadan",
+   "Muharram",
+   "Rajab"
+  ],
+  "a": 1,
+  "e": "Muslims celebrate with prayer and charity."
+ },
+ {
+  "q": "Eid al-Adha remembers the willingness of Prophet Ibrahim (AS) to",
+  "o": [
+   "sacrifice his son for Allah",
+   "leave his homeland",
+   "destroy idols",
+   "build the Ka'bah alone"
+  ],
+  "a": 0,
+  "e": "Allah replaced the son with a ram."
+ },
+ {
+  "q": "The first revelation of the Qur'an came to the Prophet (SAW) in the cave of",
+  "o": [
+   "Thawr",
+   "Uhud",
+   "Safa",
+   "Hira"
+  ],
+  "a": 3,
+  "e": "It was on Mount Nur near Makkah."
+ },
+ {
+  "q": "The first word revealed to the Prophet (SAW) was",
+  "o": [
+   "Qul (Say)",
+   "Salat (Pray)",
+   "Iqra (Read)",
+   "Amin (Truly)"
+  ],
+  "a": 2,
+  "e": "It opens Surah Al-Alaq."
+ },
+ {
+  "q": "The first Caliph after the Prophet (SAW) was",
+  "o": [
+   "Umar",
+   "Abu Bakr",
+   "Uthman",
+   "Ali"
+  ],
+  "a": 1,
+  "e": "He was called As-Siddiq."
+ },
+ {
+  "q": "The number of chapters (surahs) in the Qur'an is",
+  "o": [
+   "114",
+   "99",
+   "120",
+   "30"
+  ],
+  "a": 0,
+  "e": "The Qur'an is also divided into 30 parts (juz)."
+ },
+ {
+  "q": "The first chapter of the Qur'an is",
+  "o": [
+   "Al-Baqarah",
+   "Al-Ikhlas",
+   "An-Nas",
+   "Al-Fatihah"
+  ],
+  "a": 3,
+  "e": "It is recited in every rak'ah of prayer."
+ },
+ {
+  "q": "Muslims face the Ka'bah in Makkah during prayer. This direction is the",
+  "o": [
+   "mihrab",
+   "minbar",
+   "qiblah",
+   "adhan"
+  ],
+  "a": 2,
+  "e": "It unites Muslims in worship."
+ },
+ {
+  "q": "The Sunnah is",
+  "o": [
+   "the chapters of the Qur'an",
+   "the sayings, actions and approvals of the Prophet (SAW)",
+   "the Islamic calendar",
+   "the pilgrimage rites"
+  ],
+  "a": 1,
+  "e": "It is the second source of Islamic law."
+ },
+ {
+  "q": "Ablution before prayer is called",
+  "o": [
+   "wudu",
+   "tayammum",
+   "ghusl",
+   "tawaf"
+  ],
+  "a": 0,
+  "e": "It involves washing the face, hands and arms, wiping the head and washing the feet."
+ },
+ {
+  "q": "When water is not available, a Muslim may perform",
+  "o": [
+   "ghusl",
+   "sa'i",
+   "adhan",
+   "tayammum"
+  ],
+  "a": 3,
+  "e": "Clean earth or dust is used instead of water."
+ },
+ {
+  "q": "The special congregational prayer held on Fridays is",
+  "o": [
+   "Tarawih",
+   "Tahajjud",
+   "Jumu'ah",
+   "Duha"
+  ],
+  "a": 2,
+  "e": "It replaces the Zuhr prayer on that day."
+ },
+ {
+  "q": "The Shahadah is the",
+  "o": [
+   "act of fasting",
+   "declaration of faith in Allah and in Muhammad as His messenger",
+   "act of giving charity",
+   "journey to Makkah"
+  ],
+  "a": 1,
+  "e": "Saying it sincerely makes a person a Muslim."
+ },
+ {
+  "q": "The Prophet's mother was",
+  "o": [
+   "Aminah",
+   "Khadijah",
+   "Aishah",
+   "Fatimah"
+  ],
+  "a": 0,
+  "e": "She died when he was a young child."
+ },
+ {
+  "q": "The first wife of the Prophet (SAW) was",
+  "o": [
+   "Aishah",
+   "Hafsah",
+   "Zaynab",
+   "Khadijah"
+  ],
+  "a": 3,
+  "e": "She was the first person to accept Islam."
+ },
+ {
+  "q": "The first major battle between Muslims and the Quraysh was the Battle of",
+  "o": [
+   "Uhud",
+   "Khandaq",
+   "Badr",
+   "Hunayn"
+  ],
+  "a": 2,
+  "e": "The Muslims won in the second year after the Hijrah."
+ },
+ {
+  "q": "Zakat al-Fitr is paid",
+  "o": [
+   "during Hajj",
+   "at the end of Ramadan",
+   "in Rajab",
+   "at the start of Muharram"
+  ],
+  "a": 1,
+  "e": "It purifies the fast and feeds the needy."
+ },
+ {
+  "q": "Riba, which Islam forbids, means",
+  "o": [
+   "interest or usury",
+   "charity",
+   "trade",
+   "inheritance"
+  ],
+  "a": 0,
+  "e": "Taking or giving interest on loans is prohibited."
+ },
+ {
+  "q": "The Qur'an forbids",
+  "o": [
+   "trade",
+   "marriage",
+   "fasting",
+   "intoxicants such as alcohol"
+  ],
+  "a": 3,
+  "e": "Alcohol is called khamr."
+ },
+ {
+  "q": "The Ka'bah was rebuilt by Prophet Ibrahim (AS) and his son",
+  "o": [
+   "Ishaq (AS)",
+   "Yaqub (AS)",
+   "Isma'il (AS)",
+   "Yusuf (AS)"
+  ],
+  "a": 2,
+  "e": "They raised its foundations together."
+ },
+ {
+  "q": "Walking around the Ka'bah seven times during Hajj or Umrah is",
+  "o": [
+   "sa'i",
+   "tawaf",
+   "ihram",
+   "rami"
+  ],
+  "a": 1,
+  "e": "It starts at the Black Stone."
+ },
+ {
+  "q": "Walking between the hills of Safa and Marwa is",
+  "o": [
+   "sa'i",
+   "tawaf",
+   "wuquf",
+   "zakat"
+  ],
+  "a": 0,
+  "e": "It remembers Hajar's search for water."
+ },
+ {
+  "q": "The most important rite of Hajj, performed on the ninth of Dhul-Hijjah, is standing at",
+  "o": [
+   "Mina",
+   "Muzdalifah",
+   "Jamarat",
+   "Arafat"
+  ],
+  "a": 3,
+  "e": "Hajj is said to be Arafat."
+ },
+ {
+  "q": "The angel who brought revelation to the prophets was",
+  "o": [
+   "Mikail",
+   "Israfil",
+   "Jibril (Gabriel)",
+   "Izra'il"
+  ],
+  "a": 2,
+  "e": "He conveyed the Qur'an to the Prophet (SAW)."
+ },
+ {
+  "q": "Muslims believe that the last of the prophets was",
+  "o": [
+   "Isa (AS)",
+   "Muhammad (SAW)",
+   "Musa (AS)",
+   "Ibrahim (AS)"
+  ],
+  "a": 1,
+  "e": "He is called the Seal of the Prophets."
+ },
+ {
+  "q": "The four Rightly Guided Caliphs were Abu Bakr, Umar, Uthman and",
+  "o": [
+   "Ali",
+   "Bilal",
+   "Khalid",
+   "Hamza"
+  ],
+  "a": 0,
+  "e": "They led the Muslim community after the Prophet (SAW)."
+ },
+ {
+  "q": "The minimum amount of wealth on which zakat becomes due is the",
+  "o": [
+   "sadaqah",
+   "fidyah",
+   "khums",
+   "nisab"
+  ],
+  "a": 3,
+  "e": "A person must own at least this amount for a full year."
+ },
+ {
+  "q": "People who are exempt from fasting in Ramadan include",
+  "o": [
+   "students and teachers",
+   "traders and farmers",
+   "the sick and travellers (who make up the days later)",
+   "healthy adults at home"
+  ],
+  "a": 2,
+  "e": "The Qur'an allows them to fast later."
+ },
+ {
+  "q": "The first month of the Islamic (Hijri) calendar is",
+  "o": [
+   "Ramadan",
+   "Muharram",
+   "Shawwal",
+   "Dhul-Hijjah"
+  ],
+  "a": 1,
+  "e": "The calendar counts from the Hijrah."
+ },
+ {
+  "q": "The call to prayer is the",
+  "o": [
+   "adhan",
+   "iqamah",
+   "khutbah",
+   "tasbih"
+  ],
+  "a": 0,
+  "e": "It is called by the mu'adhdhin."
+ },
+ {
+  "q": "Surah Al-Ikhlas teaches that Allah is",
+  "o": [
+   "three in one",
+   "present only in Makkah",
+   "the son of a prophet",
+   "One and has no partner"
+  ],
+  "a": 3,
+  "e": "It affirms tawhid, the oneness of Allah."
+ },
+ {
+  "q": "The Prophet's migration to Madinah began in the year",
+  "o": [
+   "570 CE",
+   "632 CE",
+   "622 CE",
+   "610 CE"
+  ],
+  "a": 2,
+  "e": "The Islamic calendar starts from this year."
+ }
+]

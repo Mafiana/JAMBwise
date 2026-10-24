@@ -35,3 +35,10 @@ export function RequireAdmin({ children }) {
   if (!isAdmin) return <Navigate to="/app/dashboard" replace />
   return children
 }
+
+/** Pages only a full admin may open (money, PINs, prices, activity). Teachers are sent to the Students page. */
+export function AdminOnly({ children }) {
+  const { isAdmin } = useAuth()
+  if (!isAdmin) return <Navigate to="/app/admin/students" replace />
+  return children
+}

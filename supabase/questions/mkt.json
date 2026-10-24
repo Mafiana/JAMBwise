@@ -1,0 +1,420 @@
+[
+ {
+  "q": "The four Ps of the marketing mix are",
+  "o": [
+   "product, profit, place and people",
+   "product, price, place and promotion",
+   "price, packaging, people and profit",
+   "promotion, production, price and policy"
+  ],
+  "a": 1,
+  "e": "These are the controllable tools a firm uses to reach its market."
+ },
+ {
+  "q": "Market segmentation means",
+  "o": [
+   "dividing a market into groups of buyers with similar needs",
+   "selling to every buyer in the same way",
+   "reducing the price of products",
+   "making products in small sizes"
+  ],
+  "a": 0,
+  "e": "It lets a firm focus on the groups it can serve best."
+ },
+ {
+  "q": "The marketing concept puts most emphasis on",
+  "o": [
+   "producing as much as possible",
+   "cutting every cost",
+   "selling only to wholesalers",
+   "satisfying customers at a profit"
+  ],
+  "a": 3,
+  "e": "Success comes from meeting customer needs."
+ },
+ {
+  "q": "The main purpose of branding is to",
+  "o": [
+   "reduce the cost of production",
+   "increase the weight of a product",
+   "identify a product and set it apart from competitors",
+   "avoid paying taxes"
+  ],
+  "a": 2,
+  "e": "A brand helps customers recognise and trust a product."
+ },
+ {
+  "q": "The correct order of the product life cycle is",
+  "o": [
+   "growth, introduction, decline, maturity",
+   "introduction, growth, maturity, decline",
+   "introduction, maturity, growth, decline",
+   "decline, introduction, growth, maturity"
+  ],
+  "a": 1,
+  "e": "Sales usually rise, level off, then fall."
+ },
+ {
+  "q": "Price skimming means",
+  "o": [
+   "setting a high price when a new product is launched",
+   "setting a very low price",
+   "copying competitors' prices",
+   "selling at cost price"
+  ],
+  "a": 0,
+  "e": "It targets buyers who will pay more for something new."
+ },
+ {
+  "q": "Penetration pricing means",
+  "o": [
+   "setting a high price at launch",
+   "selling only to rich customers",
+   "fixing prices by law",
+   "setting a low price to win a large market share quickly"
+  ],
+  "a": 3,
+  "e": "The price may be raised later."
+ },
+ {
+  "q": "A typical channel of distribution is",
+  "o": [
+   "consumer, retailer, producer, wholesaler",
+   "retailer, producer, consumer, wholesaler",
+   "producer, wholesaler, retailer, consumer",
+   "wholesaler, consumer, producer, retailer"
+  ],
+  "a": 2,
+  "e": "Goods pass through middlemen from the maker to the user."
+ },
+ {
+  "q": "A paid, non-personal presentation of goods or ideas is",
+  "o": [
+   "personal selling",
+   "advertising",
+   "public relations",
+   "merchandising"
+  ],
+  "a": 1,
+  "e": "It is paid for by an identified sponsor."
+ },
+ {
+  "q": "Personal selling is",
+  "o": [
+   "face-to-face contact between a seller and a buyer",
+   "a poster on a wall",
+   "a free sample sent by post",
+   "a radio jingle"
+  ],
+  "a": 0,
+  "e": "A salesperson talks directly with the customer."
+ },
+ {
+  "q": "The main purpose of market research is to",
+  "o": [
+   "print advertisements",
+   "fix wages",
+   "increase production",
+   "collect information about customers and the market"
+  ],
+  "a": 3,
+  "e": "It helps managers make better marketing decisions."
+ },
+ {
+  "q": "Primary data is data that is",
+  "o": [
+   "taken from old newspapers",
+   "taken from government reports",
+   "collected first-hand for a particular purpose",
+   "copied from competitors' books"
+  ],
+  "a": 2,
+  "e": "A questionnaire survey is an example."
+ },
+ {
+  "q": "An example of secondary data is",
+  "o": [
+   "an interview you conduct",
+   "published government statistics",
+   "a questionnaire you design",
+   "your own observation"
+  ],
+  "a": 1,
+  "e": "Someone else collected it earlier for another purpose."
+ },
+ {
+  "q": "Goods bought frequently and with little effort are",
+  "o": [
+   "convenience goods",
+   "shopping goods",
+   "speciality goods",
+   "capital goods"
+  ],
+  "a": 0,
+  "e": "Examples are bread, sweets and soap."
+ },
+ {
+  "q": "Two main functions of packaging are",
+  "o": [
+   "pricing and distribution",
+   "production and storage",
+   "transport and insurance",
+   "protection and promotion"
+  ],
+  "a": 3,
+  "e": "Packaging protects the product and helps sell it."
+ },
+ {
+  "q": "Public relations aims to",
+  "o": [
+   "fix prices",
+   "pay workers",
+   "build goodwill and a good image for the organisation",
+   "store goods"
+  ],
+  "a": 2,
+  "e": "It deals with the public, the media and the community."
+ },
+ {
+  "q": "Which of these is a sales promotion?",
+  "o": [
+   "A new factory",
+   "A discount coupon",
+   "A bank loan",
+   "A tax payment"
+  ],
+  "a": 1,
+  "e": "Coupons and free samples encourage quick purchases."
+ },
+ {
+  "q": "A target market is",
+  "o": [
+   "the group of customers a firm aims its products at",
+   "all the people in the world",
+   "the firm's competitors",
+   "the firm's suppliers"
+  ],
+  "a": 0,
+  "e": "The firm designs its mix for this group."
+ },
+ {
+  "q": "A wholesaler's main role is to",
+  "o": [
+   "sell only to final consumers",
+   "manufacture goods",
+   "advertise on television",
+   "buy in bulk and sell in smaller lots to retailers"
+  ],
+  "a": 3,
+  "e": "This is called breaking bulk."
+ },
+ {
+  "q": "A retailer sells goods to",
+  "o": [
+   "manufacturers",
+   "wholesalers only",
+   "final consumers",
+   "the government only"
+  ],
+  "a": 2,
+  "e": "Retailers are the last link in the chain."
+ },
+ {
+  "q": "Which of these is an intangible product?",
+  "o": [
+   "A bag of rice",
+   "A service",
+   "A car",
+   "A book"
+  ],
+  "a": 1,
+  "e": "Services, such as banking, cannot be touched."
+ },
+ {
+  "q": "The 'place' element of the marketing mix refers to",
+  "o": [
+   "how and where products are made available to customers",
+   "how much the product costs",
+   "how the product is advertised",
+   "how the product is made"
+  ],
+  "a": 0,
+  "e": "It covers distribution and outlets."
+ },
+ {
+  "q": "Brand loyalty is the tendency of customers to",
+  "o": [
+   "try a different brand each time",
+   "buy only the cheapest brand",
+   "avoid all brands",
+   "keep buying the same brand"
+  ],
+  "a": 3,
+  "e": "Loyal customers repeat their purchases."
+ },
+ {
+  "q": "Demand is the quantity of a product that consumers",
+  "o": [
+   "need but cannot afford",
+   "see in the shop",
+   "are willing and able to buy at a given price",
+   "are forced to buy"
+  ],
+  "a": 2,
+  "e": "Both willingness and ability to pay are needed."
+ },
+ {
+  "q": "When demand is price elastic, a small fall in price causes",
+  "o": [
+   "no change in quantity demanded",
+   "a larger rise in quantity demanded",
+   "a fall in quantity demanded",
+   "a rise in costs"
+  ],
+  "a": 1,
+  "e": "Buyers are very sensitive to price."
+ },
+ {
+  "q": "Selling more of existing products in existing markets is called",
+  "o": [
+   "market penetration",
+   "diversification",
+   "product development",
+   "market segmentation"
+  ],
+  "a": 0,
+  "e": "The firm increases its share of the same market."
+ },
+ {
+  "q": "Product differentiation means",
+  "o": [
+   "selling the same product everywhere",
+   "lowering every price",
+   "stopping production",
+   "making a product different from competing ones"
+  ],
+  "a": 3,
+  "e": "Features, design or quality can be different."
+ },
+ {
+  "q": "SWOT analysis examines a firm's",
+  "o": [
+   "sales, wages, output and taxes",
+   "stocks, wages, orders and targets",
+   "strengths, weaknesses, opportunities and threats",
+   "suppliers, workers, owners and traders"
+  ],
+  "a": 2,
+  "e": "It helps in planning marketing strategy."
+ },
+ {
+  "q": "After-sales service is mainly offered to",
+  "o": [
+   "find new suppliers",
+   "keep customers satisfied after they have bought",
+   "reduce taxes",
+   "increase stock"
+  ],
+  "a": 1,
+  "e": "Repairs and warranties are examples."
+ },
+ {
+  "q": "Direct marketing is selling",
+  "o": [
+   "straight to customers without middlemen",
+   "only through wholesalers",
+   "only through supermarkets",
+   "only through exporters"
+  ],
+  "a": 0,
+  "e": "Mail order and online sales are examples."
+ },
+ {
+  "q": "Using the cost-plus method, the price is found by",
+  "o": [
+   "copying a competitor",
+   "asking customers to choose",
+   "deducting tax from sales",
+   "adding a profit margin to the cost of a product"
+  ],
+  "a": 3,
+  "e": "Cost plus mark-up gives the selling price."
+ },
+ {
+  "q": "A unique selling proposition (USP) is",
+  "o": [
+   "a price discount",
+   "a government licence",
+   "a feature that makes a product different from others",
+   "a type of packaging material"
+  ],
+  "a": 2,
+  "e": "It gives buyers a reason to choose the product."
+ },
+ {
+  "q": "Market share is",
+  "o": [
+   "a firm's profit as a proportion of capital",
+   "a firm's sales as a proportion of total sales in the market",
+   "the number of shops a firm has",
+   "the share price of a firm"
+  ],
+  "a": 1,
+  "e": "A firm with 20 of every 100 sales has a 20% share."
+ },
+ {
+  "q": "A trademark",
+  "o": [
+   "gives legal protection to a brand name or symbol",
+   "fixes the price of a product",
+   "controls imports",
+   "pays workers"
+  ],
+  "a": 0,
+  "e": "Others may not use it without permission."
+ },
+ {
+  "q": "A franchise is an arrangement in which",
+  "o": [
+   "the government sets prices",
+   "a firm sells only to its workers",
+   "a bank lends to traders",
+   "a business allows others to sell its products or use its brand for a fee"
+  ],
+  "a": 3,
+  "e": "The franchisee uses the franchisor's name and methods."
+ },
+ {
+  "q": "Merchandising is concerned with",
+  "o": [
+   "making goods in the factory",
+   "recruiting workers",
+   "displaying goods attractively in shops to boost sales",
+   "paying taxes"
+  ],
+  "a": 2,
+  "e": "Good displays encourage buyers to purchase."
+ },
+ {
+  "q": "Culture and social class are examples of factors that influence",
+  "o": [
+   "the cost of raw materials",
+   "consumer buying behaviour",
+   "the rate of tax",
+   "the exchange rate"
+  ],
+  "a": 1,
+  "e": "People's background shapes what they buy."
+ },
+ {
+  "q": "Diversification means",
+  "o": [
+   "moving into new products or new markets",
+   "selling more of the same product",
+   "cutting prices",
+   "closing shops"
+  ],
+  "a": 0,
+  "e": "It spreads risk across different activities."
+ }
+]

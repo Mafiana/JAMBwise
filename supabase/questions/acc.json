@@ -1,0 +1,431 @@
+[
+ {
+  "q": "The accounting equation is",
+  "o": [
+   "Assets = Capital - Liabilities",
+   "Assets = Capital + Liabilities",
+   "Capital = Assets + Liabilities",
+   "Liabilities = Assets + Capital"
+  ],
+  "a": 1,
+  "e": "Everything the business owns is financed by the owner or by outsiders."
+ },
+ {
+  "q": "In double entry bookkeeping, every transaction",
+  "o": [
+   "affects at least two accounts",
+   "affects only one account",
+   "is recorded only in the cash book",
+   "is recorded only on the credit side"
+  ],
+  "a": 0,
+  "e": "One account is debited and another is credited with the same amount."
+ },
+ {
+  "q": "Goods bought on credit are recorded by debiting",
+  "o": [
+   "the Sales account",
+   "the Creditors account",
+   "the Cash account",
+   "the Purchases account"
+  ],
+  "a": 3,
+  "e": "Purchases is debited and the supplier's (creditor's) account is credited."
+ },
+ {
+  "q": "The book in which cash receipts and payments are first recorded is the",
+  "o": [
+   "sales journal",
+   "general ledger",
+   "cash book",
+   "purchases day book"
+  ],
+  "a": 2,
+  "e": "The cash book is both a book of original entry and a ledger account."
+ },
+ {
+  "q": "Which of these is a current asset?",
+  "o": [
+   "Land",
+   "Debtors",
+   "Motor vehicles",
+   "Loan from a bank"
+  ],
+  "a": 1,
+  "e": "Debtors will pay within a year, so they are current assets."
+ },
+ {
+  "q": "Gross profit is calculated as",
+  "o": [
+   "sales minus cost of goods sold",
+   "sales minus all expenses",
+   "purchases minus sales",
+   "net profit plus expenses"
+  ],
+  "a": 0,
+  "e": "Gross profit is found in the trading account."
+ },
+ {
+  "q": "Net profit is gross profit",
+  "o": [
+   "plus cost of goods sold",
+   "minus drawings",
+   "plus closing stock",
+   "minus expenses (plus other income)"
+  ],
+  "a": 3,
+  "e": "Expenses are deducted in the profit and loss account."
+ },
+ {
+  "q": "A trial balance is prepared to",
+  "o": [
+   "calculate the gross profit",
+   "show the value of the business",
+   "check the arithmetical accuracy of the ledger accounts",
+   "record opening entries"
+  ],
+  "a": 2,
+  "e": "If debits equal credits, the ledger is arithmetically correct."
+ },
+ {
+  "q": "Depreciation is the",
+  "o": [
+   "increase in the value of an asset",
+   "allocation of the cost of a fixed asset over its useful life",
+   "cash set aside to replace an asset",
+   "profit made on selling an asset"
+  ],
+  "a": 1,
+  "e": "It spreads the cost over the years the asset is used."
+ },
+ {
+  "q": "A machine costs N100,000, has a scrap value of N10,000 and a life of 5 years. Straight-line depreciation per year is",
+  "o": [
+   "N18,000",
+   "N20,000",
+   "N22,000",
+   "N90,000"
+  ],
+  "a": 0,
+  "e": "(100,000 - 10,000) / 5 = 18,000."
+ },
+ {
+  "q": "Which of these is capital expenditure?",
+  "o": [
+   "Paying staff wages",
+   "Paying the electricity bill",
+   "Repairing a broken window",
+   "Buying a delivery van"
+  ],
+  "a": 3,
+  "e": "It gives benefit over several years and is added to fixed assets."
+ },
+ {
+  "q": "Which of these is revenue expenditure?",
+  "o": [
+   "Purchase of a building",
+   "Purchase of machinery",
+   "Payment of salaries",
+   "Extension of a factory"
+  ],
+  "a": 2,
+  "e": "Day-to-day running costs are revenue expenditure."
+ },
+ {
+  "q": "Bad debts are",
+  "o": [
+   "debts owed to suppliers",
+   "debts that cannot be collected from debtors",
+   "debts paid late",
+   "discounts allowed to customers"
+  ],
+  "a": 1,
+  "e": "They are written off as an expense."
+ },
+ {
+  "q": "A provision for doubtful debts is made because of the concept of",
+  "o": [
+   "prudence",
+   "going concern",
+   "consistency",
+   "money measurement"
+  ],
+  "a": 0,
+  "e": "Prudence means not overstating profits or assets."
+ },
+ {
+  "q": "The concept that treats the business and its owner as separate is the",
+  "o": [
+   "going concern concept",
+   "realisation concept",
+   "accrual concept",
+   "business entity concept"
+  ],
+  "a": 3,
+  "e": "The owner's private affairs are kept out of the business books."
+ },
+ {
+  "q": "Closing stock is valued at",
+  "o": [
+   "selling price",
+   "the higher of cost and selling price",
+   "the lower of cost and net realisable value",
+   "replacement cost only"
+  ],
+  "a": 2,
+  "e": "This follows the prudence concept."
+ },
+ {
+  "q": "Drawings are",
+  "o": [
+   "wages paid to workers",
+   "money or goods taken by the owner for personal use",
+   "profit kept in the business",
+   "loans from the bank"
+  ],
+  "a": 1,
+  "e": "Drawings reduce the owner's capital."
+ },
+ {
+  "q": "A bank reconciliation statement is prepared to",
+  "o": [
+   "explain differences between the cash book and the bank statement",
+   "calculate the profit of the business",
+   "record cheques received",
+   "show the bank's profit"
+  ],
+  "a": 0,
+  "e": "It reconciles the two balances."
+ },
+ {
+  "q": "A cheque that has been issued but not yet paid by the bank is",
+  "o": [
+   "a dishonoured cheque",
+   "a stale cheque",
+   "a bank charge",
+   "an unpresented cheque"
+  ],
+  "a": 3,
+  "e": "It causes the bank statement to show a higher balance than the cash book."
+ },
+ {
+  "q": "The journal is used to record",
+  "o": [
+   "daily cash sales only",
+   "only credit purchases",
+   "opening entries and corrections of errors",
+   "only the owner's drawings"
+  ],
+  "a": 2,
+  "e": "It is the book of original entry for items with no other book."
+ },
+ {
+  "q": "The sales returns book records",
+  "o": [
+   "goods returned to suppliers",
+   "goods returned by customers",
+   "goods sold on credit",
+   "cash sales"
+  ],
+  "a": 1,
+  "e": "It is also called the returns inwards book."
+ },
+ {
+  "q": "The current ratio is",
+  "o": [
+   "current assets divided by current liabilities",
+   "current liabilities divided by current assets",
+   "gross profit divided by sales",
+   "net profit divided by capital"
+  ],
+  "a": 0,
+  "e": "It measures a firm's ability to pay short-term debts."
+ },
+ {
+  "q": "Liabilities due for payment within one year are",
+  "o": [
+   "fixed liabilities",
+   "long-term liabilities",
+   "capital",
+   "current liabilities"
+  ],
+  "a": 3,
+  "e": "Examples are creditors and bank overdraft."
+ },
+ {
+  "q": "Goodwill is an example of",
+  "o": [
+   "a current asset",
+   "a liability",
+   "an intangible asset",
+   "an expense"
+  ],
+  "a": 2,
+  "e": "It has no physical form."
+ },
+ {
+  "q": "Which account normally has a credit balance?",
+  "o": [
+   "Cash",
+   "Capital",
+   "Purchases",
+   "Machinery"
+  ],
+  "a": 1,
+  "e": "Capital is what the business owes the owner."
+ },
+ {
+  "q": "Cash received is entered on the",
+  "o": [
+   "debit side of the cash account",
+   "credit side of the cash account",
+   "debit side of the capital account",
+   "credit side of the sales account"
+  ],
+  "a": 0,
+  "e": "Cash is an asset, and an asset increases on the debit side."
+ },
+ {
+  "q": "Accrued expenses are expenses that have been",
+  "o": [
+   "paid in advance",
+   "paid and written off",
+   "not yet incurred",
+   "incurred but not yet paid"
+  ],
+  "a": 3,
+  "e": "They are shown as current liabilities."
+ },
+ {
+  "q": "Prepaid expenses are expenses",
+  "o": [
+   "owed at the end of the year",
+   "written off as bad debts",
+   "paid in advance",
+   "paid by the owner"
+  ],
+  "a": 2,
+  "e": "They are shown as current assets."
+ },
+ {
+  "q": "The trading account is prepared to find the",
+  "o": [
+   "net profit",
+   "gross profit",
+   "capital",
+   "balance sheet total"
+  ],
+  "a": 1,
+  "e": "It matches sales with the cost of goods sold."
+ },
+ {
+  "q": "The petty cash book uses the imprest system, which means",
+  "o": [
+   "a fixed float is refilled to its original amount",
+   "only cheques are paid out",
+   "all cash goes to the bank daily",
+   "the float is never refilled"
+  ],
+  "a": 0,
+  "e": "The cashier gets back exactly what was spent."
+ },
+ {
+  "q": "If a partnership agreement says nothing about sharing profits, they are shared",
+  "o": [
+   "in proportion to capital",
+   "in proportion to age",
+   "by the senior partner",
+   "equally"
+  ],
+  "a": 3,
+  "e": "That is the rule under partnership law."
+ },
+ {
+  "q": "The sales ledger control account contains the totals of",
+  "o": [
+   "all creditors' accounts",
+   "all expenses",
+   "all debtors' accounts",
+   "all assets"
+  ],
+  "a": 2,
+  "e": "It checks the accuracy of the debtors ledger."
+ },
+ {
+  "q": "The purchases day book records",
+  "o": [
+   "goods bought for cash",
+   "goods bought on credit",
+   "goods sold on credit",
+   "returns to suppliers"
+  ],
+  "a": 1,
+  "e": "Cash purchases go in the cash book."
+ },
+ {
+  "q": "Dividends are paid to shareholders out of",
+  "o": [
+   "profit",
+   "loans",
+   "debentures",
+   "the premises"
+  ],
+  "a": 0,
+  "e": "Dividends are a share of the company's profit."
+ },
+ {
+  "q": "Cost of goods sold equals",
+  "o": [
+   "opening stock minus purchases plus closing stock",
+   "sales minus purchases",
+   "purchases plus closing stock",
+   "opening stock plus purchases minus closing stock"
+  ],
+  "a": 3,
+  "e": "It shows the cost of the goods actually sold."
+ },
+ {
+  "q": "Debenture holders are",
+  "o": [
+   "owners of the company",
+   "directors",
+   "creditors of the company",
+   "partners"
+  ],
+  "a": 2,
+  "e": "They lend money and receive interest."
+ },
+ {
+  "q": "A suspense account is used to",
+  "o": [
+   "record all cash sales",
+   "hold a difference in the trial balance until the error is found",
+   "record the owner's capital",
+   "hold the closing stock"
+  ],
+  "a": 1,
+  "e": "It is cleared once the errors are corrected."
+ },
+ {
+  "q": "Under the realisation concept, revenue is recognised when",
+  "o": [
+   "goods are delivered or services are performed",
+   "the order is placed",
+   "the customer pays, always",
+   "the goods are produced"
+  ],
+  "a": 0,
+  "e": "Revenue is earned at the point of sale, not before."
+ },
+ {
+  "q": "Stock turnover is calculated as",
+  "o": [
+   "sales divided by capital",
+   "average stock divided by sales",
+   "purchases divided by debtors",
+   "cost of goods sold divided by average stock"
+  ],
+  "a": 3,
+  "e": "It shows how many times stock is sold and replaced."
+ }
+]

@@ -1,7 +1,8 @@
 // The only file (besides AuthContext) that talks to Supabase. Every function throws an Error with a
 // message that is safe to show to a student.
 import { supabase } from './supabase.js'
-import { buildScoresheet } from './scoresheet.js'
+import { buildScoresheet, latestMocks } from './scoresheet.js'
+import { isLeave } from './integrity.js'
 
 const NETWORK = /Failed to fetch|NetworkError|Load failed|network|timed? ?out/i
 export const isNetworkError = (e) => Boolean(e?.network) || (typeof navigator !== 'undefined' && navigator.onLine === false) || NETWORK.test(String(e?.message || ''))
@@ -16,7 +17,8 @@ function friendly(error) {
   const m = String(error?.message || '')
   const limited = m.match(/rate_limited:\s*(.*)$/s)    // the database's spam limits carry a message written for people
   if (limited) return limited[1].trim()
-  if (/mock_already_taken/.test(m)) return 'You have already submitted your CBT mock. It can only be written once.'
+  if (/exam_not_open/.test(m)) return 'This exam has not opened yet. Please come back at the scheduled time.'
+  if (/mock_already_taken/.test(m)) return 'You have already submitted this exam. It can only be written once.'
   if (/PGRST20[25]|42P01|42883|schema cache|does not exist/i.test(String(error?.code || '') + ' ' + m))
     return 'Your database is missing the latest admin update. In Supabase, open the SQL Editor and run supabase/migrate-admin-panel.sql, then reload.'
   if (/not allowed/i.test(m)) return 'You do not have permission to do that.'
@@ -33,10 +35,11 @@ async function callFn(name, body, fallback = 'Something went wrong. Please try a
     try { reply = await error.context.json() } catch { /* not a JSON error */ }
     const e = new Error(reply?.error || friendly(error) || fallback)
     e.captcha = Boolean(reply?.captcha)
+    e.ended = Boolean(reply?.ended)
     e.network = NETWORK.test(String(error?.message || ''))
     throw e
   }
-  if (data?.error) { const e = new Error(data.error); e.captcha = Boolean(data.captcha); throw e }
+  if (data?.error) { const e = new Error(data.error); e.captcha = Boolean(data.captcha); e.ended = Boolean(data.ended); throw e }
   return data
 }
 
@@ -95,18 +98,72 @@ export async function insertAttempts(rows) {
 }
 
 /**
- * Has this student submitted the CBT mock? Returns { date } (or { queued: true } while it waits to sync), or null.
- * Students never get their score back: the server only tells them whether and when they submitted.
+ * Has this student submitted this exam ('mock' = CBT Mock, 'hall' = ExamHall)? Returns null, { queued: true } (written offline, waiting
+ * to sync) or { date }. For CBT Mock the result also carries { total, subjects }, because students may see that score. ExamHall scores
+ * never reach the student: the server only tells them whether and when they submitted.
  */
-export async function getMyMock(uid) {
-  const waiting = readPending().some((r) => r.user_id === uid && r.kind === 'mock' && r.mock_score != null)
-  const { data, error } = await supabase.rpc('my_mock_status')
+export async function getMyExam(uid, kind = 'mock') {
+  const waiting = readPending().some((r) => r.user_id === uid && r.kind === kind && r.mock_score != null)
+  const { data, error } = kind === 'mock'
+    ? await supabase.from('attempts').select('id, user_id, subject, correct, total, kind, mock_score, created_at').eq('user_id', uid).eq('kind', 'mock').order('created_at', { ascending: false }).limit(50)
+    : await supabase.rpc('my_exam_result', { p_kind: kind })
+  if (error && kind !== 'mock' && /my_exam_result|42883|PGRST202|schema cache/i.test(String(error.code || '') + ' ' + String(error.message || ''))) {
+    // a database from before "release results": only the date is known
+    const old = await supabase.rpc('my_exam_status', { p_kind: kind })
+    if (!old.error) return old.data ? { date: old.data, released: false } : waiting ? { queued: true } : null
+  }
   if (error) {
     if (waiting) return { queued: true }
-    return fail(error, 'Could not check your mock status.')
+    return fail(error, 'Could not check your exam status.')
   }
-  if (data) return { date: data }
+  if (kind === 'mock') {
+    const m = latestMocks(data, 'mock')[0]
+    return m ? { date: m.date, total: m.total, subjects: m.subjects } : waiting ? { queued: true } : null
+  }
+  if (data) return { date: data.date, released: Boolean(data.released), ...(data.released ? { total: data.total, subjects: data.subjects } : {}) }
   return waiting ? { queued: true } : null
+}
+
+const WINDOW_CACHE = 'jw_exam_window'
+const DEFAULT_WINDOW = { opens: null, closes: null, maxViolations: 3, released: false, offset: 0 }
+/**
+ * When may students start this exam? { opens, closes (ms or null), maxViolations, offset } where `offset` is the server clock minus this
+ * device's clock, so use Date.now() + offset. If the database has no schedule function yet, or the device is offline, the last known
+ * schedule is used (and the database still refuses a submit before the opening time).
+ */
+export async function getExamWindow(kind) {
+  const { data, error } = await supabase.rpc('exam_window', { p_kind: kind })
+  if (error) {
+    if (isNetworkError(error)) { try { const c = JSON.parse(localStorage.getItem(WINDOW_CACHE + kind)); if (c) return c } catch { /* nothing cached */ } }
+    return DEFAULT_WINDOW
+  }
+  const w = {
+    opens: data?.opens_at ? new Date(data.opens_at).getTime() : null,
+    closes: data?.closes_at ? new Date(data.closes_at).getTime() : null,
+    maxViolations: data?.max_violations ?? 3,
+    released: Boolean(data?.results_released),
+    offset: data?.server_now ? new Date(data.server_now).getTime() - Date.now() : 0,
+  }
+  try { localStorage.setItem(WINDOW_CACHE + kind, JSON.stringify(w)) } catch { /* private mode */ }
+  return w
+}
+
+// "Left the exam screen" reports are sent as they happen; any that cannot be sent wait on the device and go with the next sync.
+const PENDING_EVENTS = 'jw_pending_events'
+const readEvents = () => { try { return JSON.parse(localStorage.getItem(PENDING_EVENTS)) || [] } catch { return [] } }
+const writeEvents = (rows) => { try { rows.length ? localStorage.setItem(PENDING_EVENTS, JSON.stringify(rows)) : localStorage.removeItem(PENDING_EVENTS) } catch { /* storage full or blocked */ } }
+const sendEvent = (e) => supabase.rpc('log_exam_event', { p_kind: e.kind, p_type: e.type, p_at: e.at, p_detail: e.detail || null })
+export async function logExamEvent(uid, e) {
+  const { error } = await sendEvent(e)
+  if (error) writeEvents([...readEvents(), { uid, ...e }].slice(-200))
+}
+export async function flushExamEvents(uid) {
+  const all = readEvents()
+  const mine = all.filter((e) => e.uid === uid)
+  if (!mine.length) return
+  const left = []
+  for (const e of mine) { const { error } = await sendEvent(e); if (error && isNetworkError(error)) { left.push(e); break } }
+  writeEvents([...all.filter((e) => e.uid !== uid), ...left])
 }
 
 export const pendingAttemptCount = (uid) => readPending().filter((r) => r.user_id === uid).length
@@ -230,6 +287,18 @@ export async function adminSetPlan(id, plan, days = 30) {
   if (error) fail(error, 'Could not change the plan.')
 }
 
+/** role: 'student' | 'teacher' | 'admin' */
+export async function adminSetStaffRole(id, role) {
+  const { error } = await supabase.rpc('admin_set_staff_role', { target: id, p_role: role })
+  if (error) fail(error, 'Could not change the role.')
+}
+
+/** Show (true) or hide (false) ExamHall scores to the students who wrote it. */
+export async function adminSetResultsReleased(kind, released) {
+  const { error } = await supabase.rpc('admin_set_results_released', { p_kind: kind, p_released: released })
+  if (error) fail(error, 'Could not change this.')
+}
+
 export async function adminSetRole(id, makeAdmin) {
   const { error } = await supabase.rpc('admin_set_role', { target: id, p_admin: makeAdmin })
   if (error) fail(error, 'Could not change the role.')
@@ -240,22 +309,69 @@ export async function adminResetProgress(id) {
   if (error) fail(error, 'Could not reset progress.')
 }
 
-export async function adminAllowRetake(id) {
-  const { error } = await supabase.rpc('admin_allow_retake', { target: id })
+export async function adminAllowRetake(id, kind = 'mock') {
+  const { error } = await supabase.rpc('admin_allow_retake', { target: id, p_kind: kind })
   if (error) fail(error, 'Could not allow a retake.')
 }
 
-/** Every student's mock score, best first (for the admin Scoresheet and its PDF). */
+/**
+ * Every student's CBT Mock and ExamHall scores, best first: { mock: [...], hall: [...], schedule: { hall }, flagged: { mock, hall } }.
+ * Each row has `events` (the "left the exam screen" log). `flagged` lists students with events who have no score yet.
+ */
 export async function adminScoresheet() {
-  const [students, a] = await Promise.all([
+  const [students, a, ev, win] = await Promise.all([
     adminStudents(),
-    supabase.from('attempts').select('id, user_id, subject, correct, total, kind, mock_score, created_at').eq('kind', 'mock').order('created_at', { ascending: false }).limit(5000),
+    supabase.from('attempts').select('id, user_id, subject, correct, total, kind, mock_score, created_at').in('kind', ['mock', 'hall']).order('created_at', { ascending: false }).limit(10000),
+    Promise.all(['mock', 'hall'].map((k) => supabase.rpc('admin_exam_events', { p_kind: k }))),
+    getExamWindow('hall'),
   ])
   if (a.error) fail(a.error, 'Could not load the scoresheet.')
-  return buildScoresheet(students, a.data)
+  const events = { mock: ev[0].error ? [] : ev[0].data || [], hall: ev[1].error ? [] : ev[1].data || [] }   // an older database has no log yet
+  const out = { schedule: { hall: win }, flagged: {} }
+  for (const k of ['mock', 'hall']) {
+    const rows = buildScoresheet(students, a.data, k)
+    const by = new Map()
+    for (const e of events[k]) (by.get(e.user_id) || by.set(e.user_id, []).get(e.user_id)).push(e)
+    rows.forEach((r) => { r.events = by.get(r.id) || [] })
+    const scored = new Set(rows.map((r) => r.id))
+    out[k] = rows
+    out.flagged[k] = students.filter((s) => (by.get(s.id) || []).some(isLeave) && !scored.has(s.id)).map((s) => ({ id: s.id, name: s.full_name || 'Student', reg: s.reg_number || '', events: by.get(s.id) }))
+  }
+  return out
+}
+
+/** Saves the ExamHall (or CBT Mock) sitting window. Pass null for "no limit". `opens`/`closes` are Date or ISO strings. */
+export async function adminSetExamWindow(kind, opens, closes, maxViolations) {
+  const { error } = await supabase.rpc('admin_set_exam_window', {
+    p_kind: kind, p_opens: opens ? new Date(opens).toISOString() : null, p_closes: closes ? new Date(closes).toISOString() : null, p_max: maxViolations,
+  })
+  if (error) fail(error, 'Could not save the schedule.')
+}
+
+/**
+ * One student's exam log for the admin: { mock: [...], hall: [...] }, oldest first. Each entry is { type, at, detail }.
+ * Exams written before logging existed still show their submission, taken from the saved score.
+ */
+export async function adminStudentExamLog(id) {
+  const [ev, att] = await Promise.all([
+    Promise.all(['mock', 'hall'].map((k) => supabase.rpc('admin_exam_events', { p_kind: k, p_user: id }))),
+    supabase.from('attempts').select('kind, mock_score, created_at').eq('user_id', id).in('kind', ['mock', 'hall']),
+  ])
+  const out = {}
+  ;['mock', 'hall'].forEach((k, i) => {
+    const list = (ev[i].error ? [] : ev[i].data || []).map((e) => ({ type: e.type, at: e.occurred_at, detail: e.detail || '' }))
+    if (!list.some((e) => e.type === 'submitted')) {
+      for (const a of att.data || []) if (a.kind === k && a.mock_score != null) list.push({ type: 'submitted', at: a.created_at, detail: `Score ${a.mock_score} / 400` })
+    }
+    out[k] = list.sort((a, b) => String(a.at).localeCompare(String(b.at)))
+  })
+  return out
 }
 
 export const adminDeleteUser = (id) => callFn('admin-delete-user', { target: id })
+/** Creates a student or teacher account. `u`: { name, email, password, role: 'student' | 'teacher', plan?, days?, course?, school? } */
+export const adminCreateUser = (u) => callFn('admin-create-user', u, 'Could not create the account.')
+export const adminSetPassword = (id, password) => callFn('admin-set-password', { target: id, password }, 'Could not change the password.')
 
 /** Everything about one student in one go: results, payments and tickets (admins may read all three). */
 export async function adminStudentDetail(id) {
@@ -336,7 +452,7 @@ export async function adminDeleteMessage(id) {
 }
 
 export async function adminAudit() {
-  const { data, error } = await supabase.from('audit_log').select('*').order('created_at', { ascending: false }).limit(300)
+  const { data, error } = await supabase.from('audit_log').select('*').order('created_at', { ascending: false }).limit(2000)
   if (error) fail(error, 'Could not load the activity log.')
   return data
 }
@@ -383,4 +499,70 @@ export async function replyTicket(id, body) {
 export async function closeTicket(id) {
   const { error } = await supabase.rpc('ticket_close', { p_id: id })
   if (error) fail(error, 'Could not close the ticket.')
+}
+
+// ── notifications (the bell) ──
+export async function getNotifications() {
+  const { data, error } = await supabase.rpc('my_notifications')
+  if (error) fail(error, 'Could not load notifications.')
+  return data || []
+}
+
+/** Marks notifications read: one (`id`), those with a `link`, or all when called with nothing. */
+export async function markNotificationsRead({ id = null, link = null } = {}) {
+  const { error } = await supabase.rpc('mark_notifications_read', { p_id: id, p_link: link })
+  if (error) fail(error, 'Could not update notifications.')
+}
+
+// ── admin ↔ teacher chat ──
+export async function staffChatThread(teacherId) {
+  const { data, error } = await supabase.rpc('staff_chat_thread', { p_teacher: teacherId })
+  if (error) fail(error, 'Could not load the chat.')
+  return data || []
+}
+
+export async function staffChatSend(teacherId, body) {
+  const { error } = await supabase.rpc('staff_chat_send', { p_teacher: teacherId, p_body: body })
+  if (error) fail(error, 'Could not send the message.')
+}
+
+export async function staffChatInbox() {
+  const { data, error } = await supabase.rpc('staff_chat_inbox')
+  if (error) fail(error, 'Could not load chats.')
+  return data || []
+}
+
+// ── parent access ──
+/** A parent signs in with the student's ID and the code the student made. Returns { token, expires_at }. */
+export const parentLogin = ({ reg, code, name, relationship, captcha, website }) =>
+  callFn('parent-login', {
+    reg, code, name, relationship, website: website || '',
+    captchaToken: captcha?.turnstile || captcha?.token || '', captchaAnswer: captcha?.answer || '',
+  }, 'Parent access is not available right now. Please try again later.')
+export const parentReport = async (token) => (await callFn('parent-report', { token }, 'The report is not available right now.')).report
+export const parentEnd = (token) => callFn('parent-report', { token, end: true }).catch(() => null)
+
+/** The student's own side: { code, expires_at, expired, views: [{ parent_name, relationship, device, created_at }] }. */
+export async function myParentAccess() {
+  const { data, error } = await supabase.rpc('my_parent_access')
+  if (error) fail(error, 'Could not load parent access.')
+  return data
+}
+export async function parentCodeCreate() {
+  const { data, error } = await supabase.rpc('parent_code_create')
+  if (error) fail(error, 'Could not make a parent code.')
+  return Array.isArray(data) ? data[0] : data
+}
+export async function parentCodeRevoke() {
+  const { error } = await supabase.rpc('parent_code_revoke')
+  if (error) fail(error, 'Could not switch parent access off.')
+}
+export async function adminParentLog() {
+  const { data, error } = await supabase.rpc('admin_parent_log')
+  if (error) fail(error, 'Could not load the parent access log.')
+  return data || []
+}
+export async function adminParentRevoke(studentId) {
+  const { error } = await supabase.rpc('admin_parent_revoke', { p_student: studentId })
+  if (error) fail(error, 'Could not switch parent access off.')
 }

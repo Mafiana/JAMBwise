@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
+import { useAuth } from '../../../context/AuthContext.jsx'
 import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
 import { SUBJECTS, SUBJECT_KEYS } from '../../../lib/constants.js'
@@ -48,6 +49,7 @@ function Editor({ q, onDone }) {
 }
 
 export default function Questions() {
+  const { isAdmin } = useAuth()   // teachers can add and edit, but only admins delete
   const [subject, setSubject] = useState('eng')
   const [q, setQ] = useState('')
   const [editing, setEditing] = useState(null)
@@ -91,7 +93,7 @@ export default function Questions() {
                     <td>{'ABCD'[x.answer]}. {x.options[x.answer]}</td>
                     <td>
                       <button className="btn ghost" onClick={() => { setEditing(x); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Edit</button>{' '}
-                      <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this question?', message: `"${x.body.length > 110 ? x.body.slice(0, 110) + '…' : x.body}" will be removed for every student.`, confirmLabel: 'Delete question' })) && act.run(async () => { await api.adminDeleteQuestion(x.id); await reload() })}>Delete</button>
+                      {isAdmin && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this question?', message: `"${x.body.length > 110 ? x.body.slice(0, 110) + '…' : x.body}" will be removed for every student.`, confirmLabel: 'Delete question' })) && act.run(async () => { await api.adminDeleteQuestion(x.id); await reload() })}>Delete</button>}
                     </td>
                   </tr>
                 ))}

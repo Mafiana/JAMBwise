@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { ThemeToggle, Logo, PlanCard, ErrorLine } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
 import FaqList from '../components/FaqList.jsx'
+import ParentForm from '../components/ParentForm.jsx'
 import { HOW, SUBJECT_KEYS } from '../lib/constants.js'
 import { useAction, usePlans } from '../hooks.js'
 
@@ -46,23 +47,28 @@ export default function Landing() {
   const { session } = useAuth()
   const plans = usePlans()
   const [scrolled, setScrolled] = useState(false)
+  const [menu, setMenu] = useState(false)   // the phone menu
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 8)
     f()
     window.addEventListener('scroll', f, { passive: true })
     return () => window.removeEventListener('scroll', f)
   }, [])
-  const go = (id) => (e) => { e.preventDefault(); scrollTo(id) }
+  useEffect(() => {
+    if (!menu) return undefined
+    const key = (e) => { if (e.key === 'Escape') setMenu(false) }
+    const wide = () => { if (window.innerWidth > 720) setMenu(false) }
+    document.addEventListener('keydown', key)
+    window.addEventListener('resize', wide)
+    return () => { document.removeEventListener('keydown', key); window.removeEventListener('resize', wide) }
+  }, [menu])
+  const go = (id) => (e) => { e.preventDefault(); setMenu(false); scrollTo(id) }
   return (
     <>
       <div className={'site-nav' + (scrolled ? ' scrolled' : '')}>
         <header className="nav">
           <Logo />
-          <span>
-            <a className="nl" href="#how" onClick={go('how')}>How it works</a>
-            <a className="nl" href="#pricing" onClick={go('pricing')}>Pricing</a>
-            <a className="nl" href="#faq" onClick={go('faq')}>FAQ</a>
-            <Link className="nl" to="/contact">Contact</Link>
+          <span className="desk">
             <ThemeToggle />
             {session ? (
               <Link className="btn" to="/app/dashboard">Open app</Link>
@@ -73,7 +79,23 @@ export default function Landing() {
               </>
             )}
           </span>
+          <button type="button" className="burger" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-controls="mnav" aria-label={menu ? 'Close menu' : 'Open menu'}>
+            <Icon name={menu ? 'close' : 'menu'} size={24} />
+          </button>
         </header>
+        {menu && (
+          <nav id="mnav" className="mnav" aria-label="Menu">
+            <a href="#how" onClick={go('how')}>How it works</a>
+            <a href="#pricing" onClick={go('pricing')}>Pricing</a>
+            <a href="#faq" onClick={go('faq')}>FAQ</a>
+            <a href="#parents" onClick={go('parents')}>Parents</a>
+            <Link to="/contact" onClick={() => setMenu(false)}>Contact</Link>
+            <div className="mnav-acts">
+              <ThemeToggle />
+              {session ? <Link className="btn" to="/app/dashboard">Open app</Link> : <><Link className="btn ghost" to="/auth/login">Log in</Link><Link className="btn" to="/auth/signup">Get started</Link></>}
+            </div>
+          </nav>
+        )}
       </div>
 
       <section className="hero-bg">
@@ -142,6 +164,17 @@ export default function Landing() {
         {!session && <div className="pin-under"><PinForm /></div>}
       </section>
 
+      <section className="wrap band" id="parents" style={{ paddingTop: 16 }}>
+        <div className="parent-box">
+          <div>
+            <span className="eyebrow">For parents and guardians</span>
+            <h2>See how your child is doing</h2>
+            <p className="lead mut">Ask your child for their Student ID and the parent code from their Settings page. You will see scores, subjects that need work, mock results and how often they practise. It is read-only, and they can switch it off whenever they like.</p>
+          </div>
+          <div className="card"><ParentForm idPrefix="hp" /></div>
+        </div>
+      </section>
+
       <section className="wrap band" id="faq" style={{ paddingTop: 16 }}>
         <div className="faq-grid">
           <div className="band-head" style={{ marginBottom: 0 }}>
@@ -167,11 +200,11 @@ export default function Landing() {
               <Logo />
               <p>Practice and CBT mocks for JAMB / UTME candidates in Nigeria. An independent platform, not affiliated with JAMB.</p>
             </div>
-            <div><h4>Product</h4><a href="#how" onClick={go('how')}>How it works</a><a href="#pricing" onClick={go('pricing')}>Pricing</a><a href="#faq" onClick={go('faq')}>FAQ</a></div>
+            <div><h4>Product</h4><a href="#how" onClick={go('how')}>How it works</a><a href="#pricing" onClick={go('pricing')}>Pricing</a><a href="#faq" onClick={go('faq')}>FAQ</a><a href="#parents" onClick={go('parents')}>For parents</a></div>
             <div><h4>Account</h4><Link to="/auth/login">Log in</Link><Link to="/auth/signup">Sign up</Link><Link to="/contact">Contact us</Link></div>
             <div><h4>Legal</h4><Link to="/privacy">Privacy policy</Link><Link to="/terms">Terms and conditions</Link></div>
           </div>
-          <div className="legal-line">© {new Date().getFullYear()} JAMBwise. Questions are original practice material, not real JAMB past questions.</div>
+          <div className="legal-line">© {new Date().getFullYear()} JAMBwise.</div>
         </div>
       </footer>
     </>

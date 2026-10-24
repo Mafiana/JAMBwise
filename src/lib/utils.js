@@ -79,7 +79,7 @@ export function summarize(attempts) {
     s.total += a.total
     correct += a.correct
     total += a.total
-    if (a.mock_score != null) mocks.push({ date: dayKey(a.created_at), score: a.mock_score })
+    if (a.mock_score != null && a.kind === 'mock') mocks.push({ date: dayKey(a.created_at), score: a.mock_score })
   }
   mocks.sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0))
   return { bySubject, correct, total, mocks }
@@ -182,3 +182,55 @@ export function pageList(page, pages) {
   return out
 }
 
+
+export const REPORT_REASONS = [
+  ['wrong_answer', 'The marked answer is wrong'],
+  ['unclear', 'The question is unclear or has a typo'],
+  ['no_correct', 'None of the options is correct'],
+  ['off_syllabus', 'It is not in the JAMB syllabus'],
+  ['other', 'Something else'],
+]
+
+/**
+ * Builds the ticket a student sends when they flag a question. `q` is the question as the student saw it
+ * (options already shuffled), so the admin sees exactly what the student saw. Stays within the 2000-character ticket limit.
+ */
+export function questionReport({ q, subjectName, reason, note }) {
+  const cut = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s))
+  const label = (REPORT_REASONS.find(([k]) => k === reason) || REPORT_REASONS[REPORT_REASONS.length - 1])[1]
+  const lines = [
+    `Question #${q.id} · ${subjectName}`,
+    `Reason: ${label}`,
+    '',
+    cut(q.body, 600),
+    ...q.options.map((o, i) => `${'ABCD'[i]}. ${cut(o, 120)}${i === q.answer ? '  (marked correct)' : ''}`),
+  ]
+  const n = String(note || '').trim()
+  if (n) lines.push('', 'Student note: ' + cut(n, 500))
+  return { subject: cut(`Report: Q#${q.id} (${subjectName})`, 120), body: lines.join('\n') }
+}
+
+/** What an admin wants to know about a student at a glance, from that student's attempts rows. */
+export function studentReport(attempts) {
+  const by = {}
+  const mocks = []
+  let correct = 0
+  let total = 0
+  for (const a of attempts) {
+    const s = (by[a.subject] ||= { subject: a.subject, correct: 0, total: 0, sessions: 0 })
+    s.correct += a.correct
+    s.total += a.total
+    s.sessions += 1
+    correct += a.correct
+    total += a.total
+    if (a.mock_score != null) mocks.push({ date: a.created_at, score: a.mock_score, kind: a.kind })
+  }
+  mocks.sort((x, y) => (x.date < y.date ? 1 : -1))
+  return {
+    total, correct, sessions: attempts.length,
+    accuracy: total ? Math.round((correct / total) * 100) : 0,
+    mocks,
+    bestMock: mocks.length ? Math.max(...mocks.map((m) => m.score)) : null,
+    subjects: Object.values(by).map((s) => ({ ...s, pct: s.total ? Math.round((s.correct / s.total) * 100) : 0 })).sort((a, b) => b.total - a.total),
+  }
+}

@@ -5,6 +5,7 @@ import TicketThread from '../../../components/TicketThread.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
+import { useAuth } from '../../../context/AuthContext.jsx'
 import { SUBJECTS } from '../../../lib/constants.js'
 import { naira, studentReport, TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
 import { fmtDate, fmtDateTime, PLAN_IDS, TabLoader, useLoad } from './shared.jsx'
@@ -109,6 +110,12 @@ function Tickets({ tickets, reload }) {
   ))
 }
 
+const ROLE_TEXT = {
+  student: '{name} will lose access to the admin and teacher panels.',
+  teacher: '{name} will be able to view students, scores and exam logs, add and edit questions and answer tickets. They will not see payments, PINs, prices or activity, and cannot change plans, schedules, retakes or delete anything.',
+  admin: '{name} will be able to manage students, payments, PINs, questions, prices and everything else.',
+}
+
 function Manage({ s, me, onClose, reloadList }) {
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
@@ -119,6 +126,8 @@ function Manage({ s, me, onClose, reloadList }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const act = (msg, fn) => run(async () => { await fn(); await reloadList(); setDone(msg) })
   const self = s.id === me
+  const current = s.is_admin ? 'admin' : s.is_teacher ? 'teacher' : 'student'
+  const [role, setRole] = useState(current)
   return (
     <div className="card">
       <h3>Details</h3>
@@ -140,7 +149,14 @@ function Manage({ s, me, onClose, reloadList }) {
       <h3>Account</h3>
       <div className="row" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>
         {!self && <button className="btn ghost" disabled={busy} onClick={() => act(s.suspended ? 'Account restored.' : 'Account suspended.', () => api.adminSetStudent(s.id, { name: s.full_name, course: s.course, school: s.school, suspended: !s.suspended }))}>{s.suspended ? 'Restore account' : 'Suspend account'}</button>}
-        {!self && <button className="btn ghost" disabled={busy} onClick={async () => (await confirm({ danger: false, title: s.is_admin ? 'Remove admin rights?' : 'Make this student an admin?', message: s.is_admin ? `${s.full_name} will lose access to the admin panel.` : `${s.full_name} will be able to manage students, payments, questions and prices.`, confirmLabel: s.is_admin ? 'Remove admin' : 'Make admin' })) && act(s.is_admin ? 'Admin rights removed.' : 'Now an admin.', () => api.adminSetRole(s.id, !s.is_admin))}>{s.is_admin ? 'Remove admin' : 'Make admin'}</button>}
+        {!self && (
+          <span className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+            <select aria-label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="student">Student (no staff access)</option><option value="teacher">Teacher</option><option value="admin">Admin</option>
+            </select>
+            <button className="btn ghost" disabled={busy || role === current} onClick={async () => (await confirm({ danger: false, title: 'Change role to ' + role + '?', message: ROLE_TEXT[role].replace('{name}', s.full_name), confirmLabel: 'Change role' })) && act('Role changed to ' + role + '.', () => api.adminSetStaffRole(s.id, role))}>Change role</button>
+          </span>
+        )}
         <button className="btn ghost" disabled={busy} onClick={async () => (await confirm({ title: 'Reset progress?', message: `All practice and mock history for ${s.full_name} will be erased. This cannot be undone.`, confirmLabel: 'Reset progress' })) && act('Progress reset.', () => api.adminResetProgress(s.id))}>Reset progress</button>
         {!self && <button className="btn danger" disabled={busy} onClick={async () => (await confirm({ title: 'Delete this account?', message: `${s.full_name} and all their data will be permanently deleted. This cannot be undone.`, confirmLabel: 'Delete account' })) && run(async () => { await api.adminDeleteUser(s.id); await reloadList(); onClose() })}>Delete account</button>}
       </div>
@@ -152,13 +168,14 @@ function Manage({ s, me, onClose, reloadList }) {
 
 /** Everything about one student in one place: profile, scores by subject, mock results, payments, tickets, and the account controls. */
 export default function StudentDetail({ s, me, onClose, reloadList }) {
+  const { isAdmin } = useAuth()   // teachers get a read-only view: no payments, no account controls
   const [tab, setTab] = useState('overview')
   const fetchDetail = useCallback(() => api.adminStudentDetail(s.id), [s.id])
   const { data, error, loading, reload } = useLoad(fetchDetail)
   const rep = useMemo(() => studentReport(data?.attempts || []), [data])
   const paid = (data?.payments || []).filter((p) => p.status === 'paid').reduce((n, p) => n + p.amount_kobo, 0)
   const open = (data?.tickets || []).filter((t) => t.status === 'new' || t.status === 'read').length
-  const TABS = [['overview', 'Overview'], ['scores', 'Scores'], ['payments', 'Payments', data?.payments.length], ['tickets', 'Tickets', data?.tickets.length], ['manage', 'Manage']]
+  const TABS = [['overview', 'Overview'], ['scores', 'Scores'], ...(isAdmin ? [['payments', 'Payments', data?.payments.length]] : []), ['tickets', 'Tickets', data?.tickets.length], ...(isAdmin ? [['manage', 'Manage']] : [])]
 
   // after a change in Manage the list is reloaded; the student's own numbers are reloaded too
   const reloadAll = async () => { await reloadList(); await reload() }
@@ -168,7 +185,7 @@ export default function StudentDetail({ s, me, onClose, reloadList }) {
       <div className="card sd-head">
         <Avatar profile={{ full_name: s.full_name, avatar: null }} />
         <div className="sd-id">
-          <h2>{s.full_name}{s.is_admin && <span className="tag">admin</span>}{s.suspended && <span className="tag bad">suspended</span>}</h2>
+          <h2>{s.full_name}{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}</h2>
           <span className="sm">{s.reg_number} · {s.email}</span>
         </div>
         <span className="tag">{s.plan}</span>
@@ -177,7 +194,7 @@ export default function StudentDetail({ s, me, onClose, reloadList }) {
         <div className="card st"><b>{loading ? '–' : rep.total}</b><span>questions answered</span></div>
         <div className="card st"><b>{loading ? '–' : rep.accuracy + '%'}</b><span>accuracy</span></div>
         <div className="card st"><b>{loading ? '–' : rep.bestMock ?? '–'}</b><span>best mock, of 400</span></div>
-        <div className="card st"><b>{loading ? '–' : naira(paid)}</b><span>paid so far</span></div>
+        {isAdmin ? <div className="card st"><b>{loading ? '–' : naira(paid)}</b><span>paid so far</span></div> : <div className="card st"><b>{s.plan}</b><span>plan</span></div>}
       </div>
       <div className="dtabs" role="tablist" aria-label="Student sections">
         {TABS.map(([k, label, n]) => (

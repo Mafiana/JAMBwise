@@ -23,10 +23,11 @@ create table public.profiles (
   plan text not null default 'free' references public.plans(id),
   plan_expires timestamptz,
   subjects text[] not null default '{mat,phy,chm}'
-    check (cardinality(subjects) <= 3 and subjects <@ array['mat','phy','chm','bio','gov','eco','com','agr']),
+    check (cardinality(subjects) <= 3 and subjects <@ array['mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk']),
   exam_date date,
   study_hours int not null default 3 check (study_hours between 1 and 10),
   is_admin boolean not null default false,
+  is_teacher boolean not null default false,   -- staff with limited rights: view scores, add and edit questions, answer tickets
   suspended boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -55,12 +56,12 @@ create table public.payments (
 create table public.attempts (
   id bigserial primary key,
   user_id uuid not null references auth.users on delete cascade,
-  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr')),
+  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')),
   correct int not null check (correct >= 0),
   total int not null check (total between 1 and 200),
-  kind text not null check (kind in ('practice','mock')),
+  kind text not null check (kind in ('practice','mock','hall')),
   mock_score int check (mock_score between 0 and 400),
-  -- a mock writes one row per subject; mock_score (out of 400) is stored on one row only, so count mocks with mock_score is not null
+  -- a mock or ExamHall writes one row per subject; the score (out of 400) is stored in mock_score on one row only, so count exams with mock_score is not null
   created_at timestamptz not null default now(),
   check (correct <= total)
 );
@@ -68,7 +69,7 @@ create index attempts_user_idx on public.attempts (user_id, created_at desc);
 
 create table public.questions (
   id bigserial primary key,
-  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr')),
+  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')),
   body text not null,
   options jsonb not null check (jsonb_typeof(options) = 'array' and jsonb_array_length(options) = 4),
   answer int not null check (answer between 0 and 3),
@@ -118,6 +119,12 @@ create table public.audit_log (
 create function public.is_admin() returns boolean
 language sql security definer stable set search_path = public as
 $$ select coalesce((select is_admin from public.profiles where id = auth.uid()), false) $$;
+
+-- admin OR teacher. Teachers can read students and scores and add/edit questions and answer tickets, but cannot touch money,
+-- plans, PINs, prices, roles, schedules or deletions: those checks stay on is_admin().
+create function public.is_staff() returns boolean
+language sql security definer stable set search_path = public as
+$$ select coalesce((select is_admin or is_teacher from public.profiles where id = auth.uid()), false) $$;
 
 -- true when the signed-in user has a live (unexpired, not suspended) paid plan
 create function public.is_paid() returns boolean
@@ -276,9 +283,20 @@ language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception 'not allowed'; end if;
   if target = auth.uid() then raise exception 'you cannot change your own role'; end if;
-  update public.profiles set is_admin = coalesce(p_admin, false) where id = target;
+  update public.profiles set is_admin = coalesce(p_admin, false), is_teacher = false where id = target;
   perform public.admin_log(case when p_admin then 'admin.grant' else 'admin.revoke' end,
                            (select reg_number from public.profiles where id = target));
+end $$;
+
+-- Set a person's role: 'student' (no staff rights), 'teacher' or 'admin'. Admins only; you cannot change your own role.
+create function public.admin_set_staff_role(target uuid, p_role text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_role not in ('student','teacher','admin') then raise exception 'unknown role'; end if;
+  if target = auth.uid() then raise exception 'you cannot change your own role'; end if;
+  update public.profiles set is_admin = (p_role = 'admin'), is_teacher = (p_role = 'teacher') where id = target;
+  perform public.admin_log('role.' || p_role, (select reg_number from public.profiles where id = target));
 end $$;
 
 create function public.admin_reset_progress(target uuid) returns void
@@ -289,48 +307,56 @@ begin
   perform public.admin_log('student.reset', (select reg_number from public.profiles where id = target));
 end $$;
 
--- One CBT mock per student. A mock is saved as one row per subject, and the row carrying mock_score is the one that counts;
--- a second one is refused (the advisory lock makes two taps at the same moment safe). Only an admin can allow a retake.
-create function public.one_mock_per_student() returns trigger
+-- Two timed exams, both saved in `attempts`: kind 'mock' (CBT Mock, the student can see the score) and kind 'hall' (ExamHall,
+-- scores are visible to admins only). Each is written ONCE per student: a second scored one is refused (the advisory lock makes
+-- two taps at the same moment safe). Only an admin can allow a retake.
+create function public.one_exam_per_student() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if new.kind = 'mock' and new.mock_score is not null then
-    perform pg_advisory_xact_lock(hashtext('mock:' || new.user_id::text));
-    if exists (select 1 from public.attempts where user_id = new.user_id and kind = 'mock' and mock_score is not null) then
-      raise exception 'mock_already_taken: You have already submitted your CBT mock.';
+  if new.kind in ('mock','hall') and new.mock_score is not null then
+    -- a scheduled ExamHall cannot be submitted before it opens (the clock is the server's)
+    if exists (select 1 from public.exam_settings where kind = new.kind and opens_at is not null and now() < opens_at) then
+      raise exception 'exam_not_open: This exam has not opened yet.';
+    end if;
+    perform pg_advisory_xact_lock(hashtext(new.kind || ':' || new.user_id::text));
+    if exists (select 1 from public.attempts where user_id = new.user_id and kind = new.kind and mock_score is not null) then
+      raise exception 'mock_already_taken: You have already submitted this exam.';
     end if;
   end if;
   return new;
 end $$;
-create trigger attempts_one_mock before insert on public.attempts
-  for each row execute function public.one_mock_per_student();
+create trigger attempts_one_exam before insert on public.attempts
+  for each row execute function public.one_exam_per_student();
 
--- The student's own view of their mock: only WHEN they submitted (null = not yet), never the score.
-create function public.my_mock_status() returns timestamptz
+-- The student's own view of an exam: only WHEN they submitted (null = not yet), never the score. This is how ExamHall is checked,
+-- because ExamHall rows are hidden from students; for CBT Mock the student may also read the rows themselves.
+create function public.my_exam_status(p_kind text) returns timestamptz
 language sql security definer stable set search_path = public as $$
-  select max(created_at) from public.attempts where user_id = auth.uid() and kind = 'mock' and mock_score is not null $$;
+  select max(created_at) from public.attempts where user_id = auth.uid() and kind = p_kind and kind in ('mock','hall') and mock_score is not null $$;
 
--- Admin: let one student write the mock again (removes only their mock results; practice history stays).
-create function public.admin_allow_retake(target uuid) returns void
+-- Admin: let one student write an exam again (removes only that exam's results; practice history stays).
+create function public.admin_allow_retake(target uuid, p_kind text default 'mock') returns void
 language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception 'not allowed'; end if;
-  delete from public.attempts where user_id = target and kind = 'mock';
-  perform public.admin_log('mock.retake', (select reg_number from public.profiles where id = target));
+  if p_kind not in ('mock','hall') then raise exception 'unknown exam'; end if;
+  delete from public.attempts where user_id = target and kind = p_kind;
+  delete from public.exam_events where user_id = target and kind = p_kind;   -- a retake starts with a clean record
+  perform public.admin_log(p_kind || '.retake', (select reg_number from public.profiles where id = target));
 end $$;
 
 create function public.admin_students() returns table (
   id uuid, reg_number text, email text, full_name text, course text, school text, plan text,
   plan_expires timestamptz, suspended boolean, created_at timestamptz, questions bigint, correct bigint, mocks bigint,
-  is_admin boolean, last_active timestamptz)
+  is_admin boolean, last_active timestamptz, is_teacher boolean)
 language plpgsql security definer stable set search_path = public as $$
 begin
-  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if not public.is_staff() then raise exception 'not allowed'; end if;
   return query
     select p.id, p.reg_number, p.email, p.full_name, p.course, p.school, p.plan, p.plan_expires, p.suspended, p.created_at,
            coalesce(sum(a.total), 0)::bigint, coalesce(sum(a.correct), 0)::bigint,
            count(a.id) filter (where a.mock_score is not null)::bigint,
-           p.is_admin, max(a.created_at)
+           p.is_admin, max(a.created_at), p.is_teacher
       from public.profiles p left join public.attempts a on a.user_id = p.id
      group by p.id order by p.created_at desc limit 2000;
 end $$;
@@ -350,7 +376,7 @@ end $$;
 -- a staff reply marks the ticket 'answered'; a student reply puts it back to 'new' (needs attention).
 create function public.ticket_reply(p_id bigint, p_body text) returns void
 language plpgsql security definer set search_path = public as $$
-declare m public.messages; staff boolean := public.is_admin();
+declare m public.messages; staff boolean := public.is_staff();
 begin
   select * into m from public.messages where id = p_id;
   if not found or (not staff and m.user_id is distinct from auth.uid()) then raise exception 'not allowed'; end if;
@@ -365,9 +391,9 @@ language plpgsql security definer set search_path = public as $$
 declare m public.messages;
 begin
   select * into m from public.messages where id = p_id;
-  if not found or (not public.is_admin() and m.user_id is distinct from auth.uid()) then raise exception 'not allowed'; end if;
+  if not found or (not public.is_staff() and m.user_id is distinct from auth.uid()) then raise exception 'not allowed'; end if;
   update public.messages set status = 'resolved' where id = p_id;
-  if public.is_admin() then perform public.admin_log('ticket.resolve', '#' || p_id); end if;
+  if public.is_staff() then perform public.admin_log('ticket.resolve', '#' || p_id); end if;
 end $$;
 
 -- Spam protection for tickets and contact messages. Runs before every insert, whoever sends it.
@@ -378,7 +404,7 @@ end $$;
 create function public.limit_ticket_rate() returns trigger language plpgsql security definer set search_path = public as $$
 declare ip text; n int; lim int;
 begin
-  if public.is_admin() then return new; end if;
+  if public.is_staff() then return new; end if;
   if new.abuse_key is null then
     begin
       ip := trim(split_part(coalesce((nullif(current_setting('request.headers', true), '')::json) ->> 'x-forwarded-for', ''), ',', 1));
@@ -418,14 +444,14 @@ create function public.admin_import_questions(p_rows jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare r jsonb; ins int := 0; dup int := 0; bad int := 0; n int; ok boolean;
 begin
-  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if not public.is_staff() then raise exception 'not allowed'; end if;
   if jsonb_typeof(p_rows) is distinct from 'array' or jsonb_array_length(p_rows) not between 1 and 500 then
     raise exception 'send between 1 and 500 questions at a time';
   end if;
   perform set_config('jw.bulk', '1', true);   -- tells the audit trigger not to log every single row
   for r in select value from jsonb_array_elements(p_rows) loop
     ok := jsonb_typeof(r) = 'object'
-      and (r->>'subject') in ('eng','mat','phy','chm','bio','gov','eco','com','agr')
+      and (r->>'subject') in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')
       and char_length(btrim(coalesce(r->>'body', ''))) between 1 and 1000
       and jsonb_typeof(r->'options') = 'array' and jsonb_array_length(r->'options') = 4
       and (r->>'answer') ~ '^[0-3]$'
@@ -464,16 +490,419 @@ end $$;
 create trigger log_plans after update on public.plans for each row execute function public.log_content_change();
 create trigger log_questions after insert or update or delete on public.questions for each row execute function public.log_content_change();
 
+-- ExamHall controls: an optional sitting window (students can only start between opens_at and closes_at), the number of warnings
+-- before an automatic submit, and a log of "left the exam screen" events that admins see on the Scoresheet.
+create table if not exists public.exam_settings (
+  kind text primary key check (kind in ('mock','hall')),
+  opens_at timestamptz,
+  closes_at timestamptz,
+  max_violations int not null default 3 check (max_violations between 0 and 20),   -- 0 = warn only, never auto-submit
+  results_released boolean not null default false,   -- ExamHall: when true, students can see their own score
+  updated_at timestamptz not null default now(),
+  check (opens_at is null or closes_at is null or closes_at > opens_at)
+);
+create table if not exists public.exam_events (
+  id bigserial primary key,
+  user_id uuid not null references auth.users on delete cascade,
+  kind text not null check (kind in ('mock','hall')),
+  type text not null check (type in ('started','resumed','left_tab','left_fullscreen','limit_reached','submitted')),
+  occurred_at timestamptz not null default now(),
+  detail text check (char_length(detail) <= 200),
+  created_at timestamptz not null default now()
+);
+create index if not exists exam_events_idx on public.exam_events (kind, user_id, occurred_at);
+alter table public.exam_settings enable row level security;
+alter table public.exam_events enable row level security;   -- no policies: everything goes through the functions below
+
+-- What a student needs to know before starting: the window, the warning limit and the SERVER's clock (so a wrong phone clock cannot open the exam).
+create or replace function public.exam_window(p_kind text) returns jsonb
+language sql security definer stable set search_path = public as $$
+  select jsonb_build_object('opens_at', s.opens_at, 'closes_at', s.closes_at, 'max_violations', coalesce(s.max_violations, 3), 'results_released', coalesce(s.results_released, false), 'server_now', now())
+  from (select 1) x left join public.exam_settings s on s.kind = p_kind $$;
+
+create or replace function public.admin_set_exam_window(p_kind text, p_opens timestamptz, p_closes timestamptz, p_max int) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_kind not in ('mock','hall') then raise exception 'unknown exam'; end if;
+  if p_opens is not null and p_closes is not null and p_closes <= p_opens then raise exception 'The closing time must be after the opening time.'; end if;
+  insert into public.exam_settings (kind, opens_at, closes_at, max_violations, updated_at)
+    values (p_kind, p_opens, p_closes, coalesce(p_max, 3), now())
+    on conflict (kind) do update set opens_at = excluded.opens_at, closes_at = excluded.closes_at, max_violations = excluded.max_violations, updated_at = now();
+  perform public.admin_log(p_kind || '.schedule',
+    case when p_opens is null and p_closes is null then 'open any time' else coalesce(to_char(p_opens at time zone 'Africa/Lagos', 'DD Mon YYYY HH24:MI'), 'any time') || ' to ' || coalesce(to_char(p_closes at time zone 'Africa/Lagos', 'DD Mon YYYY HH24:MI'), 'no end') end
+    || ', ' || coalesce(p_max, 3) || ' warnings');
+end $$;
+
+-- Admin: show or hide ExamHall scores to the students who wrote it. Hidden by default.
+create or replace function public.admin_set_results_released(p_kind text, p_released boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_kind not in ('mock','hall') then raise exception 'unknown exam'; end if;
+  insert into public.exam_settings (kind, results_released, updated_at) values (p_kind, coalesce(p_released, false), now())
+    on conflict (kind) do update set results_released = excluded.results_released, updated_at = now();
+  perform public.admin_log(p_kind || case when p_released then '.release' else '.unrelease' end, case when p_released then 'results shown to students' else 'results hidden from students' end);
+end $$;
+
+-- A student's own result for an exam. ExamHall returns only the date until the admin releases results; then it returns the score too.
+create or replace function public.my_exam_result(p_kind text) returns jsonb
+language plpgsql security definer stable set search_path = public as $$
+declare head public.attempts; rel boolean; subs jsonb;
+begin
+  if p_kind not in ('mock','hall') then return null; end if;
+  select * into head from public.attempts where user_id = auth.uid() and kind = p_kind and mock_score is not null order by created_at desc limit 1;
+  if not found then return null; end if;
+  select coalesce((select results_released from public.exam_settings where kind = p_kind), false) into rel;
+  if p_kind = 'hall' and not rel then return jsonb_build_object('date', head.created_at, 'released', false); end if;
+  select jsonb_agg(jsonb_build_object('subject', a.subject, 'correct', a.correct, 'total', a.total) order by a.id) into subs
+    from public.attempts a
+   where a.user_id = auth.uid() and a.kind = p_kind
+     and (a.id = head.id or (a.mock_score is null and abs(extract(epoch from (a.created_at - head.created_at))) <= 60));
+  return jsonb_build_object('date', head.created_at, 'released', true, 'total', head.mock_score, 'subjects', subs);
+end $$;
+
+-- A student's browser reports each time they leave the exam screen. Capped so it cannot be used to flood the table.
+create or replace function public.log_exam_event(p_kind text, p_type text, p_at timestamptz, p_detail text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null or p_kind not in ('mock','hall') or p_type not in ('started','resumed','left_tab','left_fullscreen','limit_reached','submitted') then return; end if;
+  if (select count(*) from public.exam_events where user_id = auth.uid() and kind = p_kind) >= 300 then return; end if;
+  insert into public.exam_events (user_id, kind, type, occurred_at, detail)
+    values (auth.uid(), p_kind, p_type, least(coalesce(p_at, now()), now()), left(p_detail, 200));
+end $$;
+
+drop function if exists public.admin_exam_events(text);   -- replaced by the version with an optional student filter
+create or replace function public.admin_exam_events(p_kind text, p_user uuid default null) returns table (user_id uuid, type text, occurred_at timestamptz, detail text)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query select e.user_id, e.type, e.occurred_at, e.detail from public.exam_events e
+    where e.kind = p_kind and (p_user is null or e.user_id = p_user) order by e.occurred_at;
+end $$;
+
+-- ───────────── notifications (the bell) and the admin ↔ teacher chat ─────────────
+create table if not exists public.notifications (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  kind text not null,
+  title text not null check (char_length(title) <= 200),
+  body text check (char_length(body) <= 500),
+  link text check (char_length(link) <= 200),
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
+alter table public.notifications enable row level security;
+drop policy if exists notif_read on public.notifications;
+create policy notif_read on public.notifications for select to authenticated using (user_id = auth.uid());
+
+create table if not exists public.staff_chat (
+  id bigint generated always as identity primary key,
+  teacher_id uuid not null references public.profiles(id) on delete cascade,   -- the thread belongs to one teacher; every admin can read and write it
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists staff_chat_idx on public.staff_chat (teacher_id, id);
+alter table public.staff_chat enable row level security;
+drop policy if exists chat_read on public.staff_chat;
+create policy chat_read on public.staff_chat for select to authenticated using (
+  public.is_admin() or (teacher_id = auth.uid() and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_teacher)));
+
+-- Internal helper: adds a notification. Repeated chat pings collapse into the one unread notification.
+create or replace function public.notify_user(p_user uuid, p_kind text, p_title text, p_body text, p_link text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_kind = 'chat' then
+    update public.notifications set title = left(p_title, 200), body = left(p_body, 500), created_at = now()
+     where user_id = p_user and kind = 'chat' and link = p_link and read_at is null;
+    if found then return; end if;
+  end if;
+  insert into public.notifications (user_id, kind, title, body, link) values (p_user, p_kind, left(p_title, 200), left(p_body, 500), p_link);
+end $$;
+
+create or replace function public.my_notifications() returns table (id bigint, kind text, title text, body text, link text, read_at timestamptz, created_at timestamptz)
+language sql security definer stable set search_path = public as $$
+  select n.id, n.kind, n.title, n.body, n.link, n.read_at, n.created_at
+    from public.notifications n where n.user_id = auth.uid() order by n.created_at desc limit 30
+$$;
+
+-- Marks your own notifications read: one (p_id), those with a link (p_link), or all of them (no arguments).
+create or replace function public.mark_notifications_read(p_id bigint default null, p_link text default null) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  update public.notifications set read_at = now()
+   where user_id = auth.uid() and read_at is null and (p_id is null or id = p_id) and (p_link is null or link = p_link);
+end $$;
+
+-- Admin: show or hide results to the students who wrote the exam. Hidden by default. Showing them also rings every such student's bell.
+create or replace function public.admin_set_results_released(p_kind text, p_released boolean) returns void
+language plpgsql security definer set search_path = public as $$
+declare was boolean;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_kind not in ('mock','hall') then raise exception 'unknown exam'; end if;
+  select results_released into was from public.exam_settings where kind = p_kind;
+  insert into public.exam_settings (kind, results_released, updated_at) values (p_kind, coalesce(p_released, false), now())
+    on conflict (kind) do update set results_released = excluded.results_released, updated_at = now();
+  perform public.admin_log(p_kind || case when p_released then '.release' else '.unrelease' end, case when p_released then 'results shown to students' else 'results hidden from students' end);
+  if coalesce(p_released, false) and not coalesce(was, false) then
+    insert into public.notifications (user_id, kind, title, body, link)
+    select distinct a.user_id, 'result',
+           case p_kind when 'hall' then 'Your ExamHall result is out' else 'Your CBT Mock result is out' end,
+           'Your result has been released. Tap to see your score.',
+           case p_kind when 'hall' then '/app/examhall' else '/app/mock' end
+      from public.attempts a where a.kind = p_kind and a.mock_score is not null;
+  end if;
+end $$;
+
+-- Admin ↔ teacher chat. One thread per teacher; all admins share it.
+create or replace function public.staff_chat_send(p_teacher uuid, p_body text) returns void
+language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); nm text; b text := trim(coalesce(p_body, '')); a record;
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  if char_length(b) not between 1 and 2000 then raise exception 'message must be 1-2000 characters'; end if;
+  if public.is_admin() then
+    if not exists (select 1 from public.profiles where id = p_teacher and is_teacher) then raise exception 'not a teacher'; end if;
+  elsif p_teacher is distinct from me then
+    raise exception 'not allowed';
+  end if;
+  insert into public.staff_chat (teacher_id, sender_id, body) values (p_teacher, me, b);
+  select full_name into nm from public.profiles where id = me;
+  if public.is_admin() then
+    perform public.notify_user(p_teacher, 'chat', 'Message from ' || coalesce(nm, 'admin'), b, '/app/admin/chat');
+  else
+    for a in select id from public.profiles where is_admin loop
+      perform public.notify_user(a.id, 'chat', 'Message from ' || coalesce(nm, 'a teacher'), b, '/app/admin/teachers?chat=' || p_teacher);
+    end loop;
+  end if;
+end $$;
+
+create or replace function public.staff_chat_thread(p_teacher uuid) returns table (id bigint, sender_id uuid, sender_name text, body text, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not (public.is_admin() or (public.is_staff() and p_teacher = auth.uid())) then raise exception 'not allowed'; end if;
+  return query
+    select * from (
+      select c.id, c.sender_id, p.full_name, c.body, c.created_at
+        from public.staff_chat c join public.profiles p on p.id = c.sender_id
+       where c.teacher_id = p_teacher order by c.id desc limit 200) t
+    order by t.id;
+end $$;
+
+create or replace function public.staff_chat_inbox() returns table (teacher_id uuid, last_body text, last_at timestamptz, last_from uuid)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select distinct on (c.teacher_id) c.teacher_id, c.body, c.created_at, c.sender_id from public.staff_chat c order by c.teacher_id, c.id desc;
+end $$;
+
+-- ───────────── parent access ─────────────
+-- A student creates a short-lived "parent code". A parent types the student's ID + that code on the home page, passes a CAPTCHA,
+-- and gets a read-only report for 60 minutes. Parents never log in as the student. Every attempt is logged for the admin.
+create table if not exists public.parent_codes (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  code text not null check (code ~ '^[A-Z0-9]{4}-[A-Z0-9]{4}$'),
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create table if not exists public.parent_sessions (
+  token text primary key,
+  student_id uuid not null references public.profiles(id) on delete cascade,
+  parent_name text not null,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists parent_sessions_student_idx on public.parent_sessions (student_id);
+create table if not exists public.parent_log (
+  id bigint generated always as identity primary key,
+  student_id uuid references public.profiles(id) on delete set null,
+  reg_number text,
+  parent_name text,
+  relationship text,
+  outcome text not null check (outcome in ('ok','bad_code','locked','expired','off')),
+  device text,
+  ip_hash text,
+  created_at timestamptz not null default now()
+);
+create index if not exists parent_log_reg_idx on public.parent_log (reg_number, created_at desc);
+create index if not exists parent_log_ip_idx on public.parent_log (ip_hash, created_at desc);
+create index if not exists parent_log_time_idx on public.parent_log (created_at desc);
+alter table public.parent_codes enable row level security;
+alter table public.parent_sessions enable row level security;   -- no policies: only the server functions touch it
+alter table public.parent_log enable row level security;        -- no policies: read through the functions below
+drop policy if exists pcode_read on public.parent_codes;
+create policy pcode_read on public.parent_codes for select to authenticated using (user_id = auth.uid());
+
+-- A student's exam result, hiding ExamHall scores until an admin releases them (used by the student and by the parent report).
+create or replace function public.exam_result_for(p_user uuid, p_kind text) returns jsonb
+language plpgsql security definer stable set search_path = public as $$
+declare head public.attempts; rel boolean; subs jsonb;
+begin
+  if p_kind not in ('mock','hall') then return null; end if;
+  select * into head from public.attempts where user_id = p_user and kind = p_kind and mock_score is not null order by created_at desc limit 1;
+  if not found then return null; end if;
+  select coalesce((select results_released from public.exam_settings where kind = p_kind), false) into rel;
+  if p_kind = 'hall' and not rel then return jsonb_build_object('date', head.created_at, 'released', false); end if;
+  select jsonb_agg(jsonb_build_object('subject', a.subject, 'correct', a.correct, 'total', a.total) order by a.id) into subs
+    from public.attempts a
+   where a.user_id = p_user and a.kind = p_kind
+     and (a.id = head.id or (a.mock_score is null and abs(extract(epoch from (a.created_at - head.created_at))) <= 60));
+  return jsonb_build_object('date', head.created_at, 'released', true, 'total', head.mock_score, 'subjects', subs);
+end $$;
+create or replace function public.my_exam_result(p_kind text) returns jsonb
+language plpgsql security definer stable set search_path = public as $$
+begin
+  return public.exam_result_for(auth.uid(), p_kind);
+end $$;
+
+-- Student: make (or renew) the parent code. Valid for 7 days. Any parent who is signed in on the old code is signed out.
+create or replace function public.parent_code_create() returns table (code text, expires_at timestamptz)
+language plpgsql security definer set search_path = public as $$
+declare al constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; raw bytea := uuid_send(gen_random_uuid()); v text := ''; i int;
+begin
+  if auth.uid() is null or public.is_staff() then raise exception 'not allowed'; end if;
+  for i in 0..7 loop
+    v := v || substr(al, (get_byte(raw, i) % 32) + 1, 1);
+    if i = 3 then v := v || '-'; end if;
+  end loop;
+  delete from public.parent_sessions where student_id = auth.uid();
+  insert into public.parent_codes (user_id, code, expires_at) values (auth.uid(), v, now() + interval '7 days')
+    on conflict (user_id) do update set code = excluded.code, expires_at = excluded.expires_at, created_at = now();
+  return query select v, now() + interval '7 days';
+end $$;
+
+-- Student: switch parent access off. Signs out any parent who is looking right now.
+create or replace function public.parent_code_revoke() returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'not allowed'; end if;
+  delete from public.parent_sessions where student_id = auth.uid();
+  delete from public.parent_codes where user_id = auth.uid();
+end $$;
+
+-- Student: my code and who has looked at my progress.
+create or replace function public.my_parent_access() returns jsonb
+language plpgsql security definer stable set search_path = public as $$
+declare c public.parent_codes;
+begin
+  if auth.uid() is null then raise exception 'not allowed'; end if;
+  select * into c from public.parent_codes where user_id = auth.uid();
+  return jsonb_build_object(
+    'code', case when found and c.expires_at > now() then c.code end,
+    'expires_at', case when found then c.expires_at end,
+    'expired', found and c.expires_at <= now(),
+    'views', coalesce((select jsonb_agg(jsonb_build_object('parent_name', l.parent_name, 'relationship', l.relationship, 'device', l.device, 'created_at', l.created_at) order by l.created_at desc)
+                         from (select * from public.parent_log where student_id = auth.uid() and outcome = 'ok' order by created_at desc limit 20) l), '[]'::jsonb));
+end $$;
+
+-- Server only (Edge Function, service role): check the ID + code, apply the limits, log the try, open a 60 minute read-only session.
+-- Limits: 5 wrong tries per student ID per 15 minutes, 20 per device per hour. They count whether or not the ID exists, so nothing is revealed.
+create or replace function public.parent_login(p_reg text, p_code text, p_name text, p_rel text, p_device text, p_ip text) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare reg text := left(upper(trim(coalesce(p_reg, ''))), 30); nm text := left(trim(regexp_replace(coalesce(p_name, ''), '[[:cntrl:]]', '', 'g')), 80);
+        rel text := case when p_rel in ('Mother','Father','Guardian') then p_rel else 'Other' end;
+        dev text := left(coalesce(p_device, ''), 120); sid uuid; c public.parent_codes; tok text; fails int; ipfails int; why text;
+begin
+  if nm = '' then return jsonb_build_object('ok', false, 'reason', 'name'); end if;
+  select count(*) into fails from public.parent_log where reg_number = reg and outcome <> 'ok' and created_at > now() - interval '15 minutes';
+  select count(*) into ipfails from public.parent_log where p_ip is not null and ip_hash = p_ip and outcome <> 'ok' and created_at > now() - interval '1 hour';
+  select id into sid from public.profiles where reg_number = reg and not is_admin and not is_teacher;
+  if fails >= 5 or ipfails >= 20 then
+    insert into public.parent_log (student_id, reg_number, parent_name, relationship, outcome, device, ip_hash) values (sid, reg, nm, rel, 'locked', dev, p_ip);
+    return jsonb_build_object('ok', false, 'reason', 'locked');
+  end if;
+  if sid is null then why := 'bad_code';
+  else
+    select * into c from public.parent_codes where user_id = sid;
+    if not found then why := 'off';
+    elsif c.expires_at <= now() then why := 'expired';
+    elsif c.code <> upper(trim(coalesce(p_code, ''))) then why := 'bad_code';
+    end if;
+  end if;
+  if why is not null then
+    insert into public.parent_log (student_id, reg_number, parent_name, relationship, outcome, device, ip_hash) values (sid, reg, nm, rel, why, dev, p_ip);
+    return jsonb_build_object('ok', false, 'reason', 'mismatch');
+  end if;
+  delete from public.parent_sessions where expires_at < now();
+  tok := replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
+  insert into public.parent_sessions (token, student_id, parent_name, expires_at) values (tok, sid, nm, now() + interval '60 minutes');
+  insert into public.parent_log (student_id, reg_number, parent_name, relationship, outcome, device, ip_hash) values (sid, reg, nm, rel, 'ok', dev, p_ip);
+  perform public.notify_user(sid, 'parent', 'A parent viewed your progress', nm || ' (' || rel || ') signed in with your parent code.', '/app/settings');
+  return jsonb_build_object('ok', true, 'token', tok, 'expires_at', now() + interval '60 minutes');
+end $$;
+
+-- Server only: the read-only report for a live parent session (null when the session is missing or over).
+create or replace function public.parent_report(p_token text) returns jsonb
+language plpgsql security definer stable set search_path = public as $$
+declare s public.parent_sessions; pr public.profiles;
+begin
+  select * into s from public.parent_sessions where token = p_token and expires_at > now();
+  if not found then return null; end if;
+  select * into pr from public.profiles where id = s.student_id;
+  if not found then return null; end if;
+  return jsonb_build_object(
+    'student', jsonb_build_object('name', pr.full_name, 'reg_number', pr.reg_number, 'plan', pr.plan, 'plan_expires', pr.plan_expires,
+                                  'course', pr.course, 'school', pr.school, 'exam_date', pr.exam_date, 'joined', pr.created_at, 'suspended', pr.suspended),
+    'parent', s.parent_name,
+    'expires_at', s.expires_at,
+    'subjects', coalesce((select jsonb_agg(to_jsonb(t) order by t.pct, t.subject) from (
+        select a.subject, count(*)::int as sessions, sum(a.total)::int as total, sum(a.correct)::int as correct, round(100.0 * sum(a.correct) / nullif(sum(a.total), 0))::int as pct
+          from public.attempts a where a.user_id = pr.id and a.kind <> 'hall' group by a.subject) t), '[]'::jsonb),
+    'mocks', coalesce((select jsonb_agg(jsonb_build_object('date', a.created_at, 'score', a.mock_score) order by a.created_at desc)
+                         from public.attempts a where a.user_id = pr.id and a.kind = 'mock' and a.mock_score is not null), '[]'::jsonb),
+    'hall', public.exam_result_for(pr.id, 'hall'),
+    'recent', coalesce((select jsonb_agg(to_jsonb(r) order by r.created_at desc) from (
+        select a.created_at, a.kind, a.subject, a.correct, a.total from public.attempts a where a.user_id = pr.id and a.kind <> 'hall' order by a.created_at desc limit 12) r), '[]'::jsonb),
+    'days', coalesce((select jsonb_agg(d order by d desc) from (
+        select distinct (a.created_at at time zone 'Africa/Lagos')::date as d from public.attempts a where a.user_id = pr.id and a.created_at > now() - interval '60 days') x), '[]'::jsonb));
+end $$;
+
+-- Server only: end a parent session early ("Log out").
+create or replace function public.parent_end(p_token text) returns void
+language sql security definer set search_path = public as $$
+  delete from public.parent_sessions where token = p_token;
+$$;
+
+-- Admin: who tried to see which student, and when.
+create or replace function public.admin_parent_log() returns table (id bigint, student_id uuid, student_name text, reg_number text, parent_name text, relationship text, outcome text, device text, created_at timestamptz, active boolean)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query
+    select l.id, l.student_id, p.full_name, coalesce(p.reg_number, l.reg_number), l.parent_name, l.relationship, l.outcome, l.device, l.created_at,
+           exists (select 1 from public.parent_codes c where c.user_id = l.student_id and c.expires_at > now())
+      from public.parent_log l left join public.profiles p on p.id = l.student_id
+     order by l.created_at desc limit 2000;
+end $$;
+
+-- Admin: switch a student's parent access off (the parent is signed out; the student can make a new code).
+create or replace function public.admin_parent_revoke(p_student uuid) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  delete from public.parent_sessions where student_id = p_student;
+  delete from public.parent_codes where user_id = p_student;
+  perform public.admin_log('parent.revoke', (select reg_number from public.profiles where id = p_student));
+  perform public.notify_user(p_student, 'parent', 'Parent access was switched off', 'An admin switched off your parent code. You can make a new one in Settings.', '/app/settings');
+end $$;
+
 -- Lock the privileged functions down: only the roles that should call them can.
 revoke execute on all functions in schema public from public, anon, authenticated;
-grant execute on function public.is_admin(), public.is_paid(), public.has_access(text) to anon, authenticated;
+grant execute on function public.is_admin(), public.is_staff(), public.is_paid(), public.has_access(text) to anon, authenticated;
 grant execute on function public.admin_make_pin(text, text, int), public.admin_make_pins(text, int, int),
   public.admin_set_student(uuid, text, text, text, boolean), public.admin_set_plan(uuid, text, int),
-  public.admin_set_role(uuid, boolean), public.admin_reset_progress(uuid), public.admin_allow_retake(uuid), public.my_mock_status(),
+  public.admin_set_role(uuid, boolean), public.admin_set_staff_role(uuid, text), public.admin_reset_progress(uuid), public.admin_allow_retake(uuid, text), public.my_exam_status(text),
+  public.exam_window(text), public.admin_set_results_released(text, boolean), public.my_exam_result(text), public.admin_set_exam_window(text, timestamptz, timestamptz, int), public.log_exam_event(text, text, timestamptz, text), public.admin_exam_events(text, uuid),
+  public.parent_code_create(), public.parent_code_revoke(), public.my_parent_access(), public.admin_parent_log(), public.admin_parent_revoke(uuid),
+  public.my_notifications(), public.mark_notifications_read(bigint, text), public.staff_chat_send(uuid, text), public.staff_chat_thread(uuid), public.staff_chat_inbox(),
   public.admin_students(), public.admin_stats(), public.admin_import_questions(jsonb),
   public.ticket_reply(bigint, text), public.ticket_close(bigint) to authenticated;
 -- admin_log and new_pin_code stay internal (revoked above): only the admin_* functions call them.
 grant execute on function public.redeem_pin(text, uuid), public.fulfil_payment(text, int) to service_role;
+grant execute on function public.parent_login(text, text, text, text, text, text), public.parent_report(text), public.parent_end(text) to service_role;
 
 -- ───────────────────────── row level security ─────────────────────────
 
@@ -489,7 +918,7 @@ alter table public.message_replies enable row level security;
 
 create policy plans_read on public.plans for select to anon, authenticated using (true);
 
-create policy profiles_read on public.profiles for select to authenticated using (id = auth.uid() or public.is_admin());
+create policy profiles_read on public.profiles for select to authenticated using (id = auth.uid() or public.is_staff());
 create policy profiles_update on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
 
 create policy pins_select on public.access_pins for select to authenticated using (public.is_admin());
@@ -497,21 +926,21 @@ create policy pins_delete on public.access_pins for delete to authenticated usin
 
 create policy pay_read on public.payments for select to authenticated using (user_id = auth.uid() or public.is_admin());
 
--- Students can read their own practice results only. Mock scores are private to admins (the Scoresheet); a student can only ask
--- whether they have submitted (my_mock_status below).
-create policy att_read on public.attempts for select to authenticated using (public.is_admin() or (user_id = auth.uid() and kind = 'practice'));
+-- Students can read their own practice and CBT Mock results. ExamHall results are private to admins (the Scoresheet); a student can
+-- only ask whether they have submitted (my_exam_status).
+create policy att_read on public.attempts for select to authenticated using (public.is_staff() or (user_id = auth.uid() and kind in ('practice','mock')));
 create policy att_insert on public.attempts for insert to authenticated with check (
   user_id = auth.uid()
   and public.has_access(subject)
   and (kind = 'practice' or public.is_paid())
   and not coalesce((select suspended from public.profiles where id = auth.uid()), true)
 );
--- students may clear their practice history, but never a submitted mock (otherwise they could just delete it and write again)
+-- students may clear their practice history, but never a submitted exam (otherwise they could just delete it and write again)
 create policy att_delete on public.attempts for delete to authenticated using (user_id = auth.uid() and kind = 'practice');
 
-create policy q_read on public.questions for select to authenticated using (public.has_access(subject) or public.is_admin());
-create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_admin());
-create policy q_admin_upd on public.questions for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy q_read on public.questions for select to authenticated using (public.has_access(subject) or public.is_staff());
+create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_staff());
+create policy q_admin_upd on public.questions for update to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy q_admin_del on public.questions for delete to authenticated using (public.is_admin());
 
 create policy plans_admin_upd on public.plans for update to authenticated using (public.is_admin()) with check (public.is_admin());
@@ -521,10 +950,10 @@ create policy plans_admin_upd on public.plans for update to authenticated using 
 -- which checks a CAPTCHA first. Signed-in students may only open tickets as themselves, and the rate limit above applies.
 create policy msg_send on public.messages for insert to authenticated
   with check (status = 'new' and user_id = auth.uid());
-create policy msg_read on public.messages for select to authenticated using (public.is_admin() or user_id = auth.uid());
+create policy msg_read on public.messages for select to authenticated using (public.is_staff() or user_id = auth.uid());
 create policy reply_read on public.message_replies for select to authenticated using (
-  public.is_admin() or exists (select 1 from public.messages m where m.id = message_id and m.user_id = auth.uid()));
-create policy msg_upd on public.messages for update to authenticated using (public.is_admin()) with check (public.is_admin());
+  public.is_staff() or exists (select 1 from public.messages m where m.id = message_id and m.user_id = auth.uid()));
+create policy msg_upd on public.messages for update to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy msg_del on public.messages for delete to authenticated using (public.is_admin());
 
 create policy audit_read on public.audit_log for select to authenticated using (public.is_admin());
@@ -549,3 +978,5 @@ grant select, delete on public.messages to authenticated;
 grant update (status) on public.messages to authenticated;
 grant select on public.audit_log to authenticated;
 grant select on public.message_replies to authenticated;
+grant select on public.notifications, public.staff_chat to authenticated;
+grant select on public.parent_codes to authenticated;

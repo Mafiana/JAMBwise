@@ -62,6 +62,8 @@ export function AuthProvider({ children }) {
     plan: effectivePlan(profile),
     level: planLevel(profile),
     isAdmin: Boolean(profile?.is_admin),
+    isTeacher: Boolean(profile?.is_teacher && !profile?.is_admin),
+    isStaff: Boolean(profile?.is_admin || profile?.is_teacher),
     refreshProfile: loadProfile,
     async saveProfile(patch) {
       const p = await api.updateProfile(uid, patch)

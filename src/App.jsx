@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext.jsx'
+import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { demoMode } from './lib/supabase.js'
 import DemoBanner from './components/DemoBanner.jsx'
-import { RequireAuth } from './components/Guard.jsx'
+import { AdminOnly, RequireAuth } from './components/Guard.jsx'
 import AppLayout from './components/AppLayout.jsx'
 import { Spinner } from './components/ui.jsx'
 import AdminLoader from './components/AdminLoader.jsx'
@@ -35,14 +35,20 @@ const Payments = lazy(() => import('./pages/app/admin/Payments.jsx'))
 const Questions = lazy(() => import('./pages/app/admin/Questions.jsx'))
 const Messages = lazy(() => import('./pages/app/admin/Messages.jsx'))
 const PriceSettings = lazy(() => import('./pages/app/admin/PriceSettings.jsx'))
+const Parent = lazy(() => import('./pages/Parent.jsx'))
+const ParentAccess = lazy(() => import('./pages/app/admin/ParentAccess.jsx'))
+const Teachers = lazy(() => import('./pages/app/admin/Teachers.jsx'))
+const StaffChatPage = lazy(() => import('./pages/app/admin/Chat.jsx'))
 const Activity = lazy(() => import('./pages/app/admin/Activity.jsx'))
+/** Admins start on Overview, teachers on Students. */
+function AdminHome() { const { isAdmin } = useAuth(); return <Navigate to={isAdmin ? 'overview' : 'students'} replace /> }
 
 export default function App() {
   return (
     <ThemeProvider>
-      {demoMode && <DemoBanner />}
       <AuthProvider>
         <ConfirmProvider>
+          {demoMode && <DemoBanner />}
           <BrowserRouter>
             <Suspense fallback={<Spinner />}>
               <Routes>
@@ -52,6 +58,7 @@ export default function App() {
                 <Route path="/privacy" element={<Legal kind="privacy" />} />
                 <Route path="/terms" element={<Legal kind="terms" />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/parent" element={<Parent />} />
                 <Route path="/admin" element={<Navigate to="/app/admin" replace />} />
                 <Route path="/app" element={<RequireAuth />}>
                   <Route element={<AppLayout />}>
@@ -68,17 +75,20 @@ export default function App() {
                     <Route path="settings" element={<Settings />} />
                     <Route path="help" element={<Help />} />
                     <Route path="admin" element={<Suspense fallback={<AdminLoader />}><AdminLayout /></Suspense>}>
-                      <Route index element={<Navigate to="overview" replace />} />
-                      <Route path="overview" element={<Overview />} />
+                      <Route index element={<AdminHome />} />
+                      <Route path="overview" element={<AdminOnly><Overview /></AdminOnly>} />
                       <Route path="students" element={<Students />} />
-                      <Route path="pins" element={<Pins />} />
+                      <Route path="teachers" element={<AdminOnly><Teachers /></AdminOnly>} />
+                      <Route path="chat" element={<StaffChatPage />} />
+                      <Route path="parents" element={<AdminOnly><ParentAccess /></AdminOnly>} />
+                      <Route path="pins" element={<AdminOnly><Pins /></AdminOnly>} />
                       <Route path="scoresheet" element={<Scoresheet />} />
-                      <Route path="payments" element={<Payments />} />
+                      <Route path="payments" element={<AdminOnly><Payments /></AdminOnly>} />
                       <Route path="questions" element={<Questions />} />
                       <Route path="messages" element={<Messages />} />
-                      <Route path="settings" element={<PriceSettings />} />
-                      <Route path="activity" element={<Activity />} />
-                      <Route path="*" element={<Navigate to="overview" replace />} />
+                      <Route path="settings" element={<AdminOnly><PriceSettings /></AdminOnly>} />
+                      <Route path="activity" element={<AdminOnly><Activity /></AdminOnly>} />
+                      <Route path="*" element={<AdminHome />} />
                     </Route>
                     <Route path="*" element={<Navigate to="dashboard" replace />} />
                   </Route>

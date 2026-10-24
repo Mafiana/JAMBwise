@@ -84,7 +84,7 @@ export default function ImportQuestions({ onDone, onCancel }) {
       <details className="fmt">
         <summary>What goes in each column?</summary>
         <ul className="sm">
-          <li><b>subject</b>: eng, mat, phy, chm, bio, gov, eco, com or agr (names like Mathematics also work)</li>
+          <li><b>subject</b>: eng, mat, phy, chm, bio, gov, eco, com, agr, acc, mkt, lit, irk or crk (names like Mathematics also work)</li>
           <li><b>question</b>, <b>option_a</b> to <b>option_d</b>: the text. All four options are needed.</li>
           <li><b>answer</b>: the letter of the right option, A, B, C or D</li>
           <li><b>explanation</b>: optional, shown when a student gets it wrong</li>

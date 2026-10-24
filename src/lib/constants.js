@@ -9,6 +9,11 @@ export const SUBJECTS = {
   eco: { name: 'Economics', level: 1 },
   com: { name: 'Commerce', level: 1 },
   agr: { name: 'Agricultural Science', level: 1 },
+  acc: { name: 'Accounts', level: 1 },
+  mkt: { name: 'Marketing', level: 1 },
+  lit: { name: 'Literature in English', level: 1 },
+  irk: { name: 'Islamic Religious Knowledge', level: 1 },
+  crk: { name: 'Christian Religious Knowledge', level: 1 },
 }
 export const SUBJECT_KEYS = Object.keys(SUBJECTS)
 /** English is automatic in the mock, so students choose their 3 from these. */
@@ -21,7 +26,7 @@ export const SECONDS_PER_QUESTION = 40 // the real UTME pace (2 hours for 180 qu
 // Prices shown here are only a fallback. The real prices come from the `plans` table in the database.
 export const PLANS = [
   { id: 'free', name: 'Free', kobo: 0, features: ['English and Maths practice', 'Progress tracking', 'Aggregate calculator'] },
-  { id: 'student', name: 'Student', kobo: 150000, features: ['All 9 subjects', 'Timed CBT mock exams, scored out of 400', 'Everything in Free'] },
+  { id: 'student', name: 'Student', kobo: 150000, features: ['All 14 subjects', 'Timed CBT mock exams, scored out of 400', 'Everything in Free'] },
   { id: 'pro', name: 'Pro', kobo: 300000, features: ['Personal study planner', 'Weak-subject focus each week', 'Everything in Student'] },
 ]
 
@@ -60,6 +65,7 @@ export const LEGAL = {
       ['Cookies and browser storage', ['We use your browser\'s local storage to keep you signed in and to remember choices such as light or dark theme. We do not use advertising cookies.']],
       ['How long we keep data', ['We keep your account and results while your account is open. When you delete your account, your profile and results are erased. We keep payment records for accounting and legal reasons.']],
       ['Your rights', ['Under the Nigeria Data Protection Act 2023 you may ask to see, correct or delete your personal data, and to object to how it is used.', 'You can edit your profile in My Profile and delete your account in Settings. For anything else, contact us and we will respond promptly.']],
+      ['Parent access', ['A student can make a parent code in Settings and share it, with their Student ID, with a parent or guardian. Someone who has both can sign in on the home page and see the student\'s scores, subjects, mock results and activity for 60 minutes. They cannot see the student\'s email, messages or password, and they cannot change anything.', 'The code lasts 7 days. The student can renew it or switch it off at any time, and is told each time someone signs in. We record the name the parent entered, their relationship to the student, the time and a short browser description (for example Chrome on Android), including failed attempts, so that admins can spot misuse. Parents can only try a few times before being locked out for a while.']],
       ['Young users', ['Many candidates are under 18. If you are under 18, please use JAMBwise with the knowledge of a parent or guardian.']],
       ['Changes to this policy', ['If we change this policy in a way that matters, we will update the date at the top of this page and, where appropriate, tell you in the app.']],
       ['Contact us', ['Questions or requests about your data: use the Contact page or email support@jambwise.ng.']],
@@ -88,4 +94,4 @@ export const LEGAL = {
   },
 }
 
-export const LEGAL_UPDATED = '12 October 2026'
+export const LEGAL_UPDATED = '22 October 2026'

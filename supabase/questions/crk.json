@@ -1,0 +1,442 @@
+[
+ {
+  "q": "The four Gospels are Matthew, Mark, Luke and",
+  "o": [
+   "Acts",
+   "John",
+   "Peter",
+   "Paul"
+  ],
+  "a": 1,
+  "e": "They tell the life and teaching of Jesus Christ."
+ },
+ {
+  "q": "According to Genesis, God created the world in",
+  "o": [
+   "six days and rested on the seventh",
+   "seven days without rest",
+   "ten days",
+   "forty days"
+  ],
+  "a": 0,
+  "e": "The seventh day was blessed as a day of rest."
+ },
+ {
+  "q": "Adam and Eve lived in the Garden of",
+  "o": [
+   "Gethsemane",
+   "Olives",
+   "Canaan",
+   "Eden"
+  ],
+  "a": 3,
+  "e": "They were driven out after they disobeyed God."
+ },
+ {
+  "q": "Cain killed his brother",
+  "o": [
+   "Seth",
+   "Enoch",
+   "Abel",
+   "Noah"
+  ],
+  "a": 2,
+  "e": "He did it out of jealousy over their offerings."
+ },
+ {
+  "q": "Noah built an ark because",
+  "o": [
+   "he wanted to cross the Red Sea",
+   "God warned him of a great flood",
+   "he wanted to go to Egypt",
+   "he was running from Pharaoh"
+  ],
+  "a": 1,
+  "e": "He, his family and the animals were saved."
+ },
+ {
+  "q": "Abraham is called the father of faith because",
+  "o": [
+   "he obeyed God and trusted His promises",
+   "he built the temple",
+   "he led Israel out of Egypt",
+   "he became the first king"
+  ],
+  "a": 0,
+  "e": "God promised him many descendants and a land."
+ },
+ {
+  "q": "The son of Abraham and Sarah was",
+  "o": [
+   "Ishmael",
+   "Jacob",
+   "Esau",
+   "Isaac"
+  ],
+  "a": 3,
+  "e": "He was born when his parents were old."
+ },
+ {
+  "q": "Jacob was renamed",
+  "o": [
+   "Judah",
+   "Joseph",
+   "Israel",
+   "Benjamin"
+  ],
+  "a": 2,
+  "e": "The twelve tribes descended from his sons."
+ },
+ {
+  "q": "Joseph was sold to traders by his brothers because they were",
+  "o": [
+   "afraid of him",
+   "jealous of him",
+   "angry with their father",
+   "poor and hungry"
+  ],
+  "a": 1,
+  "e": "He later became a ruler in Egypt."
+ },
+ {
+  "q": "Moses led the Israelites out of",
+  "o": [
+   "Egypt",
+   "Babylon",
+   "Assyria",
+   "Persia"
+  ],
+  "a": 0,
+  "e": "The event is called the Exodus."
+ },
+ {
+  "q": "The Ten Commandments were given to Moses on Mount",
+  "o": [
+   "Carmel",
+   "Zion",
+   "Nebo",
+   "Sinai"
+  ],
+  "a": 3,
+  "e": "God gave them on two tablets of stone."
+ },
+ {
+  "q": "The Passover remembers when",
+  "o": [
+   "Noah left the ark",
+   "Daniel was saved from lions",
+   "the angel of death passed over the houses of the Israelites in Egypt",
+   "the walls of Jericho fell"
+  ],
+  "a": 2,
+  "e": "The blood on the doorposts was the sign."
+ },
+ {
+  "q": "After the death of Moses, the Israelites were led into Canaan by",
+  "o": [
+   "Aaron",
+   "Joshua",
+   "Samuel",
+   "Caleb"
+  ],
+  "a": 1,
+  "e": "Under him they crossed the River Jordan."
+ },
+ {
+  "q": "Samson lost his strength when",
+  "o": [
+   "Delilah cut his hair",
+   "he drank wine",
+   "he entered the temple",
+   "he fought Goliath"
+  ],
+  "a": 0,
+  "e": "His uncut hair was the sign of his Nazirite vow."
+ },
+ {
+  "q": "The loyal daughter-in-law of Naomi was",
+  "o": [
+   "Esther",
+   "Deborah",
+   "Hannah",
+   "Ruth"
+  ],
+  "a": 3,
+  "e": "She said, 'Where you go I will go.'"
+ },
+ {
+  "q": "The first king of Israel was",
+  "o": [
+   "David",
+   "Solomon",
+   "Saul",
+   "Samuel"
+  ],
+  "a": 2,
+  "e": "He was anointed by the prophet Samuel."
+ },
+ {
+  "q": "David killed the giant",
+  "o": [
+   "Og",
+   "Goliath",
+   "Sisera",
+   "Nebuchadnezzar"
+  ],
+  "a": 1,
+  "e": "He used a sling and a stone."
+ },
+ {
+  "q": "King Solomon is best known for",
+  "o": [
+   "wisdom and building the temple in Jerusalem",
+   "leading Israel out of Egypt",
+   "defeating Goliath",
+   "writing the Ten Commandments"
+  ],
+  "a": 0,
+  "e": "He asked God for an understanding heart."
+ },
+ {
+  "q": "On Mount Carmel, the prophet Elijah challenged the prophets of",
+  "o": [
+   "Dagon",
+   "Molech",
+   "Asherah",
+   "Baal"
+  ],
+  "a": 3,
+  "e": "God answered by fire from heaven."
+ },
+ {
+  "q": "Daniel was thrown into the lions' den because he",
+  "o": [
+   "stole from the king",
+   "refused to leave Babylon",
+   "prayed to God against the king's decree",
+   "killed a guard"
+  ],
+  "a": 2,
+  "e": "God shut the lions' mouths."
+ },
+ {
+  "q": "Jesus was born in",
+  "o": [
+   "Nazareth",
+   "Bethlehem",
+   "Jerusalem",
+   "Capernaum"
+  ],
+  "a": 1,
+  "e": "He was born in a manger because there was no room at the inn."
+ },
+ {
+  "q": "Jesus was baptised by John the Baptist in the River",
+  "o": [
+   "Jordan",
+   "Nile",
+   "Euphrates",
+   "Jabbok"
+  ],
+  "a": 0,
+  "e": "The Spirit descended on him like a dove."
+ },
+ {
+  "q": "The number of disciples chosen by Jesus was",
+  "o": [
+   "seven",
+   "ten",
+   "seventy",
+   "twelve"
+  ],
+  "a": 3,
+  "e": "They were called apostles after Pentecost."
+ },
+ {
+  "q": "The Beatitudes are found in the",
+  "o": [
+   "Last Supper",
+   "Sermon at Nazareth",
+   "Sermon on the Mount",
+   "Book of Acts"
+  ],
+  "a": 2,
+  "e": "Jesus taught them in Matthew chapters 5 to 7."
+ },
+ {
+  "q": "The first miracle of Jesus, in John's Gospel, was turning water into wine at",
+  "o": [
+   "Capernaum",
+   "Cana",
+   "Bethany",
+   "Jericho"
+  ],
+  "a": 1,
+  "e": "It happened at a wedding feast."
+ },
+ {
+  "q": "In the parable of the Good Samaritan, the person who helped the wounded man was",
+  "o": [
+   "a Samaritan",
+   "a priest",
+   "a Levite",
+   "a Pharisee"
+  ],
+  "a": 0,
+  "e": "Jesus used it to show who our neighbour is."
+ },
+ {
+  "q": "The prayer that Jesus taught his disciples is called the",
+  "o": [
+   "Beatitudes",
+   "Magnificat",
+   "Psalm",
+   "Lord's Prayer"
+  ],
+  "a": 3,
+  "e": "It begins 'Our Father in heaven'."
+ },
+ {
+  "q": "Jesus was crucified at a place called",
+  "o": [
+   "Gethsemane",
+   "Bethany",
+   "Golgotha",
+   "Emmaus"
+  ],
+  "a": 2,
+  "e": "It is also called Calvary."
+ },
+ {
+  "q": "Christians believe Jesus rose from the dead on the",
+  "o": [
+   "second day",
+   "third day",
+   "seventh day",
+   "fortieth day"
+  ],
+  "a": 1,
+  "e": "The event is celebrated at Easter."
+ },
+ {
+  "q": "The Holy Spirit came upon the apostles on the day of",
+  "o": [
+   "Pentecost",
+   "Passover",
+   "Tabernacles",
+   "Atonement"
+  ],
+  "a": 0,
+  "e": "They spoke in different languages."
+ },
+ {
+  "q": "Saul of Tarsus became a Christian on the road to",
+  "o": [
+   "Jerusalem",
+   "Antioch",
+   "Rome",
+   "Damascus"
+  ],
+  "a": 3,
+  "e": "He later became known as Paul."
+ },
+ {
+  "q": "Which of these is a fruit of the Spirit?",
+  "o": [
+   "Pride",
+   "Envy",
+   "Love",
+   "Anger"
+  ],
+  "a": 2,
+  "e": "Galatians 5 lists love, joy, peace, patience and others."
+ },
+ {
+  "q": "The disciple who denied Jesus three times was",
+  "o": [
+   "Thomas",
+   "Peter",
+   "Andrew",
+   "Philip"
+  ],
+  "a": 1,
+  "e": "The cock crowed as Jesus had foretold."
+ },
+ {
+  "q": "The disciple who betrayed Jesus for thirty pieces of silver was",
+  "o": [
+   "Judas Iscariot",
+   "Simon Peter",
+   "Bartholomew",
+   "Matthew"
+  ],
+  "a": 0,
+  "e": "He led the soldiers to Jesus in the garden."
+ },
+ {
+  "q": "The first Christian martyr was",
+  "o": [
+   "James",
+   "Paul",
+   "Barnabas",
+   "Stephen"
+  ],
+  "a": 3,
+  "e": "He was stoned to death in Jerusalem."
+ },
+ {
+  "q": "The companion of Paul on his first missionary journey was",
+  "o": [
+   "Timothy",
+   "Silas",
+   "Barnabas",
+   "Titus"
+  ],
+  "a": 2,
+  "e": "They were sent from Antioch."
+ },
+ {
+  "q": "The last book of the Bible is",
+  "o": [
+   "Acts",
+   "Revelation",
+   "Jude",
+   "Hebrews"
+  ],
+  "a": 1,
+  "e": "It was written by John on the island of Patmos."
+ },
+ {
+  "q": "In the parable of the Prodigal Son, the father",
+  "o": [
+   "welcomed his son home with joy",
+   "refused to see him",
+   "sent him away again",
+   "gave all his money to the elder son"
+  ],
+  "a": 0,
+  "e": "It shows God's forgiveness."
+ },
+ {
+  "q": "The Great Commission tells the disciples to",
+  "o": [
+   "stay in Jerusalem only",
+   "build the temple",
+   "keep the Sabbath only",
+   "go and make disciples of all nations"
+  ],
+  "a": 3,
+  "e": "Jesus gave it before returning to heaven."
+ },
+ {
+  "q": "The two greatest commandments are to love God and to",
+  "o": [
+   "keep the Sabbath",
+   "offer sacrifices",
+   "love your neighbour as yourself",
+   "pay tithes"
+  ],
+  "a": 2,
+  "e": "Jesus said all the law hangs on them."
+ }
+]

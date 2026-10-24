@@ -1,18 +1,23 @@
 import { useMemo, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
+import Icon from '../../../components/Icons.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import * as api from '../../../lib/api.js'
 import { downloadText } from '../../../lib/download.js'
 import { toCsv } from '../../../lib/utils.js'
 import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader } from './shared.jsx'
 import StudentDetail from './StudentDetail.jsx'
+import ExamLog from './ExamLog.jsx'
+import AddUser from './AddUser.jsx'
 
 export default function Students() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { data, error, loading, reload } = useLoad(api.adminStudents)
   const [q, setQ] = useState('')
   const [planF, setPlanF] = useState('all')
   const [open, setOpen] = useState(null)
+  const [adding, setAdding] = useState(false)
+  const [logOf, setLogOf] = useState(null)   // the student whose exam log is showing
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return (data || []).filter((s) => (planF === 'all' || s.plan === planF || (planF === 'suspended' && s.suspended)) &&
@@ -32,11 +37,12 @@ export default function Students() {
   return (
     <>
       <div className="adm-filters">
-        <input aria-label="Search students" placeholder="Search name, email, number or school" value={q} onChange={(e) => setQ(e.target.value)} />
+        <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search students" placeholder="Search name, email, number or school" value={q} onChange={(e) => setQ(e.target.value)} /></span>
         <select aria-label="Filter by plan" value={planF} onChange={(e) => setPlanF(e.target.value)}>
           <option value="all">All plans</option>{PLAN_IDS.map((p) => <option key={p} value={p}>{p}</option>)}<option value="suspended">Suspended</option>
         </select>
         <button className="btn ghost" onClick={exportCsv}>Export CSV</button>
+        {isAdmin && <button className="btn" onClick={() => setAdding(true)}><Icon name="plus" size={16} /> Add student</button>}
       </div>
       <p className="sm">{shown.length} of {data.length} students</p>
       <div className="card tw">
@@ -45,20 +51,22 @@ export default function Students() {
           <tbody>
             {shown.map((s) => (
               <tr key={s.id}>
-                <td><button className="linkish" onClick={() => setOpen(s.id)}>{s.full_name}</button>{s.is_admin && <span className="tag">admin</span>}{s.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{s.email}</span></td>
+                <td><button className="linkish" onClick={() => setOpen(s.id)}>{s.full_name}</button>{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{s.email}</span></td>
                 <td>{s.reg_number}</td>
                 <td>{s.plan}{s.plan !== 'free' && s.plan_expires && <div className="sm">to {fmtDate(s.plan_expires)}</div>}</td>
                 <td>{Number(s.questions)}</td>
                 <td>{Number(s.questions) ? Math.round((Number(s.correct) / Number(s.questions)) * 100) : 0}%</td>
                 <td>{Number(s.mocks)}</td>
                 <td>{fmtDate(s.last_active)}</td>
-                <td><button className="btn ghost" onClick={() => { setOpen(s.id); window.scrollTo({ top: 0 }) }}>View</button></td>
+                <td className="acts"><button className="btn ghost" onClick={() => { setOpen(s.id); window.scrollTo({ top: 0 }) }}>View</button> <button className="btn ghost" onClick={() => setLogOf(s)}>Logs</button></td>
               </tr>
             ))}
           </tbody>
         </table>
         {shown.length === 0 && <Empty>No students match.</Empty>}
       </div>
+      {adding && <AddUser role="student" onClose={() => setAdding(false)} onDone={reload} />}
+      {logOf && <ExamLog student={logOf} onClose={() => setLogOf(null)} />}
     </>
   )
 }

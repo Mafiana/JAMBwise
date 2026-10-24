@@ -1,7 +1,9 @@
+import Icon from '../../../components/Icons.jsx'
 import { useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import TicketThread from '../../../components/TicketThread.jsx'
+import { useAuth } from '../../../context/AuthContext.jsx'
 import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
 import { TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
@@ -11,6 +13,7 @@ const TOPIC = { general: 'General', payment: 'Payment', pin: 'Access PIN', bug: 
 const chip = (s) => 'tag' + (s === 'new' ? ' bad' : s === 'answered' ? ' ok' : s === 'resolved' ? ' muted' : '')
 
 export default function Messages() {
+  const { isAdmin } = useAuth()   // teachers answer tickets; only admins delete them
   const { data, error, loading, reload } = useLoad(api.adminMessages)
   const act = useAction()
   const confirm = useConfirm()
@@ -37,7 +40,7 @@ export default function Messages() {
         <select aria-label="Filter tickets" value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="open">Needs attention</option><option value="reports">Question reports</option><option value="answered">Answered</option><option value="resolved">Resolved</option><option value="all">All tickets</option>
         </select>
-        <input aria-label="Search tickets" placeholder="Search name, email, subject or ticket number" value={q} onChange={(e) => setQ(e.target.value)} />
+        <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search tickets" placeholder="Search name, email, subject or ticket number" value={q} onChange={(e) => setQ(e.target.value)} /></span>
       </div>
       <ErrorLine>{act.error}</ErrorLine>
       {shown.length === 0 && <div className="card"><Empty>Nothing here. Tickets from the Customer Support page and messages from the Contact page show up here.</Empty></div>}
@@ -54,7 +57,7 @@ export default function Messages() {
               <TicketThread ticket={m} staff onChange={reload} />
               <div className="row" style={{ justifyContent: 'flex-start', flexWrap: 'wrap', marginTop: 4 }}>
                 {m.status === 'resolved' && <button className="btn ghost" onClick={() => setStatus(m, 'new')}>Reopen</button>}
-                <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this ticket?', message: `${ticketNo(m.id)} and its whole conversation will be permanently deleted.`, confirmLabel: 'Delete ticket' })) && act.run(async () => { await api.adminDeleteMessage(m.id); setOpenId(null); await reload() })}>Delete ticket</button>
+                {isAdmin && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this ticket?', message: `${ticketNo(m.id)} and its whole conversation will be permanently deleted.`, confirmLabel: 'Delete ticket' })) && act.run(async () => { await api.adminDeleteMessage(m.id); setOpenId(null); await reload() })}>Delete ticket</button>}
               </div>
             </>
           )}

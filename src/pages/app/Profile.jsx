@@ -16,9 +16,10 @@ function toAvatar(file) {
       img.onerror = () => reject(new Error('That image could not be opened.'))
       img.onload = () => {
         const c = document.createElement('canvas')
-        c.width = c.height = 200
+        c.width = 300; c.height = 300            // square, 1:1
         const m = Math.min(img.width, img.height)
-        c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, 200, 200)
+        // tall photos are cropped from near the top, so the face is kept and not the middle of the body
+        c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 6, m, m, 0, 0, 300, 300)
         resolve(c.toDataURL('image/jpeg', 0.8))
       }
       img.src = reader.result
@@ -65,9 +66,14 @@ export default function Profile() {
       <h1>My Profile</h1>
       <p className="mut">Complete your profile so JAMBwise can track your preparation.</p>
       <div className="card">
-        <div className="row">
-          <Avatar profile={{ ...profile, avatar: f.avatar, full_name: f.full_name }} />
-          <label className="btn ghost">Upload photo<input type="file" accept="image/*" hidden onChange={photo} /></label>
+        <div className="photo-row">
+          <div className="photo-land">
+            {f.avatar ? <img src={f.avatar} alt="Your profile photo" /> : <Avatar profile={{ ...profile, avatar: null, full_name: f.full_name }} />}
+          </div>
+          <div>
+            <label className="btn ghost">{f.avatar ? 'Change photo' : 'Upload photo'}<input type="file" accept="image/*" hidden onChange={photo} /></label>
+            <p className="sm" style={{ margin: '6px 0 0' }}>A clear headshot works best.</p>
+          </div>
         </div>
         <label htmlFor="pn">Full name</label>
         <input id="pn" value={f.full_name} onChange={set('full_name')} maxLength={100} />

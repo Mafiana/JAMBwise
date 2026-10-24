@@ -5,6 +5,8 @@ import * as api from '../lib/api.js'
 import { useAuth } from './AuthContext.jsx'
 import { MOCK_PER_SUBJECT, PRACTICE_SIZE, SECONDS_PER_QUESTION } from '../lib/constants.js'
 import { prepareQuestion, sample, scoreMock } from '../lib/utils.js'
+import { canFullscreen, examEndsAt, fmtWhen, inFullscreen, leaveFullscreen, mergeEvent, shouldAutoSubmit, windowState } from '../lib/integrity.js'
+import { clearExam, loadExam, saveExam } from '../lib/examStore.js'
 
 const Ctx = createContext(null)
 
@@ -24,6 +26,7 @@ export function ExamProvider({ children }) {
   const syncPending = useCallback(async () => {
     if (!uid) return
     try { if (await api.flushPendingAttempts(uid)) refreshAttempts() } catch { /* try again next time */ }
+    try { await api.flushExamEvents(uid) } catch { /* try again next time */ }
     setPending(api.pendingAttemptCount(uid))
   }, [uid, refreshAttempts])
   useEffect(() => {
@@ -33,21 +36,26 @@ export function ExamProvider({ children }) {
     return () => window.removeEventListener('online', syncPending)
   }, [uid, syncPending])
 
-  // a different student on the same device must never inherit an exam
-  useEffect(() => { setPractice(null); setMock(null) }, [uid])
+  // a different student on the same device must never inherit an exam; the same student gets their unfinished exam back
+  useEffect(() => { setPractice(null); setMock(uid ? loadExam(uid) : null) }, [uid])
+
+  // every change to the exam is kept on the device, so a refresh or a power cut loses nothing
+  useEffect(() => { if (uid && mock) saveExam(uid, mock) }, [uid, mock])
 
   // ── practice ──
   const startPractice = useCallback(async (subject) => {
     const rows = await api.getQuestions(subject)
     if (!rows.length) throw new Error('No questions are available for this subject on your plan.')
     const qs = sample(rows, PRACTICE_SIZE).map((r) => prepareQuestion(r))
-    setPractice({ subject, qs, i: 0, score: 0, sel: null, done: false, saved: null })
+    setPractice({ subject, qs, i: 0, score: 0, sel: null, done: false, saved: null, marks: [] })
   }, [])
 
   const pick = useCallback((j) => {
     setPractice((p) => {
       if (!p || p.sel != null) return p
-      return { ...p, sel: j, score: p.score + (j === p.qs[p.i].answer ? 1 : 0) }
+      const ok = j === p.qs[p.i].answer
+      const marks = (p.marks || []).slice(); marks[p.i] = ok ? 1 : 0
+      return { ...p, sel: j, marks, score: p.score + (ok ? 1 : 0) }
     })
   }, [])
 
@@ -71,7 +79,15 @@ export function ExamProvider({ children }) {
   const endPractice = useCallback(() => setPractice(null), [])
 
   // ── mock ──
-  const startMock = useCallback(async (picked) => {
+  /** kind: 'mock' (CBT Mock) or 'hall' (ExamHall). Both are the same exam; they differ in who may see the score. */
+  const startMock = useCallback(async (picked, kind = 'mock') => {
+    // ExamHall can be scheduled: check the window now (not only when the page was opened) against the SERVER's clock
+    const win = kind === 'hall' ? await api.getExamWindow('hall') : null
+    if (win) {
+      const st = windowState(win, Date.now() + win.offset)
+      if (st === 'before') throw new Error('ExamHall opens on ' + fmtWhen(win.opens - win.offset) + '. Please come back then.')
+      if (st === 'closed') throw new Error('ExamHall closed on ' + fmtWhen(win.closes - win.offset) + '.')
+    }
     const subs = ['eng', ...picked]
     const qs = []
     for (const s of subs) {
@@ -79,11 +95,14 @@ export function ExamProvider({ children }) {
       if (rows.length < 5) throw new Error('Not enough questions yet for ' + s.toUpperCase() + '. Make sure your plan is active.')
       sample(rows, MOCK_PER_SUBJECT).forEach((r) => qs.push(prepareQuestion(r)))
     }
+    const endsAt = examEndsAt(Date.now(), qs.length * SECONDS_PER_QUESTION * 1000, win)   // never later than the closing time
+    if (endsAt - Date.now() < 60 * 1000) throw new Error('ExamHall closes in less than a minute, so it cannot be started now.')
     setMock({
-      subs, qs, i: 0, a: {}, done: false, saved: null,
-      endsAt: Date.now() + qs.length * SECONDS_PER_QUESTION * 1000,
+      kind, subs, qs, i: 0, a: {}, done: false, saved: null, endsAt,
+      events: [], maxViolations: win ? win.maxViolations : 0, closes: win?.closes != null ? win.closes - win.offset : null,
     })
-  }, [])
+    api.logExamEvent(uid, { kind, type: 'started', at: new Date().toISOString() })
+  }, [uid])
 
   const answerMock = useCallback((j) => setMock((m) => (m && !m.done ? { ...m, a: { ...m.a, [m.i]: j } } : m)), [])
   const gotoMock = useCallback((i) => setMock((m) => (m && !m.done ? { ...m, i: Math.max(0, Math.min(m.qs.length - 1, i)) } : m)), [])
@@ -94,25 +113,29 @@ export function ExamProvider({ children }) {
     try {
       // one row per subject; the overall mock score is stored on the first row only
       const res = await api.insertAttempts(m.results.map((r, idx) => ({
-        user_id: uid, subject: r.subject, correct: r.correct, total: Math.max(1, r.total), kind: 'mock',
+        user_id: uid, subject: r.subject, correct: r.correct, total: Math.max(1, r.total), kind: m.kind || 'mock',
         mock_score: idx === 0 ? m.total : null,
       })))
       setMock((x) => (x ? { ...x, saved: res === 'queued' ? 'queued' : 'ok' } : x))
+      clearExam()                                  // delivered (or safely queued): nothing left to resume
+      leaveFullscreen()
       if (res === 'queued') setPending(api.pendingAttemptCount(uid)); else refreshAttempts()
     } catch (e) {
       setMock((x) => (x ? { ...x, saved: e.message } : x))
     }
   }, [uid, refreshAttempts])
 
-  const submitMock = useCallback(async () => {
+  /** `why`: 'student' (pressed Submit), 'time' (the clock ran out) or 'warnings' (too many warnings). Recorded in the exam log. */
+  const submitMock = useCallback(async (why = 'student') => {
     const m = mockRef.current
     if (!m || m.done) return
+    api.logExamEvent(uid, { kind: m.kind, type: 'submitted', at: new Date().toISOString(), detail: { student: 'Submitted by the student', time: 'Time ran out', warnings: 'Warning limit reached' }[why] || '' })
     const { results, total } = scoreMock(m.subs, m.qs, m.a)
     const done = { ...m, done: true, results, total, saved: 'saving' }
     mockRef.current = done                      // a second tap or the timer cannot submit twice
     setMock(done)
     await saveMock(done)
-  }, [saveMock])
+  }, [saveMock, uid])
 
   /** Try again after a failed save (for example a dropped connection). */
   const retryMockSave = useCallback(() => { const m = mockRef.current; if (m?.done) saveMock(m) }, [saveMock])
@@ -122,18 +145,63 @@ export function ExamProvider({ children }) {
     if (!mock || mock.done) return undefined
     const id = setInterval(() => {
       const m = mockRef.current
-      if (m && !m.done && Date.now() >= m.endsAt) submitMock()
+      if (m && !m.done && Date.now() >= m.endsAt) submitMock('time')
     }, 1000)
     return () => clearInterval(id)
   }, [mock?.done, mock?.endsAt, submitMock]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const endMock = useCallback(() => setMock(null), [])
+  // ── ExamHall integrity guards: leaving the tab, the window or full screen is recorded, warned about, and sent to the admin ──
+  const record = useCallback((type) => {
+    const m = mockRef.current
+    if (!m || m.done || m.kind !== 'hall') return
+    const at = Date.now()
+    const { events, counted } = mergeEvent(m.events || [], { type, at })
+    if (!counted) return
+    const hit = shouldAutoSubmit(events.length, m.maxViolations)
+    const next = { ...m, events, warn: { n: events.length, max: m.maxViolations, type, hit } }
+    mockRef.current = next
+    setMock(next)
+    api.logExamEvent(uid, { kind: m.kind, type, at: new Date(at).toISOString(), detail: `Warning ${events.length}${m.maxViolations > 0 ? ' of ' + m.maxViolations : ''}` })
+    if (hit) { api.logExamEvent(uid, { kind: m.kind, type: 'limit_reached', at: new Date().toISOString() }); submitMock('warnings') }
+  }, [uid, submitMock])
+
+  const guarding = Boolean(mock && !mock.done && mock.kind === 'hall')
+  useEffect(() => {
+    if (!guarding) return undefined
+    const wasFs = { v: inFullscreen() }
+    const onVisible = () => { if (document.hidden) record('left_tab') }
+    const onBlur = () => record('left_tab')
+    const onFs = () => {
+      if (inFullscreen()) { wasFs.v = true; return }
+      if (wasFs.v) { wasFs.v = false; record('left_fullscreen') }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('blur', onBlur)
+    document.addEventListener('fullscreenchange', onFs)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('blur', onBlur)
+      document.removeEventListener('fullscreenchange', onFs)
+    }
+  }, [guarding, record])
+
+  const ackWarn = useCallback(() => {
+    const m = mockRef.current
+    if (m?.resumed && !m.done) api.logExamEvent(uid, { kind: m.kind, type: 'resumed', at: new Date().toISOString() })
+    setMock((x) => { if (!x) return x; const n = { ...x, warn: null, resumed: false }; mockRef.current = n; return n })
+  }, [uid])
+  /** ExamHall wants full screen on a computer. */
+  const needsFullscreen = guarding && canFullscreen()
+
+  const endMock = useCallback(() => { clearExam(); leaveFullscreen(); setMock(null) }, [])
+  /** The student has seen the "Successfully submitted" box (CBT Mock only: it then shows the result). */
+  const ackMock = useCallback(() => setMock((m) => (m ? { ...m, ack: true } : m)), [])
 
   const value = useMemo(() => ({
     version, refreshAttempts, pending, syncPending,
     practice, startPractice, pick, nextQuestion, endPractice,
-    mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock,
-  }), [version, refreshAttempts, pending, syncPending, practice, startPractice, pick, nextQuestion, endPractice, mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock])
+    mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock, ackMock, ackWarn, needsFullscreen,
+  }), [version, refreshAttempts, pending, syncPending, practice, startPractice, pick, nextQuestion, endPractice, mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock, ackMock, ackWarn, needsFullscreen])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
