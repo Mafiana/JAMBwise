@@ -223,6 +223,32 @@ do $$ begin
   assert (select count(*) from public.questions where subject in ('phy','chm','bio'))>0, 'teacher reads paid questions';
   assert (select count(*) from public.admin_exam_events('hall'))>=0, 'teacher reads the exam log';
 end $$;
+-- a teacher sees students only: no admins and no teachers in the list, nor in direct reads (their own row stays visible)
+do $$ begin
+  assert (select count(*) from public.admin_students() where is_admin or is_teacher) = 0, 'teacher does not see admins or teachers in the students list';
+  assert (select count(*) from public.profiles where is_admin) = 0, 'teacher cannot read an admin profile';
+  assert (select count(*) from public.profiles where id = auth.uid()) = 1, 'teacher still reads their own profile';
+end $$;
+select public.teacher_signed_in();
+select public.teacher_signed_in();
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.admin_students() where is_teacher) >= 1, 'admin still sees teachers in the list';
+  assert (select count(*) from public.my_notifications() where kind = 'teacher') = 1, 'admin told once when a teacher signs in (not twice within 30 minutes)';
+end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+select public.teacher_signed_in();
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'teacher') = 1, 'a student calling it rings nothing'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='tutor'));
+set local role authenticated;
 insert into public.questions(subject, body, options, answer) values ('eng','Teacher added this?','["a","b","c","d"]'::jsonb,2);
 update public.questions set explanation = 'edited by teacher' where body = 'Teacher added this?';
 do $$ begin assert (select explanation from public.questions where body = 'Teacher added this?') = 'edited by teacher', 'teacher edits questions'; end $$;
@@ -304,7 +330,7 @@ do $$ begin
 end $$;
 select public.mark_notifications_read();
 select pg_temp.as_user((select id from t_ids where name='admin'));
-do $$ begin assert (select count(*) from public.my_notifications()) = 0, 'admin did not get the students alert'; end $$;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'result') = 0, 'admin did not get the students alert'; end $$;
 select public.admin_set_results_released('hall', false);
 
 -- ===== admin <-> teacher chat =====
@@ -598,6 +624,14 @@ do $$ declare reg text; code text; r jsonb; tok text; rep jsonb; begin
   assert public.parent_report('nonsense') is null, 'a made-up token gets nothing';
   perform public.parent_end(tok);
   assert public.parent_report(tok) is null, 'logging out ends the session';
+end $$;
+reset role;
+-- the admin's bell rings for a parent sign-in, once for the same parent and student within 30 minutes
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.my_notifications() where kind = 'parent' and link = '/app/admin/parents') = 1, 'admin told when a parent signs in';
+  assert (select body from public.my_notifications() where kind = 'parent' limit 1) like 'Mrs Okoro (Mother) viewed Paid Student%', 'the notification names the parent and the student';
 end $$;
 reset role;
 select pg_temp.as_user((select id from t_ids where name='admin'));

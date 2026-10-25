@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { demoMode } from './lib/supabase.js'
 import DemoBanner from './components/DemoBanner.jsx'
-import { AdminOnly, RequireAuth } from './components/Guard.jsx'
+import { AdminOnly, RequireAuth, StudentOnly } from './components/Guard.jsx'
 import AppLayout from './components/AppLayout.jsx'
 import { Spinner } from './components/ui.jsx'
 import AdminLoader from './components/AdminLoader.jsx'
@@ -63,17 +63,17 @@ export default function App() {
                 <Route path="/app" element={<RequireAuth />}>
                   <Route element={<AppLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="practice" element={<Practice />} />
-                    <Route path="mock" element={<Mock />} />
-                    <Route path="examhall" element={<ExamHall />} />
-                    <Route path="calc" element={<Calc />} />
-                    <Route path="planner" element={<Planner />} />
-                    <Route path="progress" element={<Progress />} />
+                    <Route path="dashboard" element={<StudentOnly><Dashboard /></StudentOnly>} />
+                    <Route path="practice" element={<StudentOnly><Practice /></StudentOnly>} />
+                    <Route path="mock" element={<StudentOnly><Mock /></StudentOnly>} />
+                    <Route path="examhall" element={<StudentOnly><ExamHall /></StudentOnly>} />
+                    <Route path="calc" element={<StudentOnly><Calc /></StudentOnly>} />
+                    <Route path="planner" element={<StudentOnly><Planner /></StudentOnly>} />
+                    <Route path="progress" element={<StudentOnly><Progress /></StudentOnly>} />
                     <Route path="profile" element={<Profile />} />
-                    <Route path="billing" element={<Billing />} />
+                    <Route path="billing" element={<StudentOnly><Billing /></StudentOnly>} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="help" element={<Help />} />
+                    <Route path="help" element={<StudentOnly><Help /></StudentOnly>} />
                     <Route path="admin" element={<Suspense fallback={<AdminLoader />}><AdminLayout /></Suspense>}>
                       <Route index element={<AdminHome />} />
                       <Route path="overview" element={<AdminOnly><Overview /></AdminOnly>} />

@@ -36,6 +36,13 @@ export function RequireAdmin({ children }) {
   return children
 }
 
+/** Student pages (practice, mocks, planner, plans...). A teacher has no student side, so they go to their panel. */
+export function StudentOnly({ children }) {
+  const { isTeacher } = useAuth()
+  if (isTeacher) return <Navigate to="/app/admin" replace />
+  return children
+}
+
 /** Pages only a full admin may open (money, PINs, prices, activity). Teachers are sent to the Students page. */
 export function AdminOnly({ children }) {
   const { isAdmin } = useAuth()

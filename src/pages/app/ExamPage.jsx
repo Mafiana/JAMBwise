@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import { useConfirm } from '../../components/Confirm.jsx'
-import { ErrorLine, Lock, Portrait } from '../../components/ui.jsx'
+import { ErrorLine, Loader, Lock, Portrait } from '../../components/ui.jsx'
 import Icon from '../../components/Icons.jsx'
 import ExamCalculator from '../../components/ExamCalculator.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
@@ -92,7 +92,7 @@ function Picker({ cfg, kind }) {
     const next = chosen.includes(k) ? chosen.filter((x) => x !== k) : chosen.length < 3 ? [...chosen, k] : chosen
     if (next !== chosen) run(() => saveProfile({ subjects: next }))
   }
-  if (checking || win === undefined) return <><h1>{cfg.title}</h1><p className="mut" role="status">Checking your exam status…</p></>
+  if (checking || win === undefined) return <><h1>{cfg.title}</h1><Loader label="Checking your exam status…" /></>
   const back = <Link className="back-link" to="/app/dashboard"><Icon name="chevl" size={16} /> Back to dashboard</Link>
   if (taken) return <AlreadyTaken cfg={cfg} taken={taken} />
   return (

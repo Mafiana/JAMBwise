@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ErrorLine, Logo, ThemeToggle } from '../components/ui.jsx'
+import { ErrorLine, Loader, Logo, ThemeToggle } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
 import ParentForm from '../components/ParentForm.jsx'
 import * as api from '../lib/api.js'
@@ -34,6 +34,26 @@ function Report({ session, report, onEnd }) {
   }, [report.days])
   const weak = report.subjects.filter((x) => x.pct < 60).slice(0, 3)
   const hall = report.hall
+  const [saved, setSaved] = useState('')
+  /** Builds the PDF at this moment, so it carries the real date and time of the download. */
+  const download = async () => {
+    const now = new Date()
+    const [{ buildParentReportPdf, stampForFile }, { downloadBytes }] = await Promise.all([import('../lib/reportPdf.js'), import('../lib/download.js')])
+    const days = strip.filter((d) => d.on).length
+    const bytes = buildParentReportPdf({
+      student: { name: s.name, reg_number: s.reg_number, course: s.course, school: s.school, plan: s.plan, exam_date: s.exam_date ? fmtDate(s.exam_date) : '' },
+      parent: session.name,
+      stats: [{ value: total, label: 'questions answered' }, { value: accuracy + '%', label: 'accuracy' }, { value: best ?? '-', label: 'best mock, of 400' }, { value: run, label: 'day streak' }],
+      attention: weak.length ? weak.map((x) => `${subjectName(x.subject)} (${x.pct}%)`).join(', ') + '. Encourage extra practice here.' : '',
+      subjects: report.subjects.map((x) => ({ name: subjectName(x.subject), pct: x.pct, detail: `${x.correct} of ${x.total} correct` })),
+      activity: `Practised on ${days} of the last 14 days. Current streak: ${run} day${run === 1 ? '' : 's'}.`,
+      mocks: report.mocks.slice(0, 10).map((m) => ({ when: fmtDateTime(m.date), score: m.score })),
+      hall: hall ? { title: 'ExamHall', lines: hall.released ? [`Sat on ${fmtDate(hall.date)}. Score: ${hall.total} / 400`, (hall.subjects || []).map((x) => `${subjectName(x.subject)} ${x.correct}/${x.total}`).join('  |  ')].filter(Boolean) : [`Sat on ${fmtDate(hall.date)}. The score will show once the school releases the results.`] } : null,
+      recent: report.recent.map((a) => [fmtDateTime(a.created_at), KIND[a.kind] || a.kind, subjectName(a.subject), `${a.correct} / ${a.total} (${Math.round((a.correct / a.total) * 100)}%)`]),
+    }, now)
+    downloadBytes(`JAMBwise-report-${s.reg_number}-${stampForFile(now)}.pdf`, bytes)
+    setSaved(now.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'medium' }))
+  }
   return (
     <div className="parent-report">
       <div className="card pr-head">
@@ -45,6 +65,11 @@ function Report({ session, report, onEnd }) {
         <span className="tag">{s.plan}</span>
       </div>
       <p className="sm pr-note" role="status">Signed in as <b>{session.name}</b>. This is a read-only view and ends in about {left} minute{left === 1 ? '' : 's'}. {s.exam_date ? <>Exam date: <b>{fmtDate(s.exam_date)}</b>.</> : null}</p>
+
+      <div className="pr-actions">
+        <button type="button" className="btn" onClick={download}><Icon name="download" size={18} /> Download report</button>
+        {saved && <span className="sm" role="status">Report downloaded on {saved}.</span>}
+      </div>
 
       <div className="stat-grid s4">
         <div className="card st"><b>{total}</b><span>questions answered</span></div>
@@ -110,7 +135,7 @@ function Report({ session, report, onEnd }) {
         )}
       </div>
       <p className="sm">{s.name} can switch parent access off at any time in Settings.</p>
-      <button className="btn ghost" onClick={() => onEnd(false)}><Icon name="arrow" size={16} /> Log out</button>
+      <button className="btn danger" onClick={() => onEnd(false)}><Icon name="arrow" size={16} /> Log out</button>
     </div>
   )
 }
@@ -151,7 +176,7 @@ export default function Parent() {
           <>
             <h1>Your child's progress</h1>
             <ErrorLine>{error}</ErrorLine>
-            {report ? <Report session={session} report={report} onEnd={end} /> : !error && <p className="sm">Loading…</p>}
+            {report ? <Report session={session} report={report} onEnd={end} /> : !error && <Loader size="md" label="Loading your child's progress…" />}
           </>
         ) : (
           <>

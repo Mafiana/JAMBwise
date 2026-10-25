@@ -25,9 +25,26 @@ export const SECONDS_PER_QUESTION = 40 // the real UTME pace (2 hours for 180 qu
 
 // Prices shown here are only a fallback. The real prices come from the `plans` table in the database.
 export const PLANS = [
-  { id: 'free', name: 'Free', kobo: 0, features: ['English and Maths practice', 'Progress tracking', 'Aggregate calculator'] },
-  { id: 'student', name: 'Student', kobo: 150000, features: ['All 14 subjects', 'Timed CBT mock exams, scored out of 400', 'Everything in Free'] },
-  { id: 'pro', name: 'Pro', kobo: 300000, features: ['Personal study planner', 'Weak-subject focus each week', 'Everything in Student'] },
+  { id: 'free', name: 'Free', kobo: 0, features: [
+    'English and Maths practice, with an explanation for every wrong answer',
+    'My Progress: level, skill web, streaks and badges',
+    'Aggregate calculator',
+    'Parent access, so a parent can follow your progress',
+    'Support tickets for any question',
+  ] },
+  { id: 'student', name: 'Student', kobo: 150000, features: [
+    'Everything in Free',
+    'All 14 UTME subjects to practise',
+    'CBT Mock exams at the real pace, scored out of 400',
+    'ExamHall: the one-time exam your administrator releases results for',
+    'Mock score history and trend',
+  ] },
+  { id: 'pro', name: 'Pro', kobo: 300000, features: [
+    'Everything in Student',
+    'Study Planner with a countdown to your exam date',
+    'A weekly plan built from your 3 subjects, a weak-spot day and a mock day',
+    'Daily tick-off tracker to keep you on schedule',
+  ] },
 ]
 
 export const HOW = [

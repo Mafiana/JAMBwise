@@ -145,7 +145,18 @@ Parents can see how a student is doing, without ever logging in as the student.
 2. The parent opens the **For parents** box on the home page (or `/parent`), types the Student ID, the code and their own name, and passes the quick check. They get a read-only report for 60 minutes: questions and accuracy, subjects that need work, mock results, ExamHall (only after you release results), recent sessions and the last 14 days of practice. Never the email, messages or anything editable.
 3. **Admin > Parent access** shows every sign-in and failed try (parent name, relationship, student, result, device, time), with search, filters, dates, pages, CSV export, and a **Switch off** button per student.
 
-Safeguards: 5 wrong tries per student ID per 15 minutes, 20 per device per hour (counted whether or not the ID exists, so nothing is revealed); one vague error message; the same CAPTCHA as the contact form; codes expire; only a short browser description is kept (no IP address). Database: run `supabase/migrate-parent.sql` once, after `migrate-notify.sql`. Deploy the two functions: `supabase functions deploy parent-login` and `supabase functions deploy parent-report`. In demo mode, use ID `JW-2026-000002` and code `DEMO-2468` (shown in the demo banner).
+Safeguards: 5 wrong tries per student ID per 15 minutes, 20 per device per hour (counted whether or not the ID exists, so nothing is revealed); one vague error message; the same CAPTCHA as the contact form; codes expire; only a short browser description is kept (no IP address). Database: run `supabase/migrate-parent.sql` once, after `migrate-notify.sql`. If you ran it before the admin bell existed, also run `supabase/migrate-parent-bell.sql` once: every admin then gets a bell notification when a parent signs in. Deploy the two functions: `supabase functions deploy parent-login` and `supabase functions deploy parent-report`. In demo mode, use ID `JW-2026-000002` and code `DEMO-2468` (shown in the demo banner).
+
+### Sign in with Google
+
+The login and signup pages have a "Continue with Google" button. It needs a one-time setup, and no SQL or Edge Function:
+
+1. Google Cloud Console → APIs & Services → Credentials → Create credentials → **OAuth client ID** → Web application.
+2. Under **Authorized redirect URIs** add `https://YOUR_REF.supabase.co/auth/v1/callback` (the Callback URL shown on the Google provider page in Supabase).
+3. Supabase → Authentication → Providers → **Google** → switch on, paste the Client ID and Client Secret, Save.
+4. Supabase → Authentication → URL Configuration → add your site address (for example `https://yoursite.netlify.app/**` and `http://localhost:5173/**`) to **Redirect URLs**.
+
+A student who signs in with Google gets a profile and a JAMBwise number automatically, the same as signing up with email. If the Google email matches an existing account, Supabase links them. Until step 3 is done the button shows "Google sign-in is not switched on yet". In demo mode it signs in a pretend Google account.
 
 ### Spam protection
 - **Rate limits** are enforced by the database, so they cannot be skipped from the browser. A student can open 5 tickets an hour (10 question reports an hour)

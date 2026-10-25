@@ -91,7 +91,7 @@ export default function Teachers() {
         <div className="card" aria-label={`Chat with ${chatWith.full_name}`}>
           <div className="row" style={{ marginBottom: 8 }}>
             <h3 style={{ margin: 0 }}>Chat with {chatWith.full_name}</h3>
-            <button className="btn ghost" onClick={() => setParams({}, { replace: true })}>Close chat</button>
+            <button className="btn danger" onClick={() => setParams({}, { replace: true })}>Close chat</button>
           </div>
           <StaffChat teacherId={chatWith.id} markLink={'/app/admin/teachers?chat=' + chatWith.id} onSent={inbox.reload} />
         </div>

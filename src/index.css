@@ -694,7 +694,7 @@ textarea:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 4px var(--g2)
 /* ── profile photo (square headshot) ── */
 .photo-land{width:130px;height:130px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);background:var(--g2);display:flex;align-items:center;justify-content:center;flex:none}
 .photo-land img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-.photo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.photo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 
 /* ── parent code copy ── */
 .pcode-v{display:flex;align-items:center;gap:8px;justify-content:space-between}
@@ -884,3 +884,24 @@ main>.card+.card,main>.card+.notice,main>.notice+.card{margin-top:14px}
   .ov-btn{order:3;margin-left:62px;padding:7px 12px}
   .ov-plan{grid-template-columns:76px 1fr 26px 34px;gap:8px}
 }
+
+/* ── Google sign-in ── */
+.or-line{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--mut);font-size:13px}
+.or-line::before,.or-line::after{content:"";flex:1;height:1px;background:var(--bd)}
+.gbtn{display:inline-flex;gap:10px;align-items:center;justify-content:center;background:var(--card);color:var(--ink);border:1.5px solid var(--bd)}
+.gbtn:hover:not(:disabled){background:var(--g2)}
+
+/* ── small inline loader and the J mark ── */
+.aload-j{font:800 22px 'Bricolage Grotesque',sans-serif;color:var(--on);line-height:1}
+.aload.inline .aload-j{font-size:18px}
+.aload.mini{min-height:0;flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 4px;text-align:left}
+.aload.mini .aload-orb{width:34px;height:34px}
+.aload.mini .aload-ring.r2{inset:6px}
+.aload.mini .aload-core{width:20px;height:20px;border-radius:7px;box-shadow:none}
+.aload.mini .aload-j{font-size:12px}
+.aload-t{color:var(--mut);font-size:14px}
+
+.pr-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.pr-actions .btn{display:inline-flex;gap:8px;align-items:center}
+
+.spin{animation:jw-spin .8s linear infinite}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}

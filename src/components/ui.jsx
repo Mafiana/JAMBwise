@@ -36,12 +36,23 @@ export function Portrait({ profile }) {
   )
 }
 
-export function Spinner({ label = 'Loading…' }) {
+/** The branded loader. size: 'lg' fills the page, 'md' fits inside a page, 'sm' sits in a line next to other content. */
+export function Loader({ label = 'Loading…', size = 'md' }) {
   return (
-    <div className="ctr" role="status">
-      <p className="mut">{label}</p>
+    <div className={'aload' + (size === 'md' ? ' inline' : size === 'sm' ? ' mini' : '')} role="status" aria-live="polite">
+      <div className="aload-orb">
+        <span className="aload-ring" />
+        <span className="aload-ring r2" />
+        <span className="aload-core"><b className="aload-j" aria-hidden="true">J</b></span>
+      </div>
+      {size === 'sm' ? <span className="aload-t">{label}</span> : <b>{label}</b>}
     </div>
   )
+}
+
+/** Full-page loader used while the app or a page opens. */
+export function Spinner({ label = 'Loading…' }) {
+  return <Loader label={label} size="lg" />
 }
 
 export function ErrorLine({ children }) {

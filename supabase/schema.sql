@@ -358,6 +358,7 @@ begin
            count(a.id) filter (where a.mock_score is not null)::bigint,
            p.is_admin, max(a.created_at), p.is_teacher
       from public.profiles p left join public.attempts a on a.user_id = p.id
+     where public.is_admin() or (not p.is_admin and not p.is_teacher)   -- a teacher sees students only, never admins or other teachers
      group by p.id order by p.created_at desc limit 2000;
 end $$;
 
@@ -804,7 +805,7 @@ create or replace function public.parent_login(p_reg text, p_code text, p_name t
 language plpgsql security definer set search_path = public as $$
 declare reg text := left(upper(trim(coalesce(p_reg, ''))), 30); nm text := left(trim(regexp_replace(coalesce(p_name, ''), '[[:cntrl:]]', '', 'g')), 80);
         rel text := case when p_rel in ('Mother','Father','Guardian') then p_rel else 'Other' end;
-        dev text := left(coalesce(p_device, ''), 120); sid uuid; c public.parent_codes; tok text; fails int; ipfails int; why text;
+        dev text := left(coalesce(p_device, ''), 120); sid uuid; c public.parent_codes; tok text; fails int; ipfails int; why text; adm record; msg text;
 begin
   if nm = '' then return jsonb_build_object('ok', false, 'reason', 'name'); end if;
   select count(*) into fails from public.parent_log where reg_number = reg and outcome <> 'ok' and created_at > now() - interval '15 minutes';
@@ -831,6 +832,13 @@ begin
   insert into public.parent_sessions (token, student_id, parent_name, expires_at) values (tok, sid, nm, now() + interval '60 minutes');
   insert into public.parent_log (student_id, reg_number, parent_name, relationship, outcome, device, ip_hash) values (sid, reg, nm, rel, 'ok', dev, p_ip);
   perform public.notify_user(sid, 'parent', 'A parent viewed your progress', nm || ' (' || rel || ') signed in with your parent code.', '/app/settings');
+  -- every admin gets it on their bell too (once per parent and student every 30 minutes, so a page refresh does not pile up)
+  msg := nm || ' (' || rel || ') viewed ' || coalesce((select full_name from public.profiles where id = sid), 'a student') || '''s progress (' || reg || ').';
+  for adm in select id from public.profiles where is_admin loop
+    if not exists (select 1 from public.notifications n where n.user_id = adm.id and n.kind = 'parent' and n.body = msg and n.created_at > now() - interval '30 minutes') then
+      perform public.notify_user(adm.id, 'parent', 'A parent signed in', msg, '/app/admin/parents');
+    end if;
+  end loop;
   return jsonb_build_object('ok', true, 'token', tok, 'expires_at', now() + interval '60 minutes');
 end $$;
 
@@ -918,7 +926,8 @@ alter table public.message_replies enable row level security;
 
 create policy plans_read on public.plans for select to anon, authenticated using (true);
 
-create policy profiles_read on public.profiles for select to authenticated using (id = auth.uid() or public.is_staff());
+create policy profiles_read on public.profiles for select to authenticated
+  using (id = auth.uid() or public.is_admin() or (public.is_staff() and not is_admin and not is_teacher));
 create policy profiles_update on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
 
 create policy pins_select on public.access_pins for select to authenticated using (public.is_admin());
@@ -980,3 +989,20 @@ grant select on public.audit_log to authenticated;
 grant select on public.message_replies to authenticated;
 grant select on public.notifications, public.staff_chat to authenticated;
 grant select on public.parent_codes to authenticated;
+
+-- A teacher signing in rings every admin's bell (not more than once every 30 minutes for the same teacher).
+create or replace function public.teacher_signed_in() returns void
+language plpgsql security definer set search_path = public as $$
+declare me public.profiles; adm record; msg text;
+begin
+  select * into me from public.profiles where id = auth.uid();
+  if not found or not me.is_teacher or me.is_admin then return; end if;
+  msg := coalesce(nullif(trim(me.full_name), ''), 'A teacher') || ' signed in to the teacher panel.';
+  for adm in select id from public.profiles where is_admin loop
+    if not exists (select 1 from public.notifications n where n.user_id = adm.id and n.kind = 'teacher' and n.body = msg and n.created_at > now() - interval '30 minutes') then
+      perform public.notify_user(adm.id, 'teacher', 'Teacher signed in', msg, '/app/admin/teachers');
+    end if;
+  end loop;
+end $$;
+revoke execute on function public.teacher_signed_in() from public, anon;
+grant execute on function public.teacher_signed_in() to authenticated;

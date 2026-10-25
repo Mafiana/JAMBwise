@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ErrorLine } from '../../../components/ui.jsx'
+import { ErrorLine, Loader } from '../../../components/ui.jsx'
 import Icon from '../../../components/Icons.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import { useAction } from '../../../hooks.js'
@@ -37,7 +37,7 @@ export default function StaffChat({ teacherId, markLink, onSent }) {
   return (
     <div className="chat">
       <div className="chat-box" ref={box} role="log" aria-label="Messages">
-        {msgs === null && !loadErr && <p className="sm">Loading…</p>}
+        {msgs === null && !loadErr && <Loader size="sm" label="Loading messages…" />}
         {msgs?.length === 0 && <p className="sm chat-empty">No messages yet. Say hello below.</p>}
         {msgs?.map((m) => {
           const mine = m.sender_id === user.id

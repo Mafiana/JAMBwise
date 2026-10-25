@@ -74,7 +74,7 @@ export default function AppLayout() {
   const { pathname } = useLocation()
   const inAdmin = pathname.startsWith('/app/admin')
   const inExam = /^\/app\/(mock|examhall)/.test(pathname)   // exam pages are full width: no menu to wander off to
-  const { profile, plan, isAdmin, isStaff, signOut } = useAuth()
+  const { profile, plan, isAdmin, isTeacher, isStaff, signOut } = useAuth()
   const phone = usePhone()
   const [drawer, setDrawer] = useState(false)   // the menu on phones
   useEffect(() => { setDrawer(false) }, [pathname])
@@ -111,11 +111,13 @@ export default function AppLayout() {
             {!phone && <span className="tools"><NotificationBell /><ThemeToggle /></span>}
             <button type="button" className="burger on-app close-x" onClick={() => setDrawer(false)} aria-label="Close menu"><Icon name="close" size={22} /></button>
           </div>
-          {inAdmin && isStaff ? (
+          {isStaff && (inAdmin || isTeacher) ? (
             <>
               {ADMIN_NAV.filter((n) => (isAdmin || !n[3]) && (!n[4] || !isAdmin)).map((n) => link(n, '/app/admin/'))}
               <div className="nv-sep" />
-              <NavLink to="/app/dashboard" className="nv"><Icon name="arrow" /><span>Back to student view</span></NavLink>
+              {isTeacher
+                ? <>{link(['profile', 'My Profile', 'user'])}{link(['settings', 'Settings', 'settings'])}</>
+                : <NavLink to="/app/dashboard" className="nv"><Icon name="arrow" /><span>Back to student view</span></NavLink>}
             </>
           ) : (
             <>
@@ -133,7 +135,7 @@ export default function AppLayout() {
           <div className="who">
             <Avatar profile={profile} />
             <b>{profile.full_name}</b>
-            <span><span className="tag">{plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
+            <span><span className="tag">{isTeacher ? 'teacher' : plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
           </div>
         </aside>}
         <main className="main">

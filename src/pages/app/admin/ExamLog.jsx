@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { ErrorLine } from '../../../components/ui.jsx'
+import { ErrorLine, Loader } from '../../../components/ui.jsx'
 import Modal from '../../../components/Modal.jsx'
 import * as api from '../../../lib/api.js'
 import { EVENT_LABEL, isLeave } from '../../../lib/integrity.js'
@@ -20,7 +20,7 @@ export default function ExamLog({ student, onClose }) {
           </button>
         ))}
       </div>
-      {loading && <p className="mut" role="status">Loading the log…</p>}
+      {loading && <Loader size="sm" label="Loading the log…" />}
       {!loading && !data && <ErrorLine>{error}</ErrorLine>}
       {data && list.length === 0 && <p className="mut">Nothing has been logged for {kind === 'hall' ? 'ExamHall' : 'CBT Mock'} yet.</p>}
       {data && list.length > 0 && (

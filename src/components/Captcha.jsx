@@ -1,3 +1,4 @@
+import { Loader } from './ui.jsx'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as api from '../lib/api.js'
 import Icon from './Icons.jsx'
@@ -51,7 +52,7 @@ function Sum({ onChange, resetKey }) {
           <input id="cc-a" inputMode="numeric" autoComplete="off" value={answer} onChange={change} placeholder="Your answer" aria-describedby="cc-h" />
           <button type="button" className="btn ghost" onClick={load} aria-label="Get a different question"><Icon name="arrow" size={16} /> New</button>
         </div>
-      ) : error ? <p className="err" role="alert">{error}</p> : <p className="sm">Loading…</p>}
+      ) : error ? <p className="err" role="alert">{error}</p> : <Loader size="sm" label="Getting your question…" />}
       <p className="sm" id="cc-h" style={{ margin: '4px 0 0' }}>Type the answer as a number, for example 9.</p>
     </div>
   )

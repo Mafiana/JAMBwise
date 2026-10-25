@@ -640,6 +640,10 @@ const functions = {
     db.parentSessions.push({ token, student_id: sp.id, parent_name: name, expires_at })
     parentLogRow({ ...base, outcome: 'ok' })
     notify(sp.id, 'parent', 'A parent viewed your progress', `${name} (${rel}) signed in with your parent code.`, '/app/settings')
+    const msg = `${name} (${rel}) viewed ${sp.full_name || 'a student'}'s progress (${sp.reg_number}).`
+    db.profiles.filter((p) => p.is_admin).forEach((adm) => {
+      if (!db.notifications.some((x) => x.user_id === adm.id && x.kind === 'parent' && x.body === msg && Date.now() - new Date(x.created_at).getTime() < 30 * 60000)) notify(adm.id, 'parent', 'A parent signed in', msg, '/app/admin/parents')
+    })
     save()
     return { data: { ok: true, token, expires_at }, error: null }
   },
@@ -749,6 +753,21 @@ export const demoClient = {
       save()
       setSession({ user: { id, email } }, 'SIGNED_IN')
       return { data: { session }, error: null }
+    },
+    // Demo stand-in for "Continue with Google": signs in (or creates) a pretend Google account.
+    async signInWithOAuth({ provider }) {
+      await wait()
+      if (provider !== 'google') return { error: { message: 'Unsupported provider' } }
+      const email = 'google.demo@gmail.com'
+      let u = db.users.find((x) => x.email === email)
+      if (!u) {
+        u = { id: 'user-google-demo', email, password: null }
+        db.users.push(u)
+        db.profiles.push(newProfile(u.id, email, 'Google Demo'))
+        save()
+      }
+      setSession({ user: { id: u.id, email } }, 'SIGNED_IN')
+      return { data: {}, error: null }
     },
     async signOut() { setSession(null, 'SIGNED_OUT'); return {} },
     async resetPasswordForEmail() { await wait(); return { error: null } },

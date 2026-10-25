@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import { useTheme } from '../../context/ThemeContext.jsx'
-import { ErrorLine } from '../../components/ui.jsx'
+import { ErrorLine, Loader } from '../../components/ui.jsx'
 import * as api from '../../lib/api.js'
 import { useAction } from '../../hooks.js'
 import { useLoad } from './admin/shared.jsx'
@@ -33,7 +33,7 @@ function Password() {
 }
 
 function Danger() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, isTeacher } = useAuth()
   const { refreshAttempts } = useExam()
   const nav = useNavigate()
   const reset = useAction()
@@ -43,14 +43,14 @@ function Danger() {
   return (
     <div className="card">
       <h3>Danger zone</h3>
-      <p className="mut">Reset clears your practice history (a submitted CBT mock stays on record). Deleting removes your account and results for good.</p>
+      <p className="mut">{isTeacher ? 'Deleting removes your teacher account for good.' : 'Reset clears your practice history (a submitted CBT mock stays on record). Deleting removes your account and results for good.'}</p>
       <ErrorLine>{reset.error}</ErrorLine>
-      <button className="btn ghost" disabled={reset.busy} onClick={async () => {
+      {!isTeacher && <button className="btn ghost" disabled={reset.busy} onClick={async () => {
         if (await confirm({ title: 'Reset your progress?', message: 'Your practice history and scores will be cleared. A submitted CBT mock stays on record. This cannot be undone.', confirmLabel: 'Reset progress' })) {
           reset.run(async () => { await api.deleteMyAttempts(user.id); refreshAttempts() })
         }
-      }}>Reset progress</button>
-      <label htmlFor="dl"><br />Type DELETE to delete your account</label>
+      }}>Reset progress</button>}
+      <label htmlFor="dl">{!isTeacher && <br />}Type DELETE to delete your account</label>
       <input id="dl" value={text} onChange={(e) => setText(e.target.value)} autoComplete="off" />
       <ErrorLine>{del.error}</ErrorLine>
       <button className="btn" style={{ background: 'var(--bad)', color: '#fff' }} disabled={del.busy} onClick={() => del.run(async () => {
@@ -92,7 +92,7 @@ function ParentAccess() {
     <div className="card" id="parent">
       <h3>Parent access</h3>
       <p className="mut">Let a parent or guardian see how you are doing. Share your Student ID and this code with them. They sign in on the JAMBwise home page and can only look: they cannot change anything or see your messages. The code lasts 7 days.</p>
-      {loading ? <p className="sm">Loading…</p> : error ? <ErrorLine>{error}</ErrorLine> : (
+      {loading ? <Loader size="sm" label="Loading…" /> : error ? <ErrorLine>{error}</ErrorLine> : (
         <>
           {has ? (
             <div className="pcode">
@@ -119,7 +119,7 @@ function ParentAccess() {
 }
 
 export default function Settings() {
-  const { user, profile, plan, isStaff } = useAuth()
+  const { user, profile, plan, isStaff, isTeacher } = useAuth()
   const { dark, setTheme } = useTheme()
   const isPin = user.email?.endsWith('@pin.jambwise.ng')
   return (
@@ -136,17 +136,19 @@ export default function Settings() {
       <div className="card">
         <h3>Account</h3>
         <div className="ln"><span>Login email</span><b>{user.email}</b></div>
-        <div className="ln"><span>Plan</span><b>{plan}</b></div>
-        <div className="ln"><span>JAMBwise number</span><b>{profile.reg_number}</b></div>
+        {isTeacher
+          ? <div className="ln"><span>Role</span><b>Teacher</b></div>
+          : <><div className="ln"><span>Plan</span><b>{plan}</b></div>
+            <div className="ln"><span>JAMBwise number</span><b>{profile.reg_number}</b></div></>}
         <div className="ln"><span>Joined</span><b>{new Date(profile.created_at).toLocaleDateString('en-NG')}</b></div>
         {isPin && <p className="notice">You joined with an Access PIN, which is your password for now. Set your own password below to keep your account private.</p>}
-        <p><Link to="/app/profile">Edit profile</Link> &nbsp; <Link to="/app/billing">Change plan</Link></p>
+        <p><Link to="/app/profile">Edit profile</Link>{!isTeacher && <> &nbsp; <Link to="/app/billing">Change plan</Link></>}</p>
       </div>
       {!isStaff && <ParentAccess />}
       <Password />
       <div className="card">
         <h3>Privacy and help</h3>
-        <p><Link to="/privacy">Privacy policy</Link> &nbsp; <Link to="/terms">Terms and conditions</Link> &nbsp; <Link to="/app/help">Customer Support</Link></p>
+        <p><Link to="/privacy">Privacy policy</Link> &nbsp; <Link to="/terms">Terms and conditions</Link>{!isTeacher && <> &nbsp; <Link to="/app/help">Customer Support</Link></>}</p>
       </div>
       <Danger />
     </>

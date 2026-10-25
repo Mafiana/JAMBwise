@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ErrorLine } from './ui.jsx'
+import { ErrorLine, Loader } from './ui.jsx'
 import Icon from './Icons.jsx'
 import * as api from '../lib/api.js'
 import { useAction } from '../hooks.js'
@@ -28,7 +28,7 @@ export default function TicketThread({ ticket, staff = false, onChange }) {
   return (
     <div className="thread">
       <div className={'bubble ' + (staff ? 'them' : 'me')}><b>{staff ? ticket.name : 'You'}</b><span className="when">{when(ticket.created_at)}</span><p>{ticket.body}</p></div>
-      {replies === null && !loadError && <p className="sm">Loading conversation…</p>}
+      {replies === null && !loadError && <Loader size="sm" label="Loading conversation…" />}
       {replies?.map((r) => (
         <div key={r.id} className={'bubble ' + (r.is_staff === staff ? 'me' : 'them')}>
           <b>{r.is_staff ? 'JAMBwise support' : staff ? ticket.name : 'You'}</b><span className="when">{when(r.created_at)}</span><p>{r.body}</p>

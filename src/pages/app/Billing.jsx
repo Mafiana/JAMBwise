@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { ErrorLine, PlanCard } from '../../components/ui.jsx'
+import { ErrorLine, Loader, PlanCard } from '../../components/ui.jsx'
 import * as api from '../../lib/api.js'
 import { useAction, usePlans } from '../../hooks.js'
 
@@ -52,7 +52,7 @@ export default function Billing() {
   return (
     <>
       <h1>Plans</h1>
-      {ret === 'checking' && <p className="notice" role="status">Confirming your payment…</p>}
+      {ret === 'checking' && <Loader size="sm" label="Confirming your payment…" />}
       {ret === 'paid' && <p className="notice" role="status">Payment received. Your plan is active.</p>}
       {ret === 'slow' && <p className="notice" role="status">We have not heard back from Paystack yet. If you were charged, your plan will appear within a few minutes. Refresh this page to check.</p>}
       {ret === 'failed' && <p className="err">That payment did not go through. You have not been charged.</p>}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ErrorLine } from '../../../components/ui.jsx'
+import { ErrorLine, Loader } from '../../../components/ui.jsx'
 import Icon from '../../../components/Icons.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import { useAction } from '../../../hooks.js'
@@ -17,6 +17,14 @@ export default function ParentAccess() {
   const { data, error, loading, reload } = useLoad(api.adminParentLog)
   const confirm = useConfirm()
   const act = useAction()
+  const [refreshing, setRefreshing] = useState(false)
+  const [at, setAt] = useState(() => new Date())   // when the list was last loaded
+  /** Reloads the log from the server, with a loader showing for at least a moment so the click is seen to work. */
+  const refresh = async () => {
+    if (refreshing) return
+    setRefreshing(true)
+    try { await Promise.all([reload(), new Promise((r) => setTimeout(r, 600))]); setAt(new Date()) } finally { setRefreshing(false) }
+  }
   const [q, setQ] = useState('')
   const [outcome, setOutcome] = useState('all')
   const [from, setFrom] = useState('')
@@ -81,10 +89,11 @@ export default function ParentAccess() {
           <option value="new">Newest first</option><option value="old">Oldest first</option>
         </select>
         {filtered && <button className="btn ghost" onClick={clear}>Clear filters</button>}
-        <button className="btn ghost" onClick={reload}>Refresh</button>
+        <button className="btn ghost" onClick={refresh} disabled={refreshing} aria-busy={refreshing}><Icon name="refresh" size={16} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
         <button className="btn ghost" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
       </div>
-      <p className="sm">{matches.length} of {data.length} entries. Parents sign in on the home page with a student's ID and the code that student made.</p>
+      {refreshing && <Loader size="sm" label="Refreshing the list…" />}
+      <p className="sm">Updated {at.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}. {matches.length} of {data.length} entries. Parents sign in on the home page with a student's ID and the code that student made.</p>
       <ErrorLine>{act.error}</ErrorLine>
       <div className="card tw">
         <table>

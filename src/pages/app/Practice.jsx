@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import Icon from '../../components/Icons.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
-import { ErrorLine } from '../../components/ui.jsx'
+import { ErrorLine, Loader } from '../../components/ui.jsx'
 import { PRACTICE_SIZE, SUBJECTS, SUBJECT_KEYS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
 import { SubjectBadge } from '../../components/SubjectIcon.jsx'
@@ -102,7 +102,7 @@ export default function Practice() {
         <div className="score-big">{practice.score}<span className="mut" style={{ fontSize: 28 }}> / {practice.qs.length}</span></div>
         <h2>correct</h2>
         <p className="mut">{pct >= 0.7 ? 'Great work!' : 'Review the ones you missed and try again.'}</p>
-        {practice.saved === 'saving' && <p className="sm">Saving your result…</p>}
+        {practice.saved === 'saving' && <Loader size="sm" label="Saving your result…" />}
         {practice.saved === 'queued' && <p className="notice" role="status"><Icon name="offline" size={16} /> You are offline. Your result is saved on this phone and will sync when you are back online.</p>}
         {practice.saved && !['saving', 'ok', 'queued'].includes(practice.saved) && <ErrorLine>{practice.saved}</ErrorLine>}
         <ErrorLine>{error}</ErrorLine>

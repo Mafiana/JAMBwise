@@ -29,7 +29,7 @@ function toAvatar(file) {
 }
 
 export default function Profile() {
-  const { profile, saveProfile } = useAuth()
+  const { profile, saveProfile, isTeacher } = useAuth()
   const nav = useNavigate()
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({
@@ -64,7 +64,7 @@ export default function Profile() {
   return (
     <>
       <h1>My Profile</h1>
-      <p className="mut">Complete your profile so JAMBwise can track your preparation.</p>
+      <p className="mut">{isTeacher ? 'Your name and photo, as the admin and students see them.' : 'Complete your profile so JAMBwise can track your preparation.'}</p>
       <div className="card">
         <div className="photo-row">
           <div className="photo-land">
@@ -77,21 +77,26 @@ export default function Profile() {
         </div>
         <label htmlFor="pn">Full name</label>
         <input id="pn" value={f.full_name} onChange={set('full_name')} maxLength={100} />
-        <label htmlFor="rn">JAMBwise registration number</label>
-        <input id="rn" value={profile.reg_number} readOnly />
-        <label htmlFor="pcs">Course you want to study</label>
-        <input id="pcs" value={f.course} onChange={set('course')} maxLength={100} />
-        <label htmlFor="pu">Target university</label>
-        <input id="pu" value={f.school} onChange={set('school')} maxLength={100} />
-        <label>Your 3 subjects (English is automatic)</label>
-        <div className="chips">
-          {PICKABLE.map((k) => (
-            <button type="button" key={k} className={'chip ' + (f.subjects.includes(k) ? 'on' : '')} onClick={() => toggle(k)} aria-pressed={f.subjects.includes(k)}>
-              {SUBJECTS[k].name}
-            </button>
-          ))}
-        </div>
-        <p className="sm">Your registration number is created automatically and cannot be changed.</p>
+        {isTeacher && (<><label htmlFor="pe">Login email</label><input id="pe" value={profile.email || ''} readOnly /></>)}
+        {!isTeacher && (
+          <>
+            <label htmlFor="rn">JAMBwise registration number</label>
+            <input id="rn" value={profile.reg_number} readOnly />
+            <label htmlFor="pcs">Course you want to study</label>
+            <input id="pcs" value={f.course} onChange={set('course')} maxLength={100} />
+            <label htmlFor="pu">Target university</label>
+            <input id="pu" value={f.school} onChange={set('school')} maxLength={100} />
+            <label>Your 3 subjects (English is automatic)</label>
+            <div className="chips">
+              {PICKABLE.map((k) => (
+                <button type="button" key={k} className={'chip ' + (f.subjects.includes(k) ? 'on' : '')} onClick={() => toggle(k)} aria-pressed={f.subjects.includes(k)}>
+                  {SUBJECTS[k].name}
+                </button>
+              ))}
+            </div>
+            <p className="sm">Your registration number is created automatically and cannot be changed.</p>
+          </>
+        )}
         <ErrorLine>{error}</ErrorLine>
         <button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
       </div>
