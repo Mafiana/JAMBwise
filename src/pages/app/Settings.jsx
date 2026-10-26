@@ -1,4 +1,5 @@
 import Icon from '../../components/Icons.jsx'
+import PasswordInput from '../../components/PasswordInput.jsx'
 import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -20,14 +21,14 @@ function Password() {
     <div className="card">
       <h3>Change password</h3>
       <label htmlFor="np">New password (at least 8 characters)</label>
-      <input id="np" type="password" value={pw} onChange={(e) => { setPw(e.target.value); setDone(false) }} autoComplete="new-password" />
+      <PasswordInput id="np" value={pw} onChange={(e) => { setPw(e.target.value); setDone(false) }} autoComplete="new-password" />
       <ErrorLine>{error}</ErrorLine>
       <button className="btn" disabled={busy} onClick={() => run(async () => {
         if (pw.length < 8) throw new Error('Use at least 8 characters.')
         await setPassword(pw)
         setPw('')
         setDone(true)
-      })}>{done ? 'Password changed ✓' : 'Change password'}</button>
+      }, 'Password changed')}>{done ? 'Password changed ✓' : 'Change password'}</button>
     </div>
   )
 }

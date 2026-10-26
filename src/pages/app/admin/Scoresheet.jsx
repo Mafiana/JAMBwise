@@ -40,7 +40,7 @@ function Schedule({ win, onSaved }) {
     if (o && c && new Date(c) <= new Date(o)) throw new Error('The closing time must be after the opening time.')
     await api.adminSetExamWindow('hall', o || null, c || null, n)
     await onSaved()
-  })
+  }, 'Schedule saved')
   const summary = win.opens == null && win.closes == null ? 'ExamHall is open any time.'
     : `Students can enter ${win.opens != null ? 'from ' + fmtWhen(win.opens - win.offset) : 'any time'}${win.closes != null ? ' until ' + fmtWhen(win.closes - win.offset) : ''}.`
   return (

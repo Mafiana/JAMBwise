@@ -745,6 +745,160 @@ do $$ begin
   assert (select count(*) from public.parent_codes) = 1, 'one code before delete';
 end $$;
 
+-- ===== institutions =====
+reset role;
+insert into auth.users(email) values ('insta@x.com'),('instb@x.com'),('instt@x.com'),('instu@x.com');
+insert into t_ids select split_part(email,'@',1), id from auth.users where email in ('insta@x.com','instb@x.com','instt@x.com','instu@x.com');
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ declare a uuid; b uuid; begin
+  assert (select count(*) from public.institutions) >= 9, 'the starting list of institutions is there';
+  assert exists (select 1 from public.institutions where slug = 'jambwise'), 'JAMBwise is an institution';
+  a := public.admin_save_institution(null, 'Test College A', 'Lagos', 'first');
+  b := public.admin_save_institution(null, 'Test College B', null, null);
+  create temp table if not exists t_inst (name text, id uuid);
+  delete from t_inst; insert into t_inst values ('a', a), ('b', b);
+  assert (select slug from public.institutions where id = a) = 'test-college-a', 'slug made from the name';
+  perform public.admin_save_institution(a, 'Test College A', 'Ikeja', 'renamed note');
+  assert (select location from public.institutions where id = a) = 'Ikeja', 'institution edited';
+  assert exists (select 1 from public.audit_log where action = 'institution.add'), 'adding an institution is logged';
+end $$;
+grant all on t_inst to anon, authenticated, service_role;
+select pg_temp.expect_fail($$select public.admin_save_institution(null, 'Test College A', null, null)$$, 'duplicate institution name');
+select pg_temp.expect_fail($$select public.admin_save_institution(null, 'X', null, null)$$, 'too short a name');
+select public.admin_set_staff_role((select id from t_ids where name='instt'), 'teacher');
+select public.admin_assign_institution((select id from t_ids where name='instt'), (select id from t_inst where name='a'), 'Proprietor');
+select public.admin_assign_institution((select id from t_ids where name='insta'), (select id from t_inst where name='a'));
+select public.admin_assign_institution((select id from t_ids where name='instb'), (select id from t_inst where name='b'));
+select pg_temp.expect_fail($$select public.admin_assign_institution((select id from t_ids where name='insta'), gen_random_uuid())$$, 'assigning to a missing institution');
+select pg_temp.expect_fail($$select public.admin_assign_institution((select id from t_ids where name='instt'), (select id from t_inst where name='a'), 'King')$$, 'unknown title');
+do $$ begin
+  assert (select inst_title from public.profiles where email='instt@x.com') = 'Proprietor', 'staff title saved';
+  assert (select inst_title from public.profiles where email='insta@x.com') is null, 'a student has no staff title';
+  assert (select count(*) from public.my_notifications()) >= 0, 'admin can call the bell';
+end $$;
+reset role;
+insert into public.attempts(user_id,subject,correct,total,kind) values ((select id from t_ids where name='insta'),'eng',9,10,'practice'),((select id from t_ids where name='instb'),'eng',4,10,'practice');
+insert into public.messages(name,email,topic,body,user_id,status) values ('A','insta@x.com','general','ticket from school A',(select id from t_ids where name='insta'),'new'),('B','instb@x.com','general','ticket from school B',(select id from t_ids where name='instb'),'new');
+-- the assigned teacher sees only school A
+select pg_temp.as_user((select id from t_ids where name='instt'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.admin_students() where reg_number is not null and email = 'insta@x.com') = 1, 'institution staff sees their own student';
+  assert (select count(*) from public.admin_students() where email = 'instb@x.com') = 0, 'institution staff does not see another school''s student';
+  assert (select count(*) from public.admin_students() where email = 'free@x.com') = 0, 'institution staff does not see people with no school';
+  assert (select count(*) from public.admin_students() where is_admin or is_teacher) = 0, 'still no admins or teachers in the list';
+  assert (select institution from public.admin_students() where email = 'insta@x.com') = 'Test College A', 'the list names the institution';
+  assert (select count(*) from public.profiles where email = 'instb@x.com') = 0, 'cannot read another school''s profile directly';
+  assert (select count(*) from public.attempts where user_id = (select id from t_ids where name='insta')) = 1, 'reads own student''s results';
+  assert (select count(*) from public.attempts where user_id = (select id from t_ids where name='instb')) = 0, 'cannot read another school''s results';
+  assert (select count(*) from public.messages where body = 'ticket from school A') = 1, 'sees own school''s tickets';
+  assert (select count(*) from public.messages where body = 'ticket from school B') = 0, 'cannot read another school''s tickets';
+  assert public.my_institution() = (select id from t_inst where name='a'), 'knows their institution';
+end $$;
+select pg_temp.expect_fail($$select public.admin_assign_institution((select id from t_ids where name='instb'), (select id from t_inst where name='a'))$$, 'teacher assigns people');
+select pg_temp.expect_fail($$select public.admin_save_institution(null, 'Sneaky College', null, null)$$, 'teacher adds an institution');
+select pg_temp.expect_fail($$select public.admin_delete_institution((select id from t_inst where name='b'))$$, 'teacher deletes an institution');
+select pg_temp.expect_fail($$update public.profiles set institution_id = (select id from t_inst where name='b') where id = auth.uid()$$, 'teacher moves themselves to another school');
+-- a student cannot give themselves a school or manage institutions
+select pg_temp.as_user((select id from t_ids where name='insta'));
+select pg_temp.expect_fail($$update public.profiles set institution_id = (select id from t_inst where name='b') where id = auth.uid()$$, 'student moves to another school');
+select pg_temp.expect_fail($$select public.admin_save_institution(null, 'Student College', null, null)$$, 'student adds an institution');
+select pg_temp.expect_fail($$select public.admin_assign_institution(auth.uid(), null)$$, 'student unassigns themselves');
+do $$ begin assert (select count(*) from public.institutions) >= 11, 'a student can read the list of institutions'; end $$;
+-- a teacher with no institution still sees everyone (the old behaviour)
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_set_staff_role((select id from t_ids where name='instu'), 'teacher');
+select pg_temp.as_user((select id from t_ids where name='instu'));
+do $$ begin
+  assert (select count(*) from public.admin_students() where email in ('insta@x.com','instb@x.com','free@x.com')) = 3, 'staff with no institution still see every student';
+end $$;
+-- deleting an institution un-assigns its people
+select pg_temp.as_user((select id from t_ids where name='admin'));
+select public.admin_delete_institution((select id from t_inst where name='b'));
+do $$ begin
+  assert (select institution_id from public.profiles where email='instb@x.com') is null, 'deleting an institution un-assigns its students';
+  assert exists (select 1 from public.audit_log where action = 'institution.delete'), 'deleting an institution is logged';
+  assert (select count(*) from public.admin_students()) >= 6, 'admin sees everyone';
+end $$;
+select public.admin_assign_institution((select id from t_ids where name='instt'), null);
+do $$ begin assert (select institution_id is null and inst_title is null from public.profiles where email='instt@x.com'), 'un-assigning clears the title'; end $$;
+reset role;
+
+-- ===== institution logos and the sign-in log =====
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ declare a uuid; begin
+  a := (select id from t_inst where name='a');
+  perform public.admin_save_institution(a, 'Test College A', 'Ikeja', 'renamed note', 'data:image/png;base64,iVBORw0KGgo=');
+  assert (select logo from public.institutions where id = a) like 'data:image/png;base64,%', 'logo saved';
+  perform public.admin_save_institution(a, 'Test College A', 'Ikeja', 'renamed note');
+  assert (select logo from public.institutions where id = a) is not null, 'leaving the logo out keeps it';
+  perform public.admin_save_institution(a, 'Test College A', 'Ikeja', 'renamed note', '');
+  assert (select logo from public.institutions where id = a) is null, 'an empty logo removes it';
+end $$;
+select pg_temp.expect_fail($$select public.admin_save_institution((select id from t_inst where name='a'), 'Test College A', null, null, 'http://evil.example/x.png')$$, 'a logo that is not an embedded picture');
+select pg_temp.expect_fail($$select public.admin_save_institution((select id from t_inst where name='a'), 'Test College A', null, null, 'data:text/html;base64,PHNjcmlwdD4=')$$, 'a logo that is not an image');
+select pg_temp.expect_fail($$select public.admin_save_institution((select id from t_inst where name='a'), 'Test College A', null, null, 'data:image/png;base64,' || repeat('A', 90000))$$, 'a huge logo');
+-- sign-in log: one row per person per 30 minutes, admin-only to read
+select public.log_sign_in(); select public.log_sign_in();
+do $$ begin assert (select count(*) from public.audit_log where action = 'login.admin') = 1, 'an admin sign-in is logged once'; end $$;
+select pg_temp.as_user((select id from t_ids where name='instu'));
+select public.log_sign_in(); select public.log_sign_in();
+select pg_temp.as_user((select id from t_ids where name='insta'));
+select public.log_sign_in();
+select pg_temp.as_user((select id from t_ids where name='insta'));
+do $$ begin assert (select count(*) from public.audit_log) = 0, 'a student cannot read the log'; end $$;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+do $$ begin
+  assert (select count(*) from public.audit_log where action = 'login.teacher') = 1, 'a teacher sign-in is logged once';
+  assert (select count(*) from public.audit_log where action = 'login.student') = 1, 'a student sign-in is logged';
+  assert (select detail from public.audit_log where action = 'login.student') like '%JW-%', 'the log names the person';
+end $$;
+-- who is online: a heartbeat marks someone online; only staff can ask; a student cannot read others' times
+select pg_temp.as_user((select id from t_ids where name='insta'));
+select public.touch_presence();
+do $$ begin assert (select last_seen from public.profiles where id = auth.uid()) > now() - interval '1 minute', 'heartbeat saved'; end $$;
+select pg_temp.expect_fail($$select * from public.admin_online()$$, 'a student asks who is online');
+select pg_temp.as_user((select id from t_ids where name='admin'));
+do $$ begin
+  assert (select count(*) from public.admin_online() where role = 'student' and online) >= 1, 'admin sees the online student';
+  assert (select bool_and(role <> 'parent' or online) from public.admin_online()), 'parents with an open session are online';
+end $$;
+-- question reports go to whoever uploaded the question
+reset role; update public.profiles set is_teacher = true, is_admin = false, institution_id = null where email = 'tutor@x.com'; set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='tutor'));
+insert into public.questions (subject, body, options, answer, explanation, created_by)
+  values ('eng', 'Report-routing test question?', '["a","b","c","d"]'::jsonb, 1, 'x', (select id from t_ids where name='paid'));
+do $$ begin assert (select created_by from public.questions where body = 'Report-routing test question?') = auth.uid(), 'the uploader is stamped by the server, not chosen by the client'; end $$;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+select public.report_question((select id from public.questions where body = 'Report-routing test question?'), 'Report: routing test', 'Question #1' || E'\n' || 'A. a');
+select public.report_question((select id from public.questions where subject = 'eng' and created_by is null limit 1), 'Report: seeded', 'Question #2 text');
+do $$ begin
+  assert (select count(*) from public.messages where topic = 'question' and assigned_to is not null) = 1, 'a teacher-uploaded question is assigned to that teacher';
+  assert (select count(*) from public.messages where topic = 'question' and assigned_to is null) = 1, 'a built-in question goes to the admins';
+  assert (select body from public.messages where subject = 'Report: routing test') like 'Sent to:%', 'the ticket says who it was sent to';
+end $$;
+select pg_temp.expect_fail($$update public.questions set created_by = (select id from t_ids where name='paid') where false and true; select public.report_question(1,'x','y'); select public.admin_students()$$, 'a student reading staff data');
+select pg_temp.as_user((select id from t_ids where name='tutor'));
+do $$ begin
+  assert (select count(*) from public.messages where subject = 'Report: routing test') = 1, 'the uploading teacher can read the ticket';
+  assert (select count(*) from public.notifications where user_id = auth.uid() and kind = 'question') = 1, 'the uploading teacher is notified';
+end $$;
+select public.ticket_reply((select id from public.messages where subject = 'Report: routing test'), 'Thanks, fixed.');
+do $$ begin assert (select author_name from public.message_replies order by id desc limit 1) like '% (Teacher)', 'a teacher reply carries the teacher''s name'; end $$;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+do $$ begin
+  assert (select count(*) from public.notifications where user_id = auth.uid() and kind = 'ticket') = 1, 'the student is notified of the reply';
+  assert (select count(*) from public.message_replies) >= 1, 'the student can read the reply';
+end $$;
+select pg_temp.as_user((select id from t_ids where name='tutor'));
+select pg_temp.as_user((select id from t_ids where name='admin'));
+do $$ begin assert (select count(*) from public.notifications where user_id = auth.uid() and kind = 'question') = 1, 'the admins hear about built-in question reports'; end $$;
+reset role;
+
 -- ===== anon =====
 set local role anon;
 do $$ begin assert (select count(*) from public.plans)=3,'anon reads plans'; end $$;

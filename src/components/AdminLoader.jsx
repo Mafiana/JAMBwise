@@ -1,5 +1,9 @@
+import { useAuth } from '../context/AuthContext.jsx'
+
 /** Branded loader shown while the admin area opens. `inline` is the small version used inside a page. */
-export default function AdminLoader({ inline = false, label = 'Opening admin panel…' }) {
+export default function AdminLoader({ inline = false, label }) {
+  const { isAdmin, isTeacher } = useAuth()
+  label = label || (isTeacher && !isAdmin ? 'Opening Teacher panel…' : 'Opening admin panel…')
   return (
     <div className={'aload' + (inline ? ' inline' : '')} role="status" aria-live="polite">
       <div className="aload-orb">

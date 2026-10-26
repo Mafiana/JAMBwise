@@ -438,5 +438,335 @@
   ],
   "a": 2,
   "e": "Jesus said all the law hangs on them."
+ },
+ {
+  "q": "After the flood, God placed in the sky a sign of his covenant with Noah, which was the",
+  "o": [
+   "dove",
+   "star",
+   "rainbow",
+   "olive tree"
+  ],
+  "a": 2,
+  "e": "It promised that the earth would never again be destroyed by flood."
+ },
+ {
+  "q": "The people who tried to build a tower to reach heaven were scattered because of their",
+  "o": [
+   "pride",
+   "laziness",
+   "poverty",
+   "fear"
+  ],
+  "a": 0,
+  "e": "God confused their language at Babel."
+ },
+ {
+  "q": "God tested Abraham's faith by asking him to offer",
+  "o": [
+   "Ishmael",
+   "Isaac",
+   "Lot",
+   "Jacob"
+  ],
+  "a": 1,
+  "e": "God stopped him and provided a ram."
+ },
+ {
+  "q": "Esau lost his birthright to Jacob in exchange for",
+  "o": [
+   "a flock of sheep",
+   "a bowl of stew",
+   "a robe",
+   "a field"
+  ],
+  "a": 1,
+  "e": "He was hungry and despised his birthright."
+ },
+ {
+  "q": "In his dream at Bethel, Jacob saw",
+  "o": [
+   "a burning bush",
+   "a flaming sword",
+   "a great flood",
+   "a ladder reaching to heaven"
+  ],
+  "a": 3,
+  "e": "Angels went up and down on it."
+ },
+ {
+  "q": "Joseph rose to power in Egypt after he interpreted the dreams of",
+  "o": [
+   "his brothers",
+   "Potiphar",
+   "Pharaoh",
+   "the baker"
+  ],
+  "a": 2,
+  "e": "He was made governor next to Pharaoh."
+ },
+ {
+  "q": "God first spoke to Moses from",
+  "o": [
+   "a burning bush",
+   "a cloud",
+   "a whirlwind",
+   "a dream"
+  ],
+  "a": 0,
+  "e": "It happened at Mount Horeb."
+ },
+ {
+  "q": "The last of the ten plagues on Egypt was the",
+  "o": [
+   "darkness",
+   "locusts",
+   "boils",
+   "death of the firstborn"
+  ],
+  "a": 3,
+  "e": "It led Pharaoh to let Israel go."
+ },
+ {
+  "q": "The food God gave the Israelites in the wilderness was called",
+  "o": [
+   "unleavened bread",
+   "honey",
+   "figs",
+   "manna"
+  ],
+  "a": 3,
+  "e": "It appeared on the ground each morning."
+ },
+ {
+  "q": "While Moses was on the mountain, the Israelites made a golden calf with the help of",
+  "o": [
+   "Joshua",
+   "Aaron",
+   "Caleb",
+   "Miriam"
+  ],
+  "a": 1,
+  "e": "They had grown impatient."
+ },
+ {
+  "q": "The walls of Jericho fell after the Israelites",
+  "o": [
+   "marched round the city and shouted",
+   "dug under the walls",
+   "prayed for forty days",
+   "fought for seven years"
+  ],
+  "a": 0,
+  "e": "Joshua obeyed God's instructions."
+ },
+ {
+  "q": "Gideon defeated the Midianites with only",
+  "o": [
+   "300 men",
+   "3,000 men",
+   "30 men",
+   "30,000 men"
+  ],
+  "a": 0,
+  "e": "God reduced his army so Israel would know the victory was His."
+ },
+ {
+  "q": "The boy who heard God's voice in the temple at Shiloh was",
+  "o": [
+   "David",
+   "Eli",
+   "Samuel",
+   "Saul"
+  ],
+  "a": 2,
+  "e": "He served under the priest Eli."
+ },
+ {
+  "q": "The prophet who rebuked David for his sin with Bathsheba was",
+  "o": [
+   "Nathan",
+   "Elijah",
+   "Samuel",
+   "Gad"
+  ],
+  "a": 0,
+  "e": "He told the parable of the poor man's lamb."
+ },
+ {
+  "q": "King Solomon built a great temple in",
+  "o": [
+   "Bethel",
+   "Shiloh",
+   "Jerusalem",
+   "Hebron"
+  ],
+  "a": 2,
+  "e": "It took seven years."
+ },
+ {
+  "q": "After Solomon's death, the kingdom of Israel was divided under Rehoboam and",
+  "o": [
+   "Jeroboam",
+   "Ahab",
+   "Jehu",
+   "Omri"
+  ],
+  "a": 0,
+  "e": "Ten tribes followed Jeroboam in the north."
+ },
+ {
+  "q": "During the famine, Elijah was fed by",
+  "o": [
+   "angels",
+   "the king",
+   "ravens",
+   "his disciples"
+  ],
+  "a": 2,
+  "e": "He was beside the brook Cherith."
+ },
+ {
+  "q": "God sent the prophet Jonah to preach to the people of",
+  "o": [
+   "Babylon",
+   "Tarshish",
+   "Jericho",
+   "Nineveh"
+  ],
+  "a": 3,
+  "e": "He first ran away to Tarshish."
+ },
+ {
+  "q": "The Jewish queen who saved her people from Haman's plot was",
+  "o": [
+   "Ruth",
+   "Esther",
+   "Deborah",
+   "Hannah"
+  ],
+  "a": 1,
+  "e": "She was the cousin of Mordecai."
+ },
+ {
+  "q": "The angel who told Mary that she would bear Jesus was",
+  "o": [
+   "Michael",
+   "Raphael",
+   "Gabriel",
+   "Uriel"
+  ],
+  "a": 2,
+  "e": "The announcement is called the Annunciation."
+ },
+ {
+  "q": "Jesus fasted in the wilderness for",
+  "o": [
+   "seven days",
+   "forty days",
+   "three days",
+   "twelve days"
+  ],
+  "a": 1,
+  "e": "He was tempted by Satan afterwards."
+ },
+ {
+  "q": "Jesus fed the five thousand with",
+  "o": [
+   "seven loaves and a few fish",
+   "five loaves and two fish",
+   "twelve loaves",
+   "two loaves and five fish"
+  ],
+  "a": 1,
+  "e": "Twelve baskets of pieces were left over."
+ },
+ {
+  "q": "Jesus raised from the dead the brother of Mary and Martha, who was",
+  "o": [
+   "Lazarus",
+   "Jairus",
+   "Bartimaeus",
+   "Nicodemus"
+  ],
+  "a": 0,
+  "e": "It happened at Bethany."
+ },
+ {
+  "q": "The tax collector who climbed a sycamore tree to see Jesus was",
+  "o": [
+   "Matthew",
+   "Levi",
+   "Nicodemus",
+   "Zacchaeus"
+  ],
+  "a": 3,
+  "e": "Jesus went to stay in his house."
+ },
+ {
+  "q": "Jesus entered Jerusalem in triumph riding on",
+  "o": [
+   "a horse",
+   "a camel",
+   "a chariot",
+   "a donkey"
+  ],
+  "a": 3,
+  "e": "The crowd waved palm branches."
+ },
+ {
+  "q": "Before his arrest, Jesus prayed in the garden of",
+  "o": [
+   "Eden",
+   "Olives Temple",
+   "Gethsemane",
+   "Bethany"
+  ],
+  "a": 2,
+  "e": "He asked that God's will be done."
+ },
+ {
+  "q": "The man who spoke to the crowd on the day of Pentecost was",
+  "o": [
+   "John",
+   "Stephen",
+   "Philip",
+   "Peter"
+  ],
+  "a": 3,
+  "e": "About three thousand people were baptised."
+ },
+ {
+  "q": "Most of the letters (epistles) in the New Testament were written by",
+  "o": [
+   "Peter",
+   "Paul",
+   "John",
+   "James"
+  ],
+  "a": 1,
+  "e": "He wrote to churches and to individuals."
+ },
+ {
+  "q": "The first book of the Bible is",
+  "o": [
+   "Exodus",
+   "Genesis",
+   "Psalms",
+   "Matthew"
+  ],
+  "a": 1,
+  "e": "It begins with the story of creation."
+ },
+ {
+  "q": "Peter and Andrew, the first disciples called by Jesus, were",
+  "o": [
+   "tax collectors",
+   "shepherds",
+   "fishermen",
+   "carpenters"
+  ],
+  "a": 2,
+  "e": "Jesus told them he would make them fishers of men."
  }
 ]

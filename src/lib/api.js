@@ -3,6 +3,7 @@
 import { supabase } from './supabase.js'
 import { buildScoresheet, latestMocks } from './scoresheet.js'
 import { isLeave } from './integrity.js'
+import { DEFAULT_INSTITUTIONS } from './constants.js'
 
 const NETWORK = /Failed to fetch|NetworkError|Load failed|network|timed? ?out/i
 export const isNetworkError = (e) => Boolean(e?.network) || (typeof navigator !== 'undefined' && navigator.onLine === false) || NETWORK.test(String(e?.message || ''))
@@ -457,12 +458,37 @@ export async function adminAudit() {
   return data
 }
 
+/**
+ * The Activity log: what admins did, plus every sign-in. Parent sign-ins come from the parent access log.
+ * Each row is { id, created_at, actor_email, action, detail }. Newest first.
+ */
+export async function adminActivity() {
+  const [audit, parents] = await Promise.all([adminAudit(), adminParentLog().catch(() => [])])   // an older database has no parent log yet
+  const rows = parents.map((l) => ({
+    id: 'p' + l.id, created_at: l.created_at, actor_email: (l.parent_name || 'Unknown') + ' (parent)',
+    action: l.outcome === 'ok' ? 'parent.login' : 'parent.denied',
+    detail: l.outcome === 'ok'
+      ? `${l.relationship || 'Parent'} of ${l.student_name || 'a student'} (${l.reg_number || '?'}) · ${l.device || 'unknown device'}`
+      : `${({ bad_code: 'Wrong ID or code', expired: 'Code expired', off: 'Access switched off', locked: 'Locked out' })[l.outcome] || l.outcome} for ${l.reg_number || 'unknown ID'} · ${l.device || 'unknown device'}`,
+  }))
+  return audit.concat(rows).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+}
+
+/** Who is using the site now, and who was here in the last 24 hours. Each row: { id, role, full_name, email, reg_number, institution, inst_title, last_seen, online }. */
+export async function adminOnline() {
+  const { data, error } = await supabase.rpc('admin_online')
+  if (error) fail(error, 'Could not load who is online. Run supabase/migrate-presence.sql first.')
+  return data || []
+}
+/** Tells the server this person is here (sent once a minute while the tab is open). */
+export function touchPresence() { return Promise.resolve(supabase.rpc('touch_presence')).catch(() => {}) }
+
 // ── contact form and tickets ──
 /**
  * Signed-in students open tickets directly (the database limits how fast). A visitor who is not signed in goes through the
  * contact-submit Edge Function, which checks the CAPTCHA: `captcha` is { token, answer } (built-in) or { turnstile } (Cloudflare).
  */
-export async function sendMessage({ name, email, topic, subject, body, user_id, captcha, website }) {
+export async function sendMessage({ name, email, topic, subject, body, user_id, captcha, website, question_id }) {
   const row = { name: name.trim(), email: email.trim(), topic, body: body.trim() }
   if (subject?.trim()) row.subject = subject.trim()
   if (!user_id) {
@@ -471,8 +497,14 @@ export async function sendMessage({ name, email, topic, subject, body, user_id, 
     }, 'The contact form is not available right now. Please email support@jambwise.ng.')
     return
   }
+  if (question_id) {
+    // a question report goes to whoever uploaded that question (teacher or admin); if the database has not been updated yet, fall back to an ordinary ticket
+    const { error } = await supabase.rpc('report_question', { p_question: question_id, p_subject: row.subject || null, p_body: row.body })
+    if (!error) return
+    if (!/PGRST20[25]|42883|schema cache|does not exist/i.test(String(error.code || '') + ' ' + String(error.message || ''))) { if (!/rate_limited/.test(error.message || '')) console.error('report_question failed:', error); fail(error, 'Your report could not be sent. Please try again or email support@jambwise.ng.') }
+  }
   const { error } = await supabase.from('messages').insert({ ...row, user_id })
-  if (error) fail(error, 'Your message could not be sent. Please try again or email support@jambwise.ng.')
+  if (error) { if (!/rate_limited/.test(error.message || '')) console.error('sending the message failed:', error); fail(error, 'Your message could not be sent. Please try again or email support@jambwise.ng.') }
 }
 
 /** A question for the built-in CAPTCHA: { question, token }. */
@@ -565,4 +597,46 @@ export async function adminParentLog() {
 export async function adminParentRevoke(studentId) {
   const { error } = await supabase.rpc('admin_parent_revoke', { p_student: studentId })
   if (error) fail(error, 'Could not switch parent access off.')
+}
+
+// ── institutions (schools) ──
+/** Every institution, A to Z. Anyone may read the list. If the database has no institutions table yet, the built-in list is returned (without ids). */
+export async function getInstitutions({ logo = false } = {}) {
+  const { data, error } = await supabase.from('institutions').select(logo ? 'id, slug, name, location, note, logo' : 'id, slug, name, location, note').order('name')
+  if (error) {
+    if (isNetworkError(error)) throw new Error(friendly(error) || 'No internet connection.')
+    return { list: DEFAULT_INSTITUTIONS.map((i) => ({ ...i, id: null })), builtIn: true }
+  }
+  return { list: data, builtIn: false }
+}
+
+/** One institution with its logo, by slug (the login page) or id (the panel heading). */
+export async function getInstitution({ slug = null, id = null }) {
+  let q = supabase.from('institutions').select('id, slug, name, location, note, logo')
+  q = slug ? q.eq('slug', slug) : q.eq('id', id)
+  const { data, error } = await q.maybeSingle()
+  if (error) {
+    if (isNetworkError(error)) throw new Error(friendly(error) || 'No internet connection.')
+    const d = slug ? DEFAULT_INSTITUTIONS.find((i) => i.slug === slug) : null   // no institutions table yet: the built-in list
+    return { inst: d ? { ...d, id: null, logo: null } : null, builtIn: true }
+  }
+  return { inst: data, builtIn: false }
+}
+
+/** `logo`: leave it out to keep the current logo, '' to remove it, or a data: URL from fileToLogo() to set it. */
+export async function adminSaveInstitution({ id = null, name, location = '', note = '', logo = null }) {
+  const { data, error } = await supabase.rpc('admin_save_institution', { p_id: id, p_name: name, p_location: location, p_note: note, p_logo: logo })
+  if (error) fail(error, 'Could not save the institution.')
+  return data
+}
+
+export async function adminDeleteInstitution(id) {
+  const { error } = await supabase.rpc('admin_delete_institution', { p_id: id })
+  if (error) fail(error, 'Could not delete the institution.')
+}
+
+/** Puts a student or staff member in an institution (institutionId null takes them out). `title` is for staff: Teacher, Proprietor, Proprietress or Official. */
+export async function adminAssignInstitution(userId, institutionId, title = null) {
+  const { error } = await supabase.rpc('admin_assign_institution', { p_user: userId, p_inst: institutionId, p_title: title })
+  if (error) fail(error, 'Could not assign this person.')
 }

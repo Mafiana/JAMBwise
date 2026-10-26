@@ -31,7 +31,7 @@ export default function TicketThread({ ticket, staff = false, onChange }) {
       {replies === null && !loadError && <Loader size="sm" label="Loading conversation…" />}
       {replies?.map((r) => (
         <div key={r.id} className={'bubble ' + (r.is_staff === staff ? 'me' : 'them')}>
-          <b>{r.is_staff ? 'JAMBwise support' : staff ? ticket.name : 'You'}</b><span className="when">{when(r.created_at)}</span><p>{r.body}</p>
+          <b>{r.is_staff ? (r.author_name || 'JAMBwise support') : staff ? ticket.name : 'You'}</b><span className="when">{when(r.created_at)}</span><p>{r.body}</p>
         </div>
       ))}
       <ErrorLine>{loadError || error}</ErrorLine>

@@ -31,12 +31,12 @@ const short = (v) => (v >= 1e6 ? +(v / 1e6).toFixed(1) + 'm' : v >= 1e3 ? +(v / 
 /** Bars or a line, with a y-axis, light grid lines and a hover title on every point. */
 function Chart({ values, labels, kind, tone, fmt = String, yFmt = short, label }) {
   const id = useId().replace(/:/g, '')
-  const W = 560, H = 190, L = 44, R = 10, T = 12, B = 8
+  const W = 560, H = 120, L = 40, R = 8, T = 10, B = 6
   const top = niceMax(Math.max(...values, 0))
   const ticks = [0, top / 2, top]
   const x = (i) => L + ((i + 0.5) * (W - L - R)) / values.length
   const y = (v) => T + (1 - v / top) * (H - T - B)
-  const bw = Math.min(34, ((W - L - R) / values.length) * 0.55)
+  const bw = Math.min(24, ((W - L - R) / values.length) * 0.55)
   const line = values.map((v, i) => `${x(i)},${y(v)}`).join(' ')
   return (
     <svg className={'ov-chart ' + tone} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
@@ -50,7 +50,7 @@ function Chart({ values, labels, kind, tone, fmt = String, yFmt = short, label }
           <>
             <polygon points={`${x(0)},${y(0)} ${line} ${x(values.length - 1)},${y(0)}`} fill={`url(#${id})`} />
             <polyline points={line} className="ov-line" />
-            {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r="4" className="ov-dot"><title>{`${labels[i]}: ${fmt(v)}`}</title></circle>)}
+            {values.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r="3.5" className="ov-dot"><title>{`${labels[i]}: ${fmt(v)}`}</title></circle>)}
           </>
         )}
     </svg>
@@ -104,7 +104,7 @@ export default function Overview() {
       <div className="ov-grid">
         <section className="card ov-card">
           <header className="ov-head">
-            <span className="ov-ic indigo"><Icon name="users" size={26} /></span>
+            <span className="ov-ic indigo"><Icon name="users" size={20} /></span>
             <div className="ov-t"><h3>New students, last 14 days</h3><div className="ov-big"><b>{newStudents}</b><Chip pct={growth(o.signups)} /></div></div>
             <Link to="/app/admin/students" className="ov-btn indigo">View Details <Icon name="arrow" size={16} /></Link>
           </header>
@@ -113,7 +113,7 @@ export default function Overview() {
 
         <section className="card ov-card">
           <header className="ov-head">
-            <span className="ov-ic green"><Icon name="wallet" size={26} /></span>
+            <span className="ov-ic green"><Icon name="wallet" size={20} /></span>
             <div className="ov-t"><h3>Revenue, last 14 days</h3><div className="ov-big"><b>{naira(revenue)}</b><Chip pct={growth(o.revenue)} /></div></div>
             <Link to="/app/admin/payments" className="ov-btn green">View Details <Icon name="arrow" size={16} /></Link>
           </header>
@@ -121,7 +121,7 @@ export default function Overview() {
         </section>
 
         <section className="card ov-card ov-plans">
-          <header className="ov-dark"><span className="ov-ic dark"><Icon name="layers" size={24} /></span><h3>Plans right now</h3></header>
+          <header className="ov-dark"><span className="ov-ic dark"><Icon name="layers" size={20} /></span><h3>Plans right now</h3></header>
           <div className="ov-body">
             {planRows.map(([p, name, c]) => (
               <div className="ov-plan" key={p}>
@@ -137,7 +137,7 @@ export default function Overview() {
 
         <section className="card ov-card">
           <header className="ov-head">
-            <span className="ov-ic violet"><Icon name="clock" size={26} /></span>
+            <span className="ov-ic violet"><Icon name="clock" size={20} /></span>
             <div className="ov-t"><h3>Plans ending within 7 days</h3></div>
             <Link to="/app/admin/students" className="ov-btn violet">View All <Icon name="arrow" size={16} /></Link>
           </header>

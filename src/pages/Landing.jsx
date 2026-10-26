@@ -5,6 +5,7 @@ import { ThemeToggle, Logo, PlanCard, ErrorLine } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
 import FaqList from '../components/FaqList.jsx'
 import ParentForm from '../components/ParentForm.jsx'
+import InstitutionPicker from '../components/InstitutionPicker.jsx'
 import { HOW, SUBJECT_KEYS } from '../lib/constants.js'
 import { useAction, usePlans } from '../hooks.js'
 
@@ -63,6 +64,13 @@ export default function Landing() {
     return () => { document.removeEventListener('keydown', key); window.removeEventListener('resize', wide) }
   }, [menu])
   const go = (id) => (e) => { e.preventDefault(); setMenu(false); scrollTo(id) }
+  // arriving from /#institutions (the back links on the institution login page) scrolls to that section
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return undefined
+    const t = setTimeout(() => scrollTo(id), 80)
+    return () => clearTimeout(t)
+  }, [])
   return (
     <>
       <div className={'site-nav' + (scrolled ? ' scrolled' : '')}>
@@ -89,6 +97,7 @@ export default function Landing() {
             <a href="#pricing" onClick={go('pricing')}>Pricing</a>
             <a href="#faq" onClick={go('faq')}>FAQ</a>
             <a href="#parents" onClick={go('parents')}>Parents</a>
+            <a href="#institutions" onClick={go('institutions')}>Institutions</a>
             <Link to="/contact" onClick={() => setMenu(false)}>Contact</Link>
             <div className="mnav-acts">
               <ThemeToggle />
@@ -175,6 +184,17 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="wrap band" id="institutions" style={{ paddingTop: 16 }}>
+        <div className="parent-box">
+          <div>
+            <span className="eyebrow">For institutions</span>
+            <h2>See how your students are doing</h2>
+            <p className="lead mut">Proprietors, proprietresses, principals, teachers and school officials can follow how their own students are doing: practice scores, CBT Mock and ExamHall results, and the subjects that need work. Choose your institution to reach its login page. Each school sees only its own students, and students from the same school log in there too.</p>
+          </div>
+          <div className="card"><InstitutionPicker idPrefix="hi" /></div>
+        </div>
+      </section>
+
       <section className="wrap band" id="faq" style={{ paddingTop: 16 }}>
         <div className="faq-grid">
           <div className="band-head" style={{ marginBottom: 0 }}>
@@ -200,7 +220,7 @@ export default function Landing() {
               <Logo />
               <p>Practice and CBT mocks for JAMB / UTME candidates in Nigeria. An independent platform, not affiliated with JAMB.</p>
             </div>
-            <div><h4>Product</h4><a href="#how" onClick={go('how')}>How it works</a><a href="#pricing" onClick={go('pricing')}>Pricing</a><a href="#faq" onClick={go('faq')}>FAQ</a><a href="#parents" onClick={go('parents')}>For parents</a></div>
+            <div><h4>Product</h4><a href="#how" onClick={go('how')}>How it works</a><a href="#pricing" onClick={go('pricing')}>Pricing</a><a href="#faq" onClick={go('faq')}>FAQ</a><a href="#parents" onClick={go('parents')}>For parents</a><a href="#institutions" onClick={go('institutions')}>For institutions</a></div>
             <div><h4>Account</h4><Link to="/auth/login">Log in</Link><Link to="/auth/signup">Sign up</Link><Link to="/contact">Contact us</Link></div>
             <div><h4>Legal</h4><Link to="/privacy">Privacy policy</Link><Link to="/terms">Terms and conditions</Link></div>
           </div>

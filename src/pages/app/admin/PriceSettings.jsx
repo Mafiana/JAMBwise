@@ -18,7 +18,7 @@ function Row({ p, reload }) {
         <>
           <label htmlFor={`pr-${p.id}`} className="sm" style={{ margin: 0 }}>Price per 30 days (₦)</label>
           <input id={`pr-${p.id}`} type="number" min="0" step="50" value={naira_} onChange={(e) => { setNaira(e.target.value); setSaved(false) }} style={{ maxWidth: 140, margin: 0 }} />
-          <button className="btn" disabled={busy || !valid || kobo === p.price_kobo} onClick={() => run(async () => { await api.adminSavePlan(p.id, { name: p.name, price_kobo: kobo }); setSaved(true); await reload() })}>Save</button>
+          <button className="btn" disabled={busy || !valid || kobo === p.price_kobo} onClick={() => run(async () => { await api.adminSavePlan(p.id, { name: p.name, price_kobo: kobo }); setSaved(true); await reload() }, 'Price saved')}>Save</button>
           {saved && <span className="sm ok" role="status">Saved. Now {naira(kobo)}.</span>}
           <ErrorLine>{error}</ErrorLine>
         </>

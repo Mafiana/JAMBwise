@@ -47,7 +47,7 @@ export default function Planner() {
     run(async () => {
       await saveProfile({ exam_date: date || null, study_hours: Math.min(10, Math.max(1, Number(hours) || 3)) })
       setSaved(true)
-    })
+    }, 'Plan saved')
   const weekHours = h * 6                       // six study days and the mock day
   const pct = Math.round((done.length / 7) * 100)
   const weeks = left > 0 ? Math.ceil(left / 7) : 0

@@ -89,7 +89,7 @@ export default function ParentAccess() {
           <option value="new">Newest first</option><option value="old">Oldest first</option>
         </select>
         {filtered && <button className="btn ghost" onClick={clear}>Clear filters</button>}
-        <button className="btn ghost" onClick={refresh} disabled={refreshing} aria-busy={refreshing}><Icon name="refresh" size={16} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
+        <button className="btn" onClick={refresh} disabled={refreshing} aria-busy={refreshing}><Icon name="refresh" size={16} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
         <button className="btn ghost" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
       </div>
       {refreshing && <Loader size="sm" label="Refreshing the list…" />}

@@ -17,6 +17,7 @@ import lit from '../../../supabase/questions/lit.json'
 import irk from '../../../supabase/questions/irk.json'
 import crk from '../../../supabase/questions/crk.json'
 
+import { DEFAULT_INSTITUTIONS } from '../constants.js'
 import { DB_KEY, DEMO_ADMIN, DEMO_PARENT, DEMO_PIN, DEMO_STUDENT, DEMO_TEACHER, SESSION_KEY } from './accounts.js'
 
 const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk']
@@ -34,7 +35,7 @@ function newProfile(id, email, name, extra = {}) {
   return {
     id, email, full_name: name, reg_number: `JW-2026-${String(100000 + Math.floor(Math.random() * 900000))}`,
     course: '', school: '', avatar: null, plan: 'free', plan_expires: null, subjects: ['mat', 'phy', 'chm'],
-    exam_date: null, study_hours: 3, is_admin: false, is_teacher: false, suspended: false, created_at: new Date().toISOString(), ...extra,
+    exam_date: null, study_hours: 3, is_admin: false, is_teacher: false, suspended: false, institution_id: null, inst_title: null, created_at: new Date().toISOString(), ...extra,
   }
 }
 
@@ -77,6 +78,7 @@ function seed() {
     nextMessage: 4,
     audit: [{ id: 1, actor_email: DEMO_ADMIN.email, action: 'pin.create', detail: DEMO_PIN + ' (student, 30 days)', created_at: daysAgo(1) }],
     nextAudit: 2,
+    institutions: DEFAULT_INSTITUTIONS.map((i) => ({ ...i, id: 'inst-' + i.slug, created_at: daysAgo(60) })),
     notifications: [], nextNotif: 1, staffChat: [], nextChat: 1,
     parentCodes: { 'demo-student': { code: DEMO_PARENT.code, expires_at: daysAhead(365), created_at: new Date().toISOString() } }, parentSessions: [], parentLog: [], nextParentLog: 1,
     qEdits: { added: [], edited: {}, deleted: [], next: 100000 },
@@ -105,6 +107,9 @@ const me = () => session?.user?.id
 const profileOf = (id) => db.profiles.find((p) => p.id === id)
 const isAdmin = () => Boolean(profileOf(me())?.is_admin)
 const isStaff = () => { const p = profileOf(me()); return Boolean(p?.is_admin || p?.is_teacher) }   // admin or teacher
+/** Same rule as public.staff_sees(): an admin sees everyone; staff in an institution see only that institution's people; staff in none see all. */
+const myInst = () => profileOf(me())?.institution_id || null
+const staffSees = (userId) => isAdmin() || (isStaff() && (!myInst() || (Boolean(userId) && profileOf(userId)?.institution_id === myInst())))
 const isPaid = (p) => Boolean(p && ['student', 'pro'].includes(p.plan) && (!p.plan_expires || new Date(p.plan_expires) > new Date()) && !p.suspended)
 const hasAccess = (subject) => ['eng', 'mat'].includes(subject) || isPaid(profileOf(me()))
 const wait = (v) => new Promise((r) => setTimeout(() => r(v), 120))
@@ -164,15 +169,15 @@ function from(name) {
   const run = () => {
     const uid = me()
     if (offline()) return err('Failed to fetch')
-    const open = name === 'plans'   // anonymous visitors may read prices; they cannot write anything (the contact form goes through an Edge Function)
+    const open = name === 'plans' || name === 'institutions'   // anonymous visitors may read prices; they cannot write anything (the contact form goes through an Edge Function)
     if (!uid && !open) return err('JWT expired')
     let list = (tableRows(name) || []).slice()
     if (name === 'questions') list = list.filter((x) => hasAccess(x.subject) || isStaff())
-    if (name === 'profiles') list = list.filter((x) => x.id === uid || isStaff())
-    if (name === 'attempts') list = list.filter((x) => isStaff() || (x.user_id === uid && x.kind !== 'hall'))   // ExamHall scores are admin-only
+    if (name === 'profiles') list = list.filter((x) => x.id === uid || isAdmin() || (isStaff() && !x.is_admin && !x.is_teacher && staffSees(x.id)))
+    if (name === 'attempts') list = list.filter((x) => (isStaff() && staffSees(x.user_id)) || (x.user_id === uid && x.kind !== 'hall'))   // ExamHall scores are admin-only
     if (name === 'access_pins' || name === 'audit_log') list = isAdmin() ? list : []
-    if (name === 'messages') list = list.filter((x) => isStaff() || (x.user_id && x.user_id === uid))
-    if (name === 'message_replies') list = list.filter((x) => isStaff() || db.messages.some((m) => m.id === x.message_id && m.user_id === uid))
+    if (name === 'messages') list = list.filter((x) => (isStaff() && (staffSees(x.user_id) || x.assigned_to === uid)) || (x.user_id && x.user_id === uid))
+    if (name === 'message_replies') list = list.filter((x) => db.messages.some((m) => m.id === x.message_id && ((isStaff() && (staffSees(m.user_id) || m.assigned_to === uid)) || m.user_id === uid)))
     if (name === 'payments') list = list.filter((x) => x.user_id === uid || isAdmin())
     for (const [c, v] of q.filters) list = list.filter((x) => (Array.isArray(v) ? v.includes(x[c]) : x[c] === v))
     const finish = (rows) => {
@@ -247,7 +252,7 @@ function from(name) {
         for (const r of rows) {
           if (!validQuestion(r)) return err('invalid question')
           if (allQuestions().some((x) => x.subject === r.subject && x.body === r.body)) return err('duplicate key value violates unique constraint')
-          const row = { id: db.qEdits.next++, subject: r.subject, body: r.body, options: r.options, answer: r.answer, explanation: r.explanation || null }
+          const row = { id: db.qEdits.next++, subject: r.subject, body: r.body, options: r.options, answer: r.answer, explanation: r.explanation || null, created_by: uid }
           db.qEdits.added.push(row); out.push(row)
         }
         log('question.add', out.map((x) => x.id).join(','))
@@ -321,8 +326,26 @@ const parentLogRow = (row) => db.parentLog.unshift({ id: db.nextParentLog++, stu
 const adminOnly = () => { if (!isAdmin()) throw new Error('not allowed') }
 const ticketOf = (id) => {
   const m = db.messages.find((x) => x.id === id)
-  if (!m || (!isStaff() && m.user_id !== me())) throw new Error('not allowed')
+  if (!m || (!isStaff() && m.user_id !== me()) || (isStaff() && !staffSees(m.user_id) && m.assigned_to !== me())) throw new Error('not allowed')
   return m
+}
+/** Reports a question: the ticket goes to the teacher or admin who uploaded it (or to the admins when nobody is recorded). */
+function reportQuestion(a) {
+  const me_ = profileOf(me())
+  if (!me_) throw new Error('not allowed')
+  const q = allQuestions().find((x) => x.id === a.p_question)
+  const up = q?.created_by ? profileOf(q.created_by) : null
+  const target = up && (up.is_admin || up.is_teacher) ? up.id : null
+  const who = target ? (up.full_name || 'the uploader') : 'the admins'
+  const r = { name: me_.full_name || 'Student', email: me_.email, topic: 'question', subject: String(a.p_subject || '').slice(0, 120), body: ('Sent to: ' + who + '\n' + a.p_body).slice(0, 2000), user_id: me_.id }
+  if (!validMessage(r)) throw new Error('new row violates row-level security policy')
+  const limited = messageLimit(r, 'demo-device')
+  if (limited) throw new Error('rate_limited: ' + limited)
+  const row = addMessage(r, 'demo-device'); row.assigned_to = target; row.question_id = a.p_question
+  const text = `${r.name} reported a question: ${r.subject}`
+  if (target) notify(target, 'question', 'Question reported', text, '/app/admin/messages')
+  else db.profiles.filter((p) => p.is_admin).forEach((adm) => notify(adm.id, 'question', 'Question reported', text, '/app/admin/messages'))
+  return row.id
 }
 const randomPin = () => {
   const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -332,6 +355,7 @@ const randomPin = () => {
   return pin
 }
 const rpcs = {
+  report_question(a) { return reportQuestion(a) },
   exam_window(a) {
     const w = db.examSettings[a.p_kind] || {}
     return { opens_at: w.opens_at || null, closes_at: w.closes_at || null, max_violations: w.max_violations ?? 3, results_released: Boolean(w.results_released), server_now: new Date().toISOString() }
@@ -374,7 +398,7 @@ const rpcs = {
   },
   admin_exam_events(a) {
     if (!isStaff()) throw new Error('not allowed')
-    return db.events.filter((e) => e.kind === a.p_kind && (!a.p_user || e.user_id === a.p_user)).sort((x, y) => String(x.occurred_at).localeCompare(String(y.occurred_at)))
+    return db.events.filter((e) => e.kind === a.p_kind && (!a.p_user || e.user_id === a.p_user) && staffSees(e.user_id)).sort((x, y) => String(x.occurred_at).localeCompare(String(y.occurred_at)))
   },
   my_exam_status(a) {
     const rows = db.attempts.filter((x) => x.user_id === me() && x.kind === a.p_kind && ['mock', 'hall'].includes(x.kind) && x.mock_score != null)
@@ -388,6 +412,43 @@ const rpcs = {
       revenue_kobo: db.payments.filter((p) => p.status === 'paid').reduce((n, p) => n + p.amount_kobo, 0),
       mocks: db.attempts.filter((a) => a.mock_score != null).length,
     }]
+  },
+  log_sign_in() {
+    const p = profileOf(me())
+    if (!p) return null
+    const act = p.is_admin ? 'login.admin' : p.is_teacher ? 'login.teacher' : 'login.student'
+    if (db.audit.some((x) => x.actor === p.id && x.action === act && Date.now() - new Date(x.created_at).getTime() < 30 * 60000)) return null
+    const inst = db.institutions.find((i) => i.id === p.institution_id)
+    db.audit.unshift({ id: db.nextAudit++, actor: p.id, actor_email: p.email, action: act, detail: `${p.full_name || 'Unnamed'} (${p.reg_number})${inst ? ', ' + inst.name + (p.is_teacher && p.inst_title ? ' ' + p.inst_title : '') : ''}`, created_at: new Date().toISOString() })
+    return null
+  },
+  touch_presence() {
+    const p = profileOf(me())
+    if (p) p.last_seen = new Date().toISOString()
+    return null
+  },
+  admin_online() {
+    if (!isStaff()) throw new Error('not allowed')
+    const day = Date.now() - 24 * 3600000
+    const rows = db.profiles.filter((p) => p.last_seen && new Date(p.last_seen).getTime() > day && (isAdmin() || (!p.is_admin && !p.is_teacher && staffSees(p.id)))).map((p) => ({
+      id: p.id, role: p.is_admin ? 'admin' : p.is_teacher ? 'teacher' : 'student', full_name: p.full_name, email: p.email, reg_number: p.reg_number,
+      institution: db.institutions.find((i) => i.id === p.institution_id)?.name || null, inst_title: p.inst_title || null, last_seen: p.last_seen,
+      online: Date.now() - new Date(p.last_seen).getTime() < 3 * 60000,
+    }))
+    const parents = db.parentSessions.filter((x) => new Date(x.expires_at) > new Date() && (isAdmin() || staffSees(x.student_id))).map((x) => {
+      const st = profileOf(x.student_id)
+      return { id: 'ps-' + x.token, role: 'parent', full_name: x.parent_name, email: null, reg_number: st?.reg_number || null, institution: db.institutions.find((i) => i.id === st?.institution_id)?.name || null, inst_title: null, last_seen: x.created_at || new Date().toISOString(), online: true }
+    })
+    return rows.concat(parents).sort((a, b) => String(b.last_seen).localeCompare(String(a.last_seen)))
+  },
+  teacher_signed_in() {
+    const t = profileOf(me())
+    if (!t || !t.is_teacher || t.is_admin) return null
+    const msg = `${t.full_name || 'A teacher'} signed in to the teacher panel.`
+    db.profiles.filter((p) => p.is_admin).forEach((adm) => {
+      if (!db.notifications.some((x) => x.user_id === adm.id && x.kind === 'teacher' && x.body === msg && Date.now() - new Date(x.created_at).getTime() < 30 * 60000)) notify(adm.id, 'teacher', 'Teacher signed in', msg, '/app/admin/teachers')
+    })
+    return null
   },
   my_notifications() {
     if (!me()) throw new Error('not allowed')
@@ -460,11 +521,60 @@ const rpcs = {
   },
   admin_students() {
     if (!isStaff()) throw new Error('not allowed')
-    return db.profiles.map((p) => {
+    const all = isAdmin()
+    return db.profiles.filter((p) => all || (!p.is_admin && !p.is_teacher && staffSees(p.id))).map((p) => {
       const at = db.attempts.filter((a) => a.user_id === p.id)
       const last = at.map((a) => a.created_at).sort().pop() || null
-      return { ...p, questions: at.reduce((n, a) => n + a.total, 0), correct: at.reduce((n, a) => n + a.correct, 0), mocks: at.filter((a) => a.mock_score != null).length, last_active: last }
+      const inst = db.institutions.find((i) => i.id === p.institution_id)
+      return { ...p, institution: inst ? inst.name : null, questions: at.reduce((n, a) => n + a.total, 0), correct: at.reduce((n, a) => n + a.correct, 0), mocks: at.filter((a) => a.mock_score != null).length, last_active: last }
     }).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+  },
+  admin_save_institution(a) {
+    adminOnly()
+    const name = String(a.p_name || '').trim()
+    if (name.length < 2 || name.length > 120) throw new Error('Enter the institution name (2 to 120 characters).')
+    if (db.institutions.some((i) => i.name.toLowerCase() === name.toLowerCase() && i.id !== a.p_id)) throw new Error('An institution with this name already exists.')
+    const location = String(a.p_location || '').trim().slice(0, 120) || null
+    const note = String(a.p_note || '').trim().slice(0, 200) || null
+    const logo = a.p_logo
+    if (logo && (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(logo) || logo.length > 80000)) throw new Error('The logo must be a small PNG, JPEG or WebP picture.')
+    if (a.p_id) {
+      const i = db.institutions.find((x) => x.id === a.p_id)
+      if (!i) throw new Error('institution not found')
+      Object.assign(i, { name, location, note })
+      if (logo != null) i.logo = logo || null
+      log('institution.edit', name)
+      return i.id
+    }
+    let slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    if (!slug) throw new Error('Enter a name with letters or numbers.')
+    if (db.institutions.some((i) => i.slug === slug)) slug = slug.slice(0, 50) + '-' + Math.random().toString(36).slice(2, 7)
+    const row = { id: 'inst-' + slug, slug, name, location, note, logo: logo || null, created_at: new Date().toISOString() }
+    db.institutions.push(row)
+    log('institution.add', name)
+    return row.id
+  },
+  admin_delete_institution(a) {
+    adminOnly()
+    const i = db.institutions.find((x) => x.id === a.p_id)
+    if (!i) throw new Error('institution not found')
+    db.institutions = db.institutions.filter((x) => x !== i)
+    db.profiles.forEach((p) => { if (p.institution_id === i.id) Object.assign(p, { institution_id: null, inst_title: null }) })
+    log('institution.delete', i.name)
+    return null
+  },
+  admin_assign_institution(a) {
+    adminOnly()
+    const p = profileOf(a.p_user)
+    if (!p) throw new Error('person not found')
+    const inst = a.p_inst ? db.institutions.find((x) => x.id === a.p_inst) : null
+    if (a.p_inst && !inst) throw new Error('institution not found')
+    if (a.p_title != null && !['Teacher', 'Proprietor', 'Proprietress', 'Official'].includes(a.p_title)) throw new Error('unknown title')
+    p.institution_id = inst ? inst.id : null
+    p.inst_title = inst && p.is_teacher ? (a.p_title || p.inst_title || 'Teacher') : null
+    log('institution.assign', `${p.reg_number} -> ${inst ? inst.name : 'none'}`)
+    if (inst && p.is_teacher) notify(p.id, 'teacher', 'You were assigned to ' + inst.name, `You now see the results of ${inst.name}'s students in your panel.`, '/app/admin/students')
+    return null
   },
   admin_make_pin(a) {
     adminOnly()
@@ -513,7 +623,7 @@ const rpcs = {
         String(r.explanation || '').length <= 1000
       if (!ok) { invalid++; continue }
       if (allQuestions().some((x) => x.subject === r.subject && x.body === body)) { duplicates++; continue }
-      db.qEdits.added.push({ id: db.qEdits.next++, subject: r.subject, body, options: options.map((o) => o.trim()), answer: r.answer, explanation: String(r.explanation || '').trim() || null })
+      db.qEdits.added.push({ id: db.qEdits.next++, subject: r.subject, body, options: options.map((o) => o.trim()), answer: r.answer, explanation: String(r.explanation || '').trim() || null, created_by: me() })
       inserted++
     }
     log('question.import', `${inserted} added, ${duplicates} duplicates skipped, ${invalid} invalid`)
@@ -524,9 +634,14 @@ const rpcs = {
     const body = String(a.p_body || '').trim()
     if (!me() || body.length < 1 || body.length > 2000) throw new Error('message must be 1-2000 characters')
     const staff = isStaff()
-    db.replies.push({ id: db.nextReply++, message_id: m.id, author: me(), is_staff: staff, body, created_at: new Date().toISOString() })
+    const who = profileOf(me())
+    const nm = staff && who.is_teacher && !who.is_admin && (who.full_name || '').trim() ? who.full_name.trim().slice(0, 90) + ' (Teacher)' : null
+    db.replies.push({ id: db.nextReply++, message_id: m.id, author: me(), is_staff: staff, body, author_name: nm, created_at: new Date().toISOString() })
     m.status = staff ? 'answered' : 'new'
-    if (staff) log('ticket.reply', '#' + m.id)
+    if (staff) {
+      log('ticket.reply', '#' + m.id)
+      if (m.user_id) notify(m.user_id, 'ticket', 'New reply on your ticket', (nm || 'JAMBwise support') + ': ' + body.slice(0, 200), '/app/help')
+    } else if (m.assigned_to) notify(m.assigned_to, 'ticket', 'Student replied', (m.name || 'A student') + ' replied on ticket #' + m.id, '/app/admin/messages')
   },
   ticket_close(a) {
     const m = ticketOf(a.p_id)

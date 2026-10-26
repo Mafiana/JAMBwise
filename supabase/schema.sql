@@ -1006,3 +1006,341 @@ begin
 end $$;
 revoke execute on function public.teacher_signed_in() from public, anon;
 grant execute on function public.teacher_signed_in() to authenticated;
+
+-- ───────────────────────── institutions (schools) ─────────────────────────
+-- Same as supabase/migrate-institutions.sql (which upgrades an existing project). Staff assigned to an institution see only its students.
+-- ───────────── the institutions ─────────────
+create table if not exists public.institutions (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(slug) <= 60),
+  name text not null unique check (char_length(name) between 2 and 120),
+  location text check (char_length(location) <= 120),
+  note text check (char_length(note) <= 200),
+  logo text check (char_length(logo) <= 80000),   -- a small data:image picture, set from Admin > Institutions
+  created_at timestamptz not null default now()
+);
+alter table public.institutions add column if not exists logo text check (char_length(logo) <= 80000);
+alter table public.institutions enable row level security;
+drop policy if exists inst_read on public.institutions;
+create policy inst_read on public.institutions for select to anon, authenticated using (true);   -- school names are public: the home page lists them
+revoke all on public.institutions from anon, authenticated;
+grant select on public.institutions to anon, authenticated;
+
+alter table public.profiles add column if not exists institution_id uuid references public.institutions(id) on delete set null;
+alter table public.profiles add column if not exists inst_title text;
+alter table public.profiles drop constraint if exists profiles_inst_title_check;
+alter table public.profiles add constraint profiles_inst_title_check check (inst_title is null or inst_title in ('Teacher','Proprietor','Proprietress','Official'));
+create index if not exists profiles_institution_idx on public.profiles (institution_id);
+-- no new column is granted to students: institution_id and inst_title change only through admin_assign_institution below
+
+insert into public.institutions (slug, name, location, note) values
+  ('cms-grammar-school',      'CMS Grammar School',      'Bariga, Lagos State',        'Founded in 1859, the oldest secondary school in Nigeria'),
+  ('kings-college',           'King''s College',         'Lagos Island, Lagos State',  null),
+  ('jambwise',                'JAMBwise',                'Online',                     null),
+  ('queens-college',          'Queen''s College',        'Yaba, Lagos State',          null),
+  ('igbobi-college',          'Igbobi College',          'Yaba, Lagos State',          null),
+  ('lagos-baptist-academy',   'Lagos Baptist Academy',   'Obanikoro, Lagos State',     null),
+  ('grange-school',           'Grange School',           'Ikeja, Lagos State',         null),
+  ('greensprings-school',     'Greensprings School',     'Anthony/Lekki, Lagos State', null),
+  ('atlantic-hall',           'Atlantic Hall',           'Poka, Epe, Lagos State',     null)
+on conflict (slug) do nothing;
+
+-- ───────────── who may see whom ─────────────
+create or replace function public.my_institution() returns uuid
+language sql security definer stable set search_path = public as
+$$ select institution_id from public.profiles where id = auth.uid() $$;
+
+-- true when the signed-in person may look at this user's results: an admin, or staff whose institution matches (staff with none see all)
+create or replace function public.staff_sees(p_user uuid) returns boolean
+language sql security definer stable set search_path = public as
+$$ select public.is_admin() or (public.is_staff() and (public.my_institution() is null or exists (
+     select 1 from public.profiles s where s.id = p_user and s.institution_id = public.my_institution()))) $$;
+
+drop policy if exists profiles_read on public.profiles;
+create policy profiles_read on public.profiles for select to authenticated
+  using (id = auth.uid() or public.is_admin() or (public.is_staff() and not is_admin and not is_teacher and public.staff_sees(id)));
+
+drop policy if exists att_read on public.attempts;
+create policy att_read on public.attempts for select to authenticated
+  using ((public.is_staff() and public.staff_sees(user_id)) or (user_id = auth.uid() and kind in ('practice','mock')));
+
+drop policy if exists msg_read on public.messages;
+create policy msg_read on public.messages for select to authenticated using ((public.is_staff() and public.staff_sees(user_id)) or user_id = auth.uid());
+drop policy if exists msg_upd on public.messages;
+create policy msg_upd on public.messages for update to authenticated using (public.is_staff() and public.staff_sees(user_id)) with check (public.is_staff());
+drop policy if exists reply_read on public.message_replies;
+create policy reply_read on public.message_replies for select to authenticated using (
+  exists (select 1 from public.messages m where m.id = message_id and ((public.is_staff() and public.staff_sees(m.user_id)) or m.user_id = auth.uid())));
+
+create or replace function public.ticket_reply(p_id bigint, p_body text) returns void
+language plpgsql security definer set search_path = public as $$
+declare m public.messages; staff boolean := public.is_staff();
+begin
+  select * into m from public.messages where id = p_id;
+  if not found or (not staff and m.user_id is distinct from auth.uid()) or (staff and not public.staff_sees(m.user_id)) then raise exception 'not allowed'; end if;
+  if auth.uid() is null or char_length(trim(coalesce(p_body, ''))) not between 1 and 2000 then raise exception 'message must be 1-2000 characters'; end if;
+  insert into public.message_replies (message_id, author, is_staff, body) values (p_id, auth.uid(), staff, trim(p_body));
+  update public.messages set status = case when staff then 'answered' else 'new' end where id = p_id;
+  if staff then perform public.admin_log('ticket.reply', '#' || p_id); end if;
+end $$;
+
+create or replace function public.ticket_close(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare m public.messages;
+begin
+  select * into m from public.messages where id = p_id;
+  if not found or (not public.is_staff() and m.user_id is distinct from auth.uid()) or (public.is_staff() and not public.staff_sees(m.user_id)) then raise exception 'not allowed'; end if;
+  update public.messages set status = 'resolved' where id = p_id;
+  if public.is_staff() then perform public.admin_log('ticket.resolve', '#' || p_id); end if;
+end $$;
+
+create or replace function public.admin_exam_events(p_kind text, p_user uuid default null) returns table (user_id uuid, type text, occurred_at timestamptz, detail text)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query select e.user_id, e.type, e.occurred_at, e.detail from public.exam_events e
+    where e.kind = p_kind and (p_user is null or e.user_id = p_user) and public.staff_sees(e.user_id) order by e.occurred_at;
+end $$;
+
+drop function if exists public.admin_students();
+create function public.admin_students() returns table (
+  id uuid, reg_number text, email text, full_name text, course text, school text, plan text,
+  plan_expires timestamptz, suspended boolean, created_at timestamptz, questions bigint, correct bigint, mocks bigint,
+  is_admin boolean, last_active timestamptz, is_teacher boolean, institution_id uuid, institution text, inst_title text)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query
+    select p.id, p.reg_number, p.email, p.full_name, p.course, p.school, p.plan, p.plan_expires, p.suspended, p.created_at,
+           coalesce(sum(a.total), 0)::bigint, coalesce(sum(a.correct), 0)::bigint,
+           count(a.id) filter (where a.mock_score is not null)::bigint,
+           p.is_admin, max(a.created_at), p.is_teacher, p.institution_id, i.name, p.inst_title
+      from public.profiles p
+      left join public.attempts a on a.user_id = p.id
+      left join public.institutions i on i.id = p.institution_id
+     where public.is_admin() or (not p.is_admin and not p.is_teacher and public.staff_sees(p.id))   -- staff see students only, and only their own institution's
+     group by p.id, i.name order by p.created_at desc limit 2000;
+end $$;
+
+-- ───────────── admin tools ─────────────
+-- p_logo: null keeps the logo as it is, '' removes it, or a small data:image/... picture sets it
+drop function if exists public.admin_save_institution(uuid, text, text, text);
+create or replace function public.admin_save_institution(p_id uuid, p_name text, p_location text, p_note text, p_logo text default null) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare nm text := btrim(coalesce(p_name, '')); sl text; out_id uuid; lg text;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if char_length(nm) not between 2 and 120 then raise exception 'Enter the institution name (2 to 120 characters).'; end if;
+  if p_logo is not null and p_logo <> '' and (p_logo !~ '^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$' or char_length(p_logo) > 80000) then
+    raise exception 'The logo must be a small PNG, JPEG or WebP picture.';
+  end if;
+  lg := case when p_logo = '' then null else p_logo end;
+  if p_id is null then
+    sl := trim(both '-' from regexp_replace(lower(nm), '[^a-z0-9]+', '-', 'g'));
+    if sl = '' then raise exception 'Enter a name with letters or numbers.'; end if;
+    if exists (select 1 from public.institutions where slug = sl) then sl := left(sl, 50) || '-' || substr(replace(gen_random_uuid()::text, '-', ''), 1, 5); end if;
+    insert into public.institutions (slug, name, location, note, logo) values (left(sl, 60), nm, nullif(btrim(p_location), ''), nullif(btrim(p_note), ''), lg) returning id into out_id;
+    perform public.admin_log('institution.add', nm);
+  else
+    update public.institutions set name = nm, location = nullif(btrim(p_location), ''), note = nullif(btrim(p_note), ''),
+           logo = case when p_logo is null then logo else lg end
+     where id = p_id returning id into out_id;
+    if out_id is null then raise exception 'institution not found'; end if;
+    perform public.admin_log('institution.edit', nm);
+  end if;
+  return out_id;
+exception when unique_violation then raise exception 'An institution with this name already exists.';
+end $$;
+
+create or replace function public.admin_delete_institution(p_id uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare nm text;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  delete from public.institutions where id = p_id returning name into nm;   -- people in it are un-assigned (on delete set null)
+  if nm is null then raise exception 'institution not found'; end if;
+  perform public.admin_log('institution.delete', nm);
+end $$;
+
+-- Put a student or staff member in an institution (p_inst null takes them out). p_title is for staff: Teacher, Proprietor, Proprietress or Official.
+create or replace function public.admin_assign_institution(p_user uuid, p_inst uuid, p_title text default null) returns void
+language plpgsql security definer set search_path = public as $$
+declare t public.profiles; inst text;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  select * into t from public.profiles where id = p_user;
+  if not found then raise exception 'person not found'; end if;
+  if p_inst is not null then
+    select name into inst from public.institutions where id = p_inst;
+    if inst is null then raise exception 'institution not found'; end if;
+  end if;
+  if p_title is not null and p_title not in ('Teacher','Proprietor','Proprietress','Official') then raise exception 'unknown title'; end if;
+  update public.profiles
+     set institution_id = p_inst,
+         inst_title = case when p_inst is null or not is_teacher then null else coalesce(p_title, inst_title, 'Teacher') end
+   where id = p_user;
+  perform public.admin_log('institution.assign', t.reg_number || ' -> ' || coalesce(inst, 'none'));
+  if p_inst is not null and t.is_teacher then
+    perform public.notify_user(p_user, 'teacher', 'You were assigned to ' || inst, 'You now see the results of ' || inst || '''s students in your panel.', '/app/admin/students');
+  end if;
+end $$;
+
+revoke execute on function public.my_institution(), public.staff_sees(uuid), public.admin_students(),
+  public.admin_save_institution(uuid, text, text, text, text), public.admin_delete_institution(uuid), public.admin_assign_institution(uuid, uuid, text) from public, anon;
+grant execute on function public.my_institution(), public.staff_sees(uuid), public.admin_students(),
+  public.admin_save_institution(uuid, text, text, text, text), public.admin_delete_institution(uuid), public.admin_assign_institution(uuid, uuid, text) to authenticated;
+grant execute on function public.ticket_reply(bigint, text), public.ticket_close(bigint), public.admin_exam_events(text, uuid) to authenticated;
+
+-- ───────────────────────── sign-in log (Admin > Activity) ─────────────────────────
+-- Same as supabase/migrate-logs.sql.
+create or replace function public.log_sign_in() returns void
+language plpgsql security definer set search_path = public as $$
+declare me public.profiles; act text; inst text; det text;
+begin
+  select * into me from public.profiles where id = auth.uid();
+  if not found then return; end if;
+  act := case when me.is_admin then 'login.admin' when me.is_teacher then 'login.teacher' else 'login.student' end;
+  if exists (select 1 from public.audit_log where actor = auth.uid() and action = act and created_at > now() - interval '30 minutes') then return; end if;
+  select name into inst from public.institutions where id = me.institution_id;
+  det := coalesce(nullif(trim(me.full_name), ''), 'Unnamed') || ' (' || me.reg_number || ')'
+         || case when inst is not null then ', ' || inst || case when me.is_teacher and me.inst_title is not null then ' ' || me.inst_title else '' end else '' end;
+  insert into public.audit_log (actor, actor_email, action, detail) values (auth.uid(), me.email, act, left(det, 500));
+end $$;
+revoke execute on function public.log_sign_in() from public, anon;
+grant execute on function public.log_sign_in() to authenticated;
+
+-- ───────────── who is online (migrate-presence.sql) ─────────────
+alter table public.profiles add column if not exists last_seen timestamptz;
+
+create or replace function public.touch_presence() returns void
+language sql security definer set search_path = public as
+$$ update public.profiles set last_seen = now() where id = auth.uid() and (last_seen is null or last_seen < now() - interval '30 seconds') $$;
+revoke execute on function public.touch_presence() from public, anon;
+grant execute on function public.touch_presence() to authenticated;
+
+-- Admins see everyone; a teacher sees only the students of their own institution.
+create or replace function public.admin_online() returns table (
+  id text, role text, full_name text, email text, reg_number text, institution text, inst_title text, last_seen timestamptz, online boolean)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query
+    select p.id::text,
+           case when p.is_admin then 'admin' when p.is_teacher then 'teacher' else 'student' end,
+           p.full_name, p.email, p.reg_number, i.name, p.inst_title, p.last_seen, p.last_seen > now() - interval '3 minutes'
+      from public.profiles p left join public.institutions i on i.id = p.institution_id
+     where p.last_seen > now() - interval '24 hours'
+       and (public.is_admin() or (not p.is_admin and not p.is_teacher and public.staff_sees(p.id)))
+    union all
+    select 'ps-' || s.token, 'parent', s.parent_name, null::text, st.reg_number, i.name, null, s.created_at, true
+      from public.parent_sessions s join public.profiles st on st.id = s.student_id left join public.institutions i on i.id = st.institution_id
+     where s.expires_at > now() and (public.is_admin() or public.staff_sees(st.id))
+    order by 8 desc nulls last limit 500;
+end $$;
+revoke execute on function public.admin_online() from public, anon;
+grant execute on function public.admin_online() to authenticated;
+
+-- ───────────── question reports go to the uploader (migrate-report.sql) ─────────────
+alter table public.questions add column if not exists created_by uuid references public.profiles(id) on delete set null;
+alter table public.questions alter column created_by set default auth.uid();
+alter table public.messages add column if not exists question_id bigint references public.questions(id) on delete set null;
+alter table public.messages add column if not exists assigned_to uuid references public.profiles(id) on delete set null;
+create index if not exists messages_assigned_idx on public.messages (assigned_to);
+
+-- make sure a "question" ticket is an allowed topic (older databases may not have it)
+alter table public.messages drop constraint if exists messages_topic_check;
+alter table public.messages add constraint messages_topic_check check (topic in ('general','payment','pin','bug','question','other'));
+
+-- the uploader is always the real signed-in person: nobody can claim a question as someone else's
+create or replace function public.stamp_question_owner() returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    if auth.uid() is not null then new.created_by := auth.uid(); end if;
+  else
+    new.created_by := old.created_by;
+  end if;
+  return new;
+end $$;
+drop trigger if exists stamp_question_owner on public.questions;
+create trigger stamp_question_owner before insert or update on public.questions for each row execute function public.stamp_question_owner();
+
+-- the assigned teacher can read, answer and close the ticket even when the student belongs to another institution
+drop policy if exists msg_read on public.messages;
+create policy msg_read on public.messages for select to authenticated
+  using ((public.is_staff() and (public.staff_sees(user_id) or assigned_to = auth.uid())) or user_id = auth.uid());
+drop policy if exists msg_upd on public.messages;
+create policy msg_upd on public.messages for update to authenticated
+  using (public.is_staff() and (public.staff_sees(user_id) or assigned_to = auth.uid())) with check (public.is_staff());
+drop policy if exists reply_read on public.message_replies;
+create policy reply_read on public.message_replies for select to authenticated using (
+  exists (select 1 from public.messages m where m.id = message_id
+          and ((public.is_staff() and (public.staff_sees(m.user_id) or m.assigned_to = auth.uid())) or m.user_id = auth.uid())));
+
+-- the name shown on a staff reply: a teacher's own name (admins stay "JAMBwise support")
+alter table public.message_replies add column if not exists author_name text;
+update public.message_replies r set author_name = trim(p.full_name) || ' (Teacher)'
+  from public.profiles p where p.id = r.author and r.author_name is null and r.is_staff and p.is_teacher and not p.is_admin and nullif(trim(p.full_name), '') is not null;
+
+create or replace function public.ticket_reply(p_id bigint, p_body text) returns void
+language plpgsql security definer set search_path = public as $$
+declare m public.messages; staff boolean := public.is_staff(); me public.profiles; nm text; adm record;
+begin
+  select * into m from public.messages where id = p_id;
+  if not found or (not staff and m.user_id is distinct from auth.uid())
+     or (staff and not (public.staff_sees(m.user_id) or m.assigned_to = auth.uid())) then raise exception 'not allowed'; end if;
+  if auth.uid() is null or char_length(trim(coalesce(p_body, ''))) not between 1 and 2000 then raise exception 'message must be 1-2000 characters'; end if;
+  select * into me from public.profiles where id = auth.uid();
+  if staff and me.is_teacher and not me.is_admin and nullif(trim(me.full_name), '') is not null then nm := left(trim(me.full_name), 90) || ' (Teacher)'; end if;
+  insert into public.message_replies (message_id, author, is_staff, body, author_name) values (p_id, auth.uid(), staff, trim(p_body), nm);
+  update public.messages set status = case when staff then 'answered' else 'new' end where id = p_id;
+  if staff then
+    perform public.admin_log('ticket.reply', '#' || p_id);
+    if m.user_id is not null then   -- the student's bell rings
+      perform public.notify_user(m.user_id, 'ticket', 'New reply on your ticket', coalesce(nm, 'JAMBwise support') || ': ' || left(trim(p_body), 200), '/app/help');
+    end if;
+  elsif m.assigned_to is not null then   -- the student wrote back: tell the teacher the ticket was sent to
+    perform public.notify_user(m.assigned_to, 'ticket', 'Student replied', coalesce(m.name, 'A student') || ' replied on ticket #' || p_id, '/app/admin/messages');
+  end if;
+end $$;
+
+create or replace function public.ticket_close(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare m public.messages;
+begin
+  select * into m from public.messages where id = p_id;
+  if not found or (not public.is_staff() and m.user_id is distinct from auth.uid())
+     or (public.is_staff() and not (public.staff_sees(m.user_id) or m.assigned_to = auth.uid())) then raise exception 'not allowed'; end if;
+  update public.messages set status = 'resolved' where id = p_id;
+  if public.is_staff() then perform public.admin_log('ticket.resolve', '#' || p_id); end if;
+end $$;
+
+-- the student's "Report this question" button
+create or replace function public.report_question(p_question bigint, p_subject text, p_body text) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare me public.profiles; q public.questions; up public.profiles; target uuid; who text; mid bigint; adm record; nm text; txt text;
+begin
+  select * into me from public.profiles where id = auth.uid();
+  if not found then raise exception 'not allowed'; end if;
+  select * into q from public.questions where id = p_question;
+  if found and q.created_by is not null then
+    select * into up from public.profiles where id = q.created_by;
+    if found and (up.is_admin or up.is_teacher) then target := up.id; end if;
+  end if;
+  who := case when target is null then 'the admins' else coalesce(nullif(trim(up.full_name), ''), 'the uploader') end;
+  nm := coalesce(nullif(trim(me.full_name), ''), 'Student');
+  insert into public.messages (name, email, topic, subject, body, user_id, question_id, assigned_to)
+  values (left(nm, 100), coalesce(nullif(me.email, ''), (select email from auth.users where id = me.id)), 'question', left(p_subject, 120),
+          left('Sent to: ' || who || E'\n' || coalesce(p_body, ''), 2000), me.id, p_question, target)
+  returning id into mid;
+  txt := nm || ' reported a question: ' || coalesce(left(p_subject, 120), 'question #' || p_question);
+  if target is not null then
+    perform public.notify_user(target, 'question', 'Question reported', txt, '/app/admin/messages');
+  else
+    for adm in select id from public.profiles where is_admin loop
+      perform public.notify_user(adm.id, 'question', 'Question reported', txt, '/app/admin/messages');
+    end loop;
+  end if;
+  return mid;
+end $$;
+revoke execute on function public.report_question(bigint, text, text) from public, anon;
+grant execute on function public.report_question(bigint, text, text) to authenticated;

@@ -30,6 +30,7 @@ const ADMIN_NAV = [
   ['overview', 'Overview', 'chart', true],
   ['students', 'Students', 'user'],
   ['teachers', 'Teachers', 'users', true],
+  ['institutions', 'Institutions', 'school', true],
   ['chat', 'Chat with admin', 'chat', false, true],
   ['scoresheet', 'Scoresheet', 'file'],
   ['parents', 'Parent access', 'eye', true],
@@ -38,6 +39,7 @@ const ADMIN_NAV = [
   ['questions', 'Questions', 'book'],
   ['messages', 'Support tickets', 'inbox'],
   ['settings', 'Prices', 'settings', true],
+  ['online', 'Who is online', 'users'],
   ['activity', 'Activity', 'clock', true],
 ]
 
@@ -135,7 +137,7 @@ export default function AppLayout() {
           <div className="who">
             <Avatar profile={profile} />
             <b>{profile.full_name}</b>
-            <span><span className="tag">{isTeacher ? 'teacher' : plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
+            <span><span className="tag">{isTeacher ? (profile.inst_title || 'Teacher').toLowerCase() : plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
           </div>
         </aside>}
         <main className="main">

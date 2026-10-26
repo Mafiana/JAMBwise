@@ -9,6 +9,7 @@ import { useAuth } from '../../../context/AuthContext.jsx'
 import { SUBJECTS } from '../../../lib/constants.js'
 import { naira, studentReport, TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
 import { fmtDate, fmtDateTime, PLAN_IDS, TabLoader, useLoad } from './shared.jsx'
+import InstitutionAssign from './InstitutionAssign.jsx'
 
 const subjectName = (k) => SUBJECTS[k]?.name || k
 const chip = (s) => 'tag' + (s === 'new' ? ' bad' : s === 'answered' ? ' ok' : s === 'resolved' ? ' muted' : '')
@@ -22,7 +23,7 @@ function Overview({ s, rep }) {
   const rows = [
     ['Email', s.email], ['Joined', fmtDate(s.created_at)], ['Last practised', fmtDate(s.last_active)],
     ['Plan', s.plan === 'free' ? 'Free' : `${s.plan}${s.plan_expires ? ', ends ' + fmtDate(s.plan_expires) : ''}`],
-    ['Course', s.course || '–'], ['Target university', s.school || '–'],
+    ['Institution', s.institution ? s.institution + (s.inst_title ? ' (' + s.inst_title + ')' : '') : '–'], ['Course', s.course || '–'], ['Target university', s.school || '–'],
     ['Mock subjects', (s.subjects || []).length ? ['English', ...s.subjects.map(subjectName)].join(', ') : '–'],
     ['Exam date', s.exam_date ? fmtDate(s.exam_date) : 'not set'], ['Study time', s.study_hours ? `${s.study_hours} hours a day` : '–'],
   ]
@@ -124,7 +125,7 @@ function Manage({ s, me, onClose, reloadList }) {
   const [days, setDays] = useState(30)
   const [done, setDone] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const act = (msg, fn) => run(async () => { await fn(); await reloadList(); setDone(msg) })
+  const act = (msg, fn) => run(async () => { await fn(); await reloadList(); setDone(msg) }, msg)
   const self = s.id === me
   const current = s.is_admin ? 'admin' : s.is_teacher ? 'teacher' : 'student'
   const [role, setRole] = useState(current)
@@ -137,6 +138,13 @@ function Manage({ s, me, onClose, reloadList }) {
         <div><label htmlFor="ss">Target university</label><input id="ss" value={f.school} onChange={set('school')} /></div>
       </div>
       <button className="btn" disabled={busy} onClick={() => act('Details saved.', () => api.adminSetStudent(s.id, { ...f, suspended: s.suspended }))}>Save details</button>
+
+      {!s.is_admin && (
+        <>
+          <h3>Institution</h3>
+          <InstitutionAssign person={s} onSaved={reloadList} />
+        </>
+      )}
 
       <h3>Plan</h3>
       <div className="row" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>

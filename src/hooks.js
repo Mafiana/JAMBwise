@@ -3,6 +3,7 @@ import * as api from './lib/api.js'
 import { summarize } from './lib/utils.js'
 import { useExam } from './context/ExamContext.jsx'
 import { PLANS } from './lib/constants.js'
+import { useDone } from './components/Done.jsx'
 
 /** The signed-in student's attempts, refreshed whenever a practice or mock result is saved. */
 export function useProgress() {
@@ -56,18 +57,22 @@ export function useNow(active) {
 export function useAction() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const run = useCallback(async (fn) => {
+  const flash = useDone()
+  /** Runs `fn`; when it works and `doneMsg` is given, a "Successful" box shows for a moment. */
+  const run = useCallback(async (fn, doneMsg) => {
     setBusy(true)
     setError('')
     try {
-      return await fn()
+      const out = await fn()
+      if (doneMsg) flash(doneMsg)
+      return out
     } catch (e) {
       setError(e.message || 'Something went wrong.')
       return undefined
     } finally {
       setBusy(false)
     }
-  }, [])
+  }, [flash])
   return { busy, error, setError, run }
 }
 

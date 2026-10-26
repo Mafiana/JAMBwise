@@ -438,5 +438,335 @@
   ],
   "a": 2,
   "e": "The Islamic calendar starts from this year."
+ },
+ {
+  "q": "The year in which the Prophet (SAW) was born is known as the Year of the",
+  "o": [
+   "Camel",
+   "Elephant",
+   "Lion",
+   "Horse"
+  ],
+  "a": 1,
+  "e": "Abraha's army with an elephant came to destroy the Ka'bah that year."
+ },
+ {
+  "q": "The father of the Prophet (SAW) was",
+  "o": [
+   "Abu Talib",
+   "Abdul Muttalib",
+   "Abdullah",
+   "Abu Lahab"
+  ],
+  "a": 2,
+  "e": "He died before the Prophet was born."
+ },
+ {
+  "q": "After the death of his mother, the Prophet (SAW) was first looked after by his grandfather",
+  "o": [
+   "Abu Bakr",
+   "Hamzah",
+   "Abdul Muttalib",
+   "Abbas"
+  ],
+  "a": 2,
+  "e": "After his grandfather died, his uncle Abu Talib took over."
+ },
+ {
+  "q": "The uncle who brought up the Prophet (SAW) after his grandfather died was",
+  "o": [
+   "Abu Talib",
+   "Abu Lahab",
+   "Hamzah",
+   "Abu Jahl"
+  ],
+  "a": 0,
+  "e": "Abu Talib protected him until his own death."
+ },
+ {
+  "q": "Before he became a prophet, the Prophet (SAW) was known among the Quraysh as",
+  "o": [
+   "Al-Farooq, the one who separates",
+   "As-Siddiq, the truthful",
+   "Al-Ghani, the rich",
+   "Al-Amin, the trustworthy"
+  ],
+  "a": 3,
+  "e": "People trusted him with their valuables."
+ },
+ {
+  "q": "The Prophet (SAW) received the first revelation at the age of",
+  "o": [
+   "twenty-five",
+   "thirty",
+   "fifty",
+   "forty"
+  ],
+  "a": 3,
+  "e": "It came in the month of Ramadan."
+ },
+ {
+  "q": "The longest chapter of the Qur'an is",
+  "o": [
+   "Al-Fatihah",
+   "Al-Imran",
+   "An-Nisa",
+   "Al-Baqarah"
+  ],
+  "a": 3,
+  "e": "It has 286 verses."
+ },
+ {
+  "q": "The Qur'an was revealed to the Prophet (SAW) gradually over about",
+  "o": [
+   "23 years",
+   "10 years",
+   "40 years",
+   "3 years"
+  ],
+  "a": 0,
+  "e": "Revelation began in Makkah and ended in Madinah."
+ },
+ {
+  "q": "Laylatul Qadr (the Night of Power) is said to be better than",
+  "o": [
+   "a thousand months",
+   "a hundred days",
+   "a hundred years",
+   "ten Ramadans"
+  ],
+  "a": 0,
+  "e": "The Qur'an says so in Surah Al-Qadr."
+ },
+ {
+  "q": "The first mosque built after the Hijrah was at",
+  "o": [
+   "Makkah",
+   "Quba",
+   "Jerusalem",
+   "Taif"
+  ],
+  "a": 1,
+  "e": "The Prophet (SAW) helped to build it on arriving near Madinah."
+ },
+ {
+  "q": "The first person to call the adhan in Islam was",
+  "o": [
+   "Bilal ibn Rabah",
+   "Abu Bakr",
+   "Salman al-Farsi",
+   "Khalid ibn Walid"
+  ],
+  "a": 0,
+  "e": "He was chosen for his strong, beautiful voice."
+ },
+ {
+  "q": "The prophet who was swallowed by a big fish was",
+  "o": [
+   "Musa (AS)",
+   "Yunus (AS)",
+   "Ayyub (AS)",
+   "Yusuf (AS)"
+  ],
+  "a": 1,
+  "e": "He repented and was saved."
+ },
+ {
+  "q": "The holy book given to Prophet Dawud (AS) is the",
+  "o": [
+   "Zabur",
+   "Tawrat",
+   "Injil",
+   "Suhuf"
+  ],
+  "a": 0,
+  "e": "The Zabur is the Psalms."
+ },
+ {
+  "q": "The holy book given to Prophet Musa (AS) is the",
+  "o": [
+   "Tawrat",
+   "Zabur",
+   "Injil",
+   "Qur'an"
+  ],
+  "a": 0,
+  "e": "Muslims know it as the Torah."
+ },
+ {
+  "q": "The holy book given to Prophet Isa (AS) is the",
+  "o": [
+   "Injil",
+   "Tawrat",
+   "Zabur",
+   "Suhuf"
+  ],
+  "a": 0,
+  "e": "It is the Gospel revealed to him."
+ },
+ {
+  "q": "The compulsory prayer with two rak'ah is",
+  "o": [
+   "Dhuhr",
+   "Fajr",
+   "Asr",
+   "Isha"
+  ],
+  "a": 1,
+  "e": "Fajr is the dawn prayer."
+ },
+ {
+  "q": "The number of rak'ah in the Maghrib prayer is",
+  "o": [
+   "three",
+   "two",
+   "four",
+   "five"
+  ],
+  "a": 0,
+  "e": "It is the sunset prayer."
+ },
+ {
+  "q": "Tawhid means",
+  "o": [
+   "belief in the Day of Judgement",
+   "belief in the angels",
+   "belief in the oneness of Allah",
+   "belief in all the prophets"
+  ],
+  "a": 2,
+  "e": "It is the most important belief in Islam."
+ },
+ {
+  "q": "Associating partners with Allah is called",
+  "o": [
+   "Tawhid",
+   "Taqwa",
+   "Shirk",
+   "Ihsan"
+  ],
+  "a": 2,
+  "e": "It is the greatest sin in Islam."
+ },
+ {
+  "q": "Things that are allowed in Islam are described as",
+  "o": [
+   "haram",
+   "makruh",
+   "fard",
+   "halal"
+  ],
+  "a": 3,
+  "e": "Halal means lawful."
+ },
+ {
+  "q": "Things that are forbidden in Islam are described as",
+  "o": [
+   "halal",
+   "mubah",
+   "sunnah",
+   "haram"
+  ],
+  "a": 3,
+  "e": "Haram means unlawful."
+ },
+ {
+  "q": "The number of articles of faith (Iman) in Islam is",
+  "o": [
+   "five",
+   "four",
+   "six",
+   "seven"
+  ],
+  "a": 2,
+  "e": "They include belief in Allah, angels, books, prophets, the Last Day and destiny."
+ },
+ {
+  "q": "The Caliph who had the Qur'an copied in one standard text and sent to major cities was",
+  "o": [
+   "Abu Bakr",
+   "Uthman",
+   "Umar",
+   "Ali"
+  ],
+  "a": 1,
+  "e": "This ended differences in recitation."
+ },
+ {
+  "q": "The Caliph who was given the title Al-Farooq was",
+  "o": [
+   "Abu Bakr",
+   "Umar ibn al-Khattab",
+   "Uthman",
+   "Ali"
+  ],
+  "a": 1,
+  "e": "The title means the one who separates truth from falsehood."
+ },
+ {
+  "q": "The peace agreement between the Muslims and the Quraysh in 6 AH was the Treaty of",
+  "o": [
+   "Madinah",
+   "Aqabah",
+   "Badr",
+   "Hudaybiyyah"
+  ],
+  "a": 3,
+  "e": "It allowed the Muslims to perform Umrah the next year."
+ },
+ {
+  "q": "The Prophet (SAW) gave his Farewell Sermon at",
+  "o": [
+   "Madinah",
+   "Uhud",
+   "Mount Arafat",
+   "Mina's mosque"
+  ],
+  "a": 2,
+  "e": "It was during his last Hajj."
+ },
+ {
+  "q": "Aishah, wife of the Prophet (SAW), was the daughter of",
+  "o": [
+   "Umar",
+   "Abu Bakr",
+   "Uthman",
+   "Abu Talib"
+  ],
+  "a": 1,
+  "e": "Abu Bakr was the first Caliph."
+ },
+ {
+  "q": "The daughter of the Prophet (SAW) who married Ali ibn Abi Talib was",
+  "o": [
+   "Zaynab",
+   "Ruqayyah",
+   "Umm Kulthum",
+   "Fatimah"
+  ],
+  "a": 3,
+  "e": "She was the youngest daughter of the Prophet."
+ },
+ {
+  "q": "Islam first reached northern Nigeria mainly through",
+  "o": [
+   "colonial schools",
+   "trade across the Sahara",
+   "newspapers",
+   "sea voyages from Asia"
+  ],
+  "a": 1,
+  "e": "Traders and scholars from North Africa brought it."
+ },
+ {
+  "q": "The leader of the 1804 jihad that founded the Sokoto Caliphate was",
+  "o": [
+   "Muhammadu Bello",
+   "Ahmadu Bello",
+   "Usman dan Fodio",
+   "Rabih"
+  ],
+  "a": 2,
+  "e": "He was a Fulani scholar from Gobir."
  }
 ]

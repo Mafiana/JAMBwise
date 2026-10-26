@@ -3,6 +3,8 @@ import { ErrorLine } from '../../../components/ui.jsx'
 import { useAction } from '../../../hooks.js'
 import * as api from '../../../lib/api.js'
 import { copyText, PLAN_IDS } from './shared.jsx'
+import { INST_TITLES } from '../../../lib/constants.js'
+import { useInstitutions } from './InstitutionAssign.jsx'
 
 export const makePassword = () => {
   const al = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
@@ -15,7 +17,8 @@ export const makePassword = () => {
 export default function AddUser({ role, onClose, onDone }) {
   const teacher = role === 'teacher'
   const { busy, error, run } = useAction()
-  const [f, setF] = useState({ name: '', email: '', password: makePassword(), plan: 'free', days: 30, course: '', school: '' })
+  const [f, setF] = useState({ name: '', email: '', password: makePassword(), plan: 'free', days: 30, course: '', school: '', institution: '', title: 'Teacher' })
+  const insts = useInstitutions()
   const [made, setMade] = useState(null)
   const [copied, setCopied] = useState(false)
   const first = useRef(null)
@@ -30,8 +33,13 @@ export default function AddUser({ role, onClose, onDone }) {
   const submit = (e) => {
     e.preventDefault()
     run(async () => {
-      await api.adminCreateUser({ ...f, role, days: Number(f.days) || 30 })
-      setMade({ email: f.email.trim().toLowerCase(), password: f.password, name: f.name.trim() })
+      const { institution, title, ...account } = f
+      const r = await api.adminCreateUser({ ...account, role, days: Number(f.days) || 30 })
+      let note = ''
+      if (institution && r?.id) {
+        try { await api.adminAssignInstitution(r.id, institution, teacher ? title : null) } catch (e) { note = 'The account was made, but it could not be added to the institution: ' + e.message }
+      }
+      setMade({ email: f.email.trim().toLowerCase(), password: f.password, name: f.name.trim(), note, institution: insts.list.find((i) => i.id === institution)?.name || '' })
       await onDone()
     })
   }
@@ -44,9 +52,11 @@ export default function AddUser({ role, onClose, onDone }) {
             <h3>{teacher ? 'Teacher' : 'Student'} added</h3>
             <p className="sm">Give {made.name} these login details. The password is not shown again, so copy it now. They can change it in Settings after logging in.</p>
             <div className="card flat">
+              {made.institution && !made.note && <div className="ln"><span>Institution</span><b>{made.institution}</b></div>}
               <div className="ln"><span>Email</span><b>{made.email}</b></div>
               <div className="ln"><span>Password</span><b><code>{made.password}</code></b></div>
             </div>
+            {made.note && <p className="sm bad" role="alert">{made.note}</p>}
             <div className="modal-actions">
               <button className="btn ghost" onClick={async () => { await copyText(`Email: ${made.email}\nPassword: ${made.password}`); setCopied(true) }}>{copied ? 'Copied' : 'Copy details'}</button>
               <button className="btn" onClick={onClose}>Done</button>
@@ -65,6 +75,18 @@ export default function AddUser({ role, onClose, onDone }) {
               <input id="au-p" required minLength={8} maxLength={72} value={f.password} onChange={set('password')} style={{ margin: 0 }} />
               <button type="button" className="btn danger" onClick={() => setF({ ...f, password: makePassword() })}>Generate</button>
             </div>
+            {!insts.builtIn && insts.list.length > 0 && (
+              <>
+                <label htmlFor="au-in">Institution (optional)</label>
+                <div className="row" style={{ justifyContent: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
+                  <select id="au-in" value={f.institution} onChange={set('institution')} style={{ margin: 0, maxWidth: 260 }}>
+                    <option value="">None</option>
+                    {insts.list.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                  </select>
+                  {teacher && f.institution && <select aria-label="Title" value={f.title} onChange={set('title')} style={{ margin: 0, maxWidth: 160 }}>{INST_TITLES.map((t) => <option key={t}>{t}</option>)}</select>}
+                </div>
+              </>
+            )}
             {!teacher && (
               <>
                 <label htmlFor="au-pl">Plan</label>

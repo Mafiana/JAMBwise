@@ -9,10 +9,12 @@ import AppLayout from './components/AppLayout.jsx'
 import { Spinner } from './components/ui.jsx'
 import AdminLoader from './components/AdminLoader.jsx'
 import { ConfirmProvider } from './components/Confirm.jsx'
+import { DoneProvider } from './components/Done.jsx'
 import Landing from './pages/Landing.jsx'
 import Auth from './pages/Auth.jsx'
 import Contact from './pages/Contact.jsx'
 import Legal from './pages/Legal.jsx'
+import Institution from './pages/Institution.jsx'
 import Dashboard from './pages/app/Dashboard.jsx'
 import Practice from './pages/app/Practice.jsx'
 import Mock from './pages/app/Mock.jsx'
@@ -38,7 +40,9 @@ const PriceSettings = lazy(() => import('./pages/app/admin/PriceSettings.jsx'))
 const Parent = lazy(() => import('./pages/Parent.jsx'))
 const ParentAccess = lazy(() => import('./pages/app/admin/ParentAccess.jsx'))
 const Teachers = lazy(() => import('./pages/app/admin/Teachers.jsx'))
+const Institutions = lazy(() => import('./pages/app/admin/Institutions.jsx'))
 const StaffChatPage = lazy(() => import('./pages/app/admin/Chat.jsx'))
+const Online = lazy(() => import('./pages/app/admin/Online.jsx'))
 const Activity = lazy(() => import('./pages/app/admin/Activity.jsx'))
 /** Admins start on Overview, teachers on Students. */
 function AdminHome() { const { isAdmin } = useAuth(); return <Navigate to={isAdmin ? 'overview' : 'students'} replace /> }
@@ -47,7 +51,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ConfirmProvider>
+        <ConfirmProvider><DoneProvider>
           {demoMode && <DemoBanner />}
           <BrowserRouter>
             <Suspense fallback={<Spinner />}>
@@ -59,6 +63,7 @@ export default function App() {
                 <Route path="/terms" element={<Legal kind="terms" />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/parent" element={<Parent />} />
+                <Route path="/institution/:slug" element={<Institution />} />
                 <Route path="/admin" element={<Navigate to="/app/admin" replace />} />
                 <Route path="/app" element={<RequireAuth />}>
                   <Route element={<AppLayout />}>
@@ -79,6 +84,8 @@ export default function App() {
                       <Route path="overview" element={<AdminOnly><Overview /></AdminOnly>} />
                       <Route path="students" element={<Students />} />
                       <Route path="teachers" element={<AdminOnly><Teachers /></AdminOnly>} />
+                      <Route path="institutions" element={<AdminOnly><Institutions /></AdminOnly>} />
+                      <Route path="online" element={<Online />} />
                       <Route path="chat" element={<StaffChatPage />} />
                       <Route path="parents" element={<AdminOnly><ParentAccess /></AdminOnly>} />
                       <Route path="pins" element={<AdminOnly><Pins /></AdminOnly>} />
@@ -97,7 +104,7 @@ export default function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
-        </ConfirmProvider>
+        </DoneProvider></ConfirmProvider>
       </AuthProvider>
     </ThemeProvider>
   )

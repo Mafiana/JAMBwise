@@ -21,7 +21,7 @@ function Editor({ q, onDone }) {
     return run(async () => {
       await api.adminSaveQuestion({ ...f, body: f.body.trim(), options: f.options.map((o) => o.trim()), explanation: f.explanation.trim() })
       onDone(true)
-    })
+    }, 'Question saved')
   }
   return (
     <div className="card" aria-label="Question editor">

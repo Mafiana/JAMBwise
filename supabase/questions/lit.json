@@ -427,5 +427,335 @@
   ],
   "a": 3,
   "e": "Shakespeare used blank verse in many of his plays."
+ },
+ {
+  "q": "A figure of speech that joins two opposite ideas, such as 'cruel kindness', is an",
+  "o": [
+   "oxymoron",
+   "simile",
+   "metaphor",
+   "hyperbole"
+  ],
+  "a": 0,
+  "e": "The two words contradict each other."
+ },
+ {
+  "q": "A statement that seems self-contradictory but contains a truth is a",
+  "o": [
+   "paradox",
+   "pun",
+   "simile",
+   "euphemism"
+  ],
+  "a": 0,
+  "e": "'The child is father of the man' is an example."
+ },
+ {
+  "q": "A mild word used in place of a harsh one, such as 'passed away' for 'died', is a",
+  "o": [
+   "hyperbole",
+   "euphemism",
+   "irony",
+   "satire"
+  ],
+  "a": 1,
+  "e": "It softens the effect."
+ },
+ {
+  "q": "Addressing an absent person or a thing as if it could hear is",
+  "o": [
+   "simile",
+   "apostrophe",
+   "alliteration",
+   "metonymy"
+  ],
+  "a": 1,
+  "e": "'O Death, where is thy sting?' is an example."
+ },
+ {
+  "q": "The repetition of vowel sounds in nearby words is",
+  "o": [
+   "alliteration",
+   "rhyme",
+   "assonance",
+   "onomatopoeia"
+  ],
+  "a": 2,
+  "e": "As in 'the rain in Spain'."
+ },
+ {
+  "q": "Using the name of one thing to stand for something closely linked to it, such as 'the crown' for the king, is",
+  "o": [
+   "simile",
+   "paradox",
+   "metonymy",
+   "pun"
+  ],
+  "a": 2,
+  "e": "The two things are associated, not compared."
+ },
+ {
+  "q": "A story in which characters and events stand for deeper moral or political meanings is an",
+  "o": [
+   "allegory",
+   "elegy",
+   "ode",
+   "epic"
+  ],
+  "a": 0,
+  "e": "'Animal Farm' is an example."
+ },
+ {
+  "q": "A short story with animals as characters that teaches a moral is a",
+  "o": [
+   "ballad",
+   "tragedy",
+   "fable",
+   "sonnet"
+  ],
+  "a": 2,
+  "e": "It usually ends with a lesson."
+ },
+ {
+  "q": "A character who changes and grows during the story is a",
+  "o": [
+   "flat character",
+   "stock character",
+   "round character",
+   "foil"
+  ],
+  "a": 2,
+  "e": "Flat characters stay the same."
+ },
+ {
+  "q": "A character who contrasts with another in order to bring out that character's qualities is a",
+  "o": [
+   "narrator",
+   "chorus",
+   "foil",
+   "antagonist"
+  ],
+  "a": 2,
+  "e": "The contrast shows the main traits clearly."
+ },
+ {
+  "q": "The fatal weakness in a tragic hero's character is known as",
+  "o": [
+   "hamartia, the tragic flaw",
+   "catharsis",
+   "denouement",
+   "soliloquy"
+  ],
+  "a": 0,
+  "e": "It leads to the hero's downfall."
+ },
+ {
+  "q": "The feeling of release of pity and fear that the audience feels at the end of a tragedy is",
+  "o": [
+   "irony",
+   "catharsis",
+   "exposition",
+   "climax"
+  ],
+  "a": 1,
+  "e": "The term came from Aristotle."
+ },
+ {
+  "q": "In Greek drama, the group of actors who comment on the action are the",
+  "o": [
+   "protagonists",
+   "antagonists",
+   "narrators",
+   "chorus"
+  ],
+  "a": 3,
+  "e": "They sing and speak between scenes."
+ },
+ {
+  "q": "Instructions in a play script that tell actors how to move or speak are",
+  "o": [
+   "dialogue",
+   "stage directions",
+   "soliloquies",
+   "asides"
+  ],
+  "a": 1,
+  "e": "They are usually in brackets or italics."
+ },
+ {
+  "q": "The part of a plot where the story's problem is resolved is the",
+  "o": [
+   "denouement",
+   "exposition",
+   "climax",
+   "prologue"
+  ],
+  "a": 0,
+  "e": "It follows the climax."
+ },
+ {
+  "q": "The opening part of a plot that introduces the characters and setting is the",
+  "o": [
+   "denouement",
+   "resolution",
+   "epilogue",
+   "exposition"
+  ],
+  "a": 3,
+  "e": "It sets the scene."
+ },
+ {
+  "q": "A poem that does not follow a regular rhyme or metre is",
+  "o": [
+   "free verse",
+   "blank verse",
+   "a sonnet",
+   "a ballad"
+  ],
+  "a": 0,
+  "e": "It follows the natural rhythm of speech."
+ },
+ {
+  "q": "A line or group of lines repeated in a poem or song is a",
+  "o": [
+   "stanza",
+   "couplet",
+   "foot",
+   "refrain"
+  ],
+  "a": 3,
+  "e": "It adds emphasis and music."
+ },
+ {
+  "q": "A three-line Japanese poem with a 5-7-5 syllable pattern is a",
+  "o": [
+   "limerick",
+   "haiku",
+   "sonnet",
+   "ode"
+  ],
+  "a": 1,
+  "e": "It often describes nature."
+ },
+ {
+  "q": "A humorous five-line poem is a",
+  "o": [
+   "haiku",
+   "limerick",
+   "elegy",
+   "ode"
+  ],
+  "a": 1,
+  "e": "It has an AABBA rhyme scheme."
+ },
+ {
+  "q": "A fictional prose work shorter than a novel but longer than a short story is a",
+  "o": [
+   "epic",
+   "novella",
+   "fable",
+   "ballad"
+  ],
+  "a": 1,
+  "e": "It has fewer characters and plots than a novel."
+ },
+ {
+  "q": "The mood or attitude of a writer toward the subject is the",
+  "o": [
+   "plot",
+   "tone",
+   "theme",
+   "setting"
+  ],
+  "a": 1,
+  "e": "It may be serious, humorous or angry."
+ },
+ {
+  "q": "The writer's choice of words is known as",
+  "o": [
+   "rhyme",
+   "metre",
+   "plot",
+   "diction"
+  ],
+  "a": 3,
+  "e": "It affects the style of a work."
+ },
+ {
+  "q": "The use of words to create pictures in the mind of the reader is",
+  "o": [
+   "imagery",
+   "refrain",
+   "irony",
+   "satire"
+  ],
+  "a": 0,
+  "e": "It appeals to the five senses."
+ },
+ {
+  "q": "A thing that stands for an idea, such as a dove for peace, is a",
+  "o": [
+   "foil",
+   "stanza",
+   "pun",
+   "symbol"
+  ],
+  "a": 3,
+  "e": "It carries meaning beyond itself."
+ },
+ {
+  "q": "The first novel in English by a Nigerian woman, 'Efuru', was written by",
+  "o": [
+   "Flora Nwapa",
+   "Buchi Emecheta",
+   "Chimamanda Adichie",
+   "Ama Ata Aidoo"
+  ],
+  "a": 0,
+  "e": "It was published in 1966."
+ },
+ {
+  "q": "'The Lion and the Jewel' is a play by",
+  "o": [
+   "Ola Rotimi",
+   "J. P. Clark",
+   "Wole Soyinka",
+   "Femi Osofisan"
+  ],
+  "a": 2,
+  "e": "It is a comedy set in the village of Ilunjinle."
+ },
+ {
+  "q": "'The Gods Are Not to Blame' was written by",
+  "o": [
+   "Wole Soyinka",
+   "Chinua Achebe",
+   "Ola Rotimi",
+   "Athol Fugard"
+  ],
+  "a": 2,
+  "e": "It retells the story of Oedipus in a Yoruba setting."
+ },
+ {
+  "q": "'Half of a Yellow Sun' is a novel by",
+  "o": [
+   "Buchi Emecheta",
+   "Flora Nwapa",
+   "Ngugi wa Thiong'o",
+   "Chimamanda Ngozi Adichie"
+  ],
+  "a": 3,
+  "e": "It is set around the Nigerian civil war."
+ },
+ {
+  "q": "'The Palm-Wine Drinkard' was written by",
+  "o": [
+   "Cyprian Ekwensi",
+   "Gabriel Okara",
+   "T. M. Aluko",
+   "Amos Tutuola"
+  ],
+  "a": 3,
+  "e": "It draws on Yoruba folktales."
  }
 ]

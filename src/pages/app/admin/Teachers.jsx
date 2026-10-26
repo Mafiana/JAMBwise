@@ -8,6 +8,7 @@ import * as api from '../../../lib/api.js'
 import { Empty, fmtDate, TabLoader, useLoad } from './shared.jsx'
 import AddUser, { makePassword } from './AddUser.jsx'
 import StaffChat from './StaffChat.jsx'
+import InstitutionAssign, { useInstitutions } from './InstitutionAssign.jsx'
 
 /** Edit one teacher: details, suspend, new password, take away the role, delete. */
 function EditTeacher({ t, onClose, reload }) {
@@ -17,7 +18,7 @@ function EditTeacher({ t, onClose, reload }) {
   const [pw, setPw] = useState('')
   const [done, setDone] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const act = (msg, fn) => run(async () => { await fn(); await reload(); setDone(msg) })
+  const act = (msg, fn) => run(async () => { await fn(); await reload(); setDone(msg) }, msg)
   useEffect(() => {
     const key = (e) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', key)
@@ -35,6 +36,9 @@ function EditTeacher({ t, onClose, reload }) {
         <label htmlFor="et-s">School</label>
         <input id="et-s" value={f.school} maxLength={100} onChange={set('school')} />
         <button className="btn" disabled={busy || !f.name.trim()} onClick={() => act('Details saved.', () => api.adminSetStudent(t.id, { ...f, suspended: t.suspended }))}>Save details</button>
+
+        <h4>Institution</h4>
+        <InstitutionAssign person={t} onSaved={reload} />
 
         <h4>New password</h4>
         <div className="row" style={{ gap: 8 }}>
@@ -64,14 +68,16 @@ export default function Teachers() {
   const fetchInbox = useCallback(() => api.staffChatInbox(), [])
   const inbox = useLoad(fetchInbox)
   const [q, setQ] = useState('')
+  const [instF, setInstF] = useState('all')
+  const insts = useInstitutions()
   const [adding, setAdding] = useState(false)
   const [edit, setEdit] = useState(null)   // id of the teacher being edited
   const chatId = params.get('chat')
   const teachers = useMemo(() => (data || []).filter((s) => s.is_teacher), [data])
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    return teachers.filter((s) => !needle || [s.full_name, s.email, s.reg_number].some((v) => String(v || '').toLowerCase().includes(needle)))
-  }, [teachers, q])
+    return teachers.filter((s) => (instF === 'all' || (instF === 'none' ? !s.institution_id : s.institution_id === instF)) && (!needle || [s.full_name, s.email, s.reg_number].some((v) => String(v || '').toLowerCase().includes(needle))))
+  }, [teachers, q, instF])
   const last = useMemo(() => new Map((inbox.data || []).map((m) => [m.teacher_id, m])), [inbox.data])
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
@@ -83,6 +89,12 @@ export default function Teachers() {
     <>
       <div className="adm-filters">
         <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search teachers" placeholder="Search name, email or number" value={q} onChange={(e) => setQ(e.target.value)} /></span>
+        {!insts.builtIn && insts.list.length > 0 && (
+          <select aria-label="Filter by institution" value={instF} onChange={(e) => setInstF(e.target.value)}>
+            <option value="all">All institutions</option><option value="none">No institution</option>
+            {insts.list.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+          </select>
+        )}
         <button className="btn" onClick={() => setAdding(true)}><Icon name="plus" size={16} /> Add teacher</button>
       </div>
       <p className="sm">{shown.length} of {teachers.length} teachers</p>
@@ -99,13 +111,14 @@ export default function Teachers() {
 
       <div className="card tw">
         <table>
-          <thead><tr><th>Teacher</th><th>Reg number</th><th>Last message</th><th>Joined</th><th /></tr></thead>
+          <thead><tr><th>Teacher</th><th>Institution</th><th>Reg number</th><th>Last message</th><th>Joined</th><th /></tr></thead>
           <tbody>
             {shown.map((t) => {
               const m = last.get(t.id)
               return (
                 <tr key={t.id}>
                   <td><span className="who-cell"><Avatar profile={{ full_name: t.full_name, avatar: null }} /><span><b>{t.full_name}</b>{t.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{t.email}</span></span></span></td>
+                  <td>{t.institution ? <>{t.institution}<br /><span className="sm">{t.inst_title || 'Teacher'}</span></> : <span className="sm">–</span>}</td>
                   <td>{t.reg_number}</td>
                   <td className="sm">{m ? <>{m.last_from === t.id ? 'Teacher: ' : 'You: '}{String(m.last_body).slice(0, 40)}{m.last_body.length > 40 ? '…' : ''}</> : '–'}</td>
                   <td>{fmtDate(t.created_at)}</td>

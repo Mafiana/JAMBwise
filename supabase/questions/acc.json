@@ -427,5 +427,335 @@
   ],
   "a": 3,
   "e": "It shows how many times stock is sold and replaced."
+ },
+ {
+  "q": "Carriage inwards is added to",
+  "o": [
+   "sales in the trading account",
+   "purchases in the trading account",
+   "expenses in the profit and loss account",
+   "the capital account"
+  ],
+  "a": 1,
+  "e": "It is a cost of bringing goods to the business, so it forms part of the cost of goods."
+ },
+ {
+  "q": "Carriage outwards is treated as",
+  "o": [
+   "part of purchases",
+   "a selling expense in the profit and loss account",
+   "an asset",
+   "part of sales"
+  ],
+  "a": 1,
+  "e": "It is the cost of delivering goods to customers."
+ },
+ {
+  "q": "Discount allowed is",
+  "o": [
+   "an expense to the business",
+   "income to the business",
+   "an asset",
+   "a liability"
+  ],
+  "a": 0,
+  "e": "It is given to customers who pay early."
+ },
+ {
+  "q": "Discount received is",
+  "o": [
+   "an expense to the business",
+   "income to the business",
+   "a current asset",
+   "a fixed asset"
+  ],
+  "a": 1,
+  "e": "It is given by suppliers when the business pays early."
+ },
+ {
+  "q": "Opening stock plus purchases, less closing stock, gives the",
+  "o": [
+   "gross profit",
+   "net profit",
+   "working capital",
+   "cost of goods sold"
+  ],
+  "a": 3,
+  "e": "This is the cost of the goods actually sold in the period."
+ },
+ {
+  "q": "The gross profit margin is calculated as",
+  "o": [
+   "gross profit divided by purchases, multiplied by 100",
+   "gross profit divided by sales, multiplied by 100",
+   "net profit divided by sales, multiplied by 100",
+   "sales divided by gross profit, multiplied by 100"
+  ],
+  "a": 1,
+  "e": "It shows the profit on each naira of sales before expenses."
+ },
+ {
+  "q": "A trader sells goods at a mark-up of 25% on cost. If the cost is N400, the selling price is",
+  "o": [
+   "N425",
+   "N450",
+   "N500",
+   "N525"
+  ],
+  "a": 2,
+  "e": "25% of N400 is N100, and N400 + N100 = N500."
+ },
+ {
+  "q": "A van bought for N500,000 is depreciated at 20% on the reducing balance. The depreciation in the second year is",
+  "o": [
+   "N100,000",
+   "N60,000",
+   "N400,000",
+   "N80,000"
+  ],
+  "a": 3,
+  "e": "First year N100,000; the book value N400,000 x 20% = N80,000."
+ },
+ {
+  "q": "Working capital is",
+  "o": [
+   "fixed assets less current liabilities",
+   "total assets less capital",
+   "capital less drawings",
+   "current assets less current liabilities"
+  ],
+  "a": 3,
+  "e": "It shows the funds available for day-to-day running."
+ },
+ {
+  "q": "The acid test (quick) ratio leaves out",
+  "o": [
+   "debtors",
+   "cash",
+   "bank balance",
+   "stock"
+  ],
+  "a": 3,
+  "e": "Stock cannot be turned into cash quickly."
+ },
+ {
+  "q": "A statement of affairs is used to find the capital of a business that keeps",
+  "o": [
+   "incomplete records",
+   "a full set of books",
+   "a cash book only",
+   "a bank account only"
+  ],
+  "a": 0,
+  "e": "Capital is found by subtracting liabilities from assets."
+ },
+ {
+  "q": "The receipts and payments account of a club is",
+  "o": [
+   "a summary of its cash book",
+   "its profit and loss account",
+   "its balance sheet",
+   "its trial balance"
+  ],
+  "a": 0,
+  "e": "It lists cash received and paid in the period."
+ },
+ {
+  "q": "In a non-profit organisation, the excess of income over expenditure is called",
+  "o": [
+   "a profit",
+   "a dividend",
+   "a drawing",
+   "a surplus"
+  ],
+  "a": 3,
+  "e": "It is added to the accumulated fund."
+ },
+ {
+  "q": "The accumulated fund of a club is similar to",
+  "o": [
+   "drawings",
+   "a debtor",
+   "the capital of a trader",
+   "a bank loan"
+  ],
+  "a": 2,
+  "e": "It is the net worth of the club."
+ },
+ {
+  "q": "In a partnership, a partner's share of profit is shown in the",
+  "o": [
+   "trading account",
+   "cash book",
+   "appropriation account",
+   "trial balance"
+  ],
+  "a": 2,
+  "e": "Interest on capital, salaries and shares of profit are shown there."
+ },
+ {
+  "q": "The authorised share capital of a company is",
+  "o": [
+   "the maximum share capital it may issue",
+   "the amount actually issued",
+   "the amount paid by shareholders",
+   "its profits kept in the business"
+  ],
+  "a": 0,
+  "e": "It is stated in the memorandum of association."
+ },
+ {
+  "q": "Preference shareholders are paid",
+  "o": [
+   "after ordinary shareholders",
+   "a fixed dividend before ordinary shareholders",
+   "no dividend",
+   "interest at the bank rate"
+  ],
+  "a": 1,
+  "e": "They are given priority for dividends."
+ },
+ {
+  "q": "The owners of a limited company are the",
+  "o": [
+   "ordinary shareholders",
+   "debenture holders",
+   "creditors",
+   "directors only"
+  ],
+  "a": 0,
+  "e": "They share in the profits and risks."
+ },
+ {
+  "q": "Debenture interest is",
+  "o": [
+   "paid out of profit after tax",
+   "an expense charged before arriving at profit",
+   "a dividend",
+   "an asset"
+  ],
+  "a": 1,
+  "e": "Debentures are loans, so their interest is a cost."
+ },
+ {
+  "q": "A trial balance that agrees does NOT prove",
+  "o": [
+   "that debits equal credits",
+   "that the ledger totals are added correctly",
+   "that there are no errors in the books",
+   "that the arithmetic was done"
+  ],
+  "a": 2,
+  "e": "Some errors do not affect the totals."
+ },
+ {
+  "q": "If a transaction is left out of the books altogether, this is an error of",
+  "o": [
+   "commission",
+   "principle",
+   "original entry",
+   "omission"
+  ],
+  "a": 3,
+  "e": "The trial balance still balances."
+ },
+ {
+  "q": "If a payment is posted to the wrong customer's account, this is an error of",
+  "o": [
+   "omission",
+   "commission",
+   "principle",
+   "compensation"
+  ],
+  "a": 1,
+  "e": "The account is of the right class but wrong."
+ },
+ {
+  "q": "Recording the purchase of a machine as a purchase of goods is an error of",
+  "o": [
+   "omission",
+   "commission",
+   "reversal",
+   "principle"
+  ],
+  "a": 3,
+  "e": "Items were put in the wrong class of account."
+ },
+ {
+  "q": "The purchases ledger control account contains the totals of",
+  "o": [
+   "debtors' transactions",
+   "cash sales",
+   "creditors' transactions",
+   "fixed assets"
+  ],
+  "a": 2,
+  "e": "It checks the personal accounts of suppliers."
+ },
+ {
+  "q": "A bank overdraft is shown as a",
+  "o": [
+   "fixed asset",
+   "current liability",
+   "current asset",
+   "capital"
+  ],
+  "a": 1,
+  "e": "It is repayable on demand."
+ },
+ {
+  "q": "A contra entry in the cash book is used when",
+  "o": [
+   "cash is paid into the bank, or drawn from it",
+   "goods are returned",
+   "wages are paid",
+   "a debtor is written off"
+  ],
+  "a": 0,
+  "e": "It appears on both the cash and bank sides."
+ },
+ {
+  "q": "The accounting concept that assumes a business will continue in operation is the",
+  "o": [
+   "going concern concept",
+   "prudence concept",
+   "accrual concept",
+   "money measurement concept"
+  ],
+  "a": 0,
+  "e": "It lets assets be valued as for continuing use."
+ },
+ {
+  "q": "Using the same accounting methods from year to year follows the concept of",
+  "o": [
+   "materiality",
+   "duality",
+   "consistency",
+   "realisation"
+  ],
+  "a": 2,
+  "e": "It makes results from different years comparable."
+ },
+ {
+  "q": "The concept that expenses are matched with the revenue they helped to earn is the",
+  "o": [
+   "matching concept",
+   "cost concept",
+   "entity concept",
+   "prudence concept"
+  ],
+  "a": 0,
+  "e": "It is also called the accrual concept."
+ },
+ {
+  "q": "Prime cost in a manufacturing account is made up of",
+  "o": [
+   "factory overheads only",
+   "indirect materials and wages",
+   "direct materials, direct labour and direct expenses",
+   "selling expenses"
+  ],
+  "a": 2,
+  "e": "It is the total of direct costs of production."
  }
 ]

@@ -5,7 +5,8 @@ import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
 import { downloadText } from '../../../lib/download.js'
 import { toCsv } from '../../../lib/utils.js'
-import { copyText, Empty, fmtDate, PLAN_IDS, useLoad, TabLoader } from './shared.jsx'
+import CopyButton from '../../../components/CopyButton.jsx'
+import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader } from './shared.jsx'
 
 export default function Pins() {
   const { data, error: loadError, loading, reload } = useLoad(api.adminPins)
@@ -45,7 +46,7 @@ export default function Pins() {
         {fresh.length > 0 && (
           <div className="fresh" role="status">
             <b>New PIN{fresh.length > 1 ? 's' : ''}:</b> <span className="mono">{fresh.join('   ')}</span>{' '}
-            <button className="btn ghost" onClick={() => copyText(fresh.join('\n'))}>Copy</button>
+            <CopyButton text={fresh.join('\n')} label={fresh.length > 1 ? 'all new PINs' : 'the new PIN'} />
           </div>
         )}
       </div>
@@ -69,7 +70,7 @@ export default function Pins() {
                 <td><b className="mono">{x.pin}</b></td><td>{x.plan}</td><td>{x.days}</td><td>{x.student_name || '–'}</td>
                 <td>{used(x) ? `Used ${fmtDate(x.used_at)}` : 'Unused'}</td><td>{fmtDate(x.created_at)}</td>
                 <td>
-                  <button className="btn ghost" onClick={() => copyText(x.pin)}>Copy</button>{' '}
+                  <CopyButton text={x.pin} label={'PIN ' + x.pin} />{' '}
                   {!used(x) && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this PIN?', message: `${x.pin} will stop working immediately.`, confirmLabel: 'Delete PIN' })) && run(async () => { await api.adminDeletePin(x.pin); await reload() })}>Delete</button>}
                 </td>
               </tr>

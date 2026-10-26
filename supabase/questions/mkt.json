@@ -416,5 +416,346 @@
   ],
   "a": 0,
   "e": "It spreads risk across different activities."
+ },
+ {
+  "q": "Factors outside the firm, such as the economy, laws and technology, make up its",
+  "o": [
+   "marketing mix",
+   "macro (external) environment",
+   "product line",
+   "distribution channel"
+  ],
+  "a": 1,
+  "e": "A firm cannot control them."
+ },
+ {
+  "q": "The first stage in the consumer buying decision process is",
+  "o": [
+   "need recognition",
+   "purchase",
+   "evaluation of options",
+   "after-sales feeling"
+  ],
+  "a": 0,
+  "e": "The buyer realises there is a problem or need."
+ },
+ {
+  "q": "A short, catchy phrase used to promote a brand is a",
+  "o": [
+   "trademark",
+   "slogan",
+   "patent",
+   "warranty"
+  ],
+  "a": 1,
+  "e": "It helps customers remember the brand."
+ },
+ {
+  "q": "A big sign placed beside a road to advertise a product is",
+  "o": [
+   "direct mail",
+   "outdoor advertising",
+   "personal selling",
+   "publicity"
+  ],
+  "a": 1,
+  "e": "Billboards are an example."
+ },
+ {
+  "q": "Advertising that happens when satisfied customers tell others about a product is",
+  "o": [
+   "sponsorship",
+   "billboard advertising",
+   "word-of-mouth",
+   "direct selling"
+  ],
+  "a": 2,
+  "e": "It costs the firm nothing and is trusted."
+ },
+ {
+  "q": "Promoting products over the internet and social media is",
+  "o": [
+   "telemarketing",
+   "outdoor advertising",
+   "barter",
+   "online (digital) marketing"
+  ],
+  "a": 3,
+  "e": "It reaches customers using the web."
+ },
+ {
+  "q": "A middleman who brings buyers and sellers together without owning the goods is an",
+  "o": [
+   "retailer",
+   "wholesaler",
+   "agent",
+   "manufacturer"
+  ],
+  "a": 2,
+  "e": "He earns a commission."
+ },
+ {
+  "q": "Supermarkets and hypermarkets are examples of",
+  "o": [
+   "wholesalers",
+   "agents",
+   "manufacturers",
+   "retail outlets"
+  ],
+  "a": 3,
+  "e": "They sell to final consumers."
+ },
+ {
+  "q": "Selling goods through machines that accept coins or cards is",
+  "o": [
+   "mail order",
+   "telemarketing",
+   "franchising",
+   "vending"
+  ],
+  "a": 3,
+  "e": "Drinks and snacks are often sold this way."
+ },
+ {
+  "q": "Pricing a product at N4,999 instead of N5,000 is",
+  "o": [
+   "cost-plus pricing",
+   "price skimming",
+   "psychological pricing",
+   "penetration pricing"
+  ],
+  "a": 2,
+  "e": "It makes the price seem lower."
+ },
+ {
+  "q": "Charging different prices to different groups of customers for the same product is",
+  "o": [
+   "price skimming",
+   "price discrimination",
+   "cost-plus pricing",
+   "penetration pricing"
+  ],
+  "a": 1,
+  "e": "Student and adult tickets are an example."
+ },
+ {
+  "q": "The set of all the products a firm offers is its",
+  "o": [
+   "market share",
+   "product mix",
+   "channel",
+   "brand"
+  ],
+  "a": 1,
+  "e": "It may contain several product lines."
+ },
+ {
+  "q": "A group of closely related products, such as different sizes of one brand of soap, is a",
+  "o": [
+   "product mix",
+   "product line",
+   "market segment",
+   "trademark"
+  ],
+  "a": 1,
+  "e": "They are sold to the same customers."
+ },
+ {
+  "q": "Introducing a new product in a small area first, to see how customers react, is",
+  "o": [
+   "market share",
+   "diversification",
+   "test marketing",
+   "skimming"
+  ],
+  "a": 2,
+  "e": "It lowers the risk of a full launch."
+ },
+ {
+  "q": "Goods that buyers compare on price and quality before buying, such as furniture, are",
+  "o": [
+   "shopping goods",
+   "convenience goods",
+   "unsought goods",
+   "impulse goods"
+  ],
+  "a": 0,
+  "e": "Buyers take time to choose."
+ },
+ {
+  "q": "Goods that buyers do not normally think of buying, such as insurance, are",
+  "o": [
+   "unsought goods",
+   "convenience goods",
+   "shopping goods",
+   "consumer durables"
+  ],
+  "a": 0,
+  "e": "They need strong promotion."
+ },
+ {
+  "q": "A system that collects, sorts and reports marketing information for decisions is a",
+  "o": [
+   "balance sheet",
+   "trial balance",
+   "bank statement",
+   "marketing information system"
+  ],
+  "a": 3,
+  "e": "It supports managers' decisions."
+ },
+ {
+  "q": "A list of questions used to collect information from people is a",
+  "o": [
+   "questionnaire",
+   "slogan",
+   "catalogue",
+   "brochure"
+  ],
+  "a": 0,
+  "e": "It is a common research tool."
+ },
+ {
+  "q": "Watching how customers behave in a shop to collect data is",
+  "o": [
+   "survey by post",
+   "observation",
+   "telephone survey",
+   "test marketing"
+  ],
+  "a": 1,
+  "e": "It is one way of getting primary data."
+ },
+ {
+  "q": "Building long-term relationships with customers is the aim of",
+  "o": [
+   "customer relationship management",
+   "price skimming",
+   "outdoor advertising",
+   "diversification"
+  ],
+  "a": 0,
+  "e": "It keeps customers loyal."
+ },
+ {
+  "q": "The Nigerian agency that approves the safety of food and drugs is",
+  "o": [
+   "SON",
+   "CPC",
+   "FIRS",
+   "NAFDAC"
+  ],
+  "a": 3,
+  "e": "It stands for the National Agency for Food and Drug Administration and Control."
+ },
+ {
+  "q": "The body that sets standards for the quality of goods in Nigeria is the",
+  "o": [
+   "Nigerian Ports Authority",
+   "Central Bank",
+   "Standards Organisation of Nigeria (SON)",
+   "Federal Road Safety Corps"
+  ],
+  "a": 2,
+  "e": "It checks that products meet standards."
+ },
+ {
+  "q": "A firm that believes it should make what it can produce efficiently, without much regard for customers' wishes, has a",
+  "o": [
+   "marketing orientation",
+   "selling orientation",
+   "production orientation",
+   "social orientation"
+  ],
+  "a": 2,
+  "e": "It focuses on the factory, not the market."
+ },
+ {
+  "q": "A firm that focuses on a small, specialised part of the market is following",
+  "o": [
+   "niche marketing",
+   "mass marketing",
+   "undifferentiated marketing",
+   "price discrimination"
+  ],
+  "a": 0,
+  "e": "It meets the needs of a small group."
+ },
+ {
+  "q": "A firm that sells more than any of its competitors in a market is the",
+  "o": [
+   "market leader",
+   "market follower",
+   "niche player",
+   "middleman"
+  ],
+  "a": 0,
+  "e": "It often sets the price for others."
+ },
+ {
+  "q": "Giving out free samples is a form of",
+  "o": [
+   "market research",
+   "packaging",
+   "distribution",
+   "sales promotion"
+  ],
+  "a": 3,
+  "e": "It encourages people to try a product."
+ },
+ {
+  "q": "A display of goods at the point of sale, to attract buyers, is",
+  "o": [
+   "merchandising",
+   "brand loyalty",
+   "diversification",
+   "segmentation"
+  ],
+  "a": 0,
+  "e": "It makes goods catch the eye."
+ },
+ {
+  "q": "A written promise by a seller to repair or replace a faulty product is a",
+  "o": [
+   "slogan",
+   "trademark",
+   "coupon",
+   "warranty (guarantee)"
+  ],
+  "a": 3,
+  "e": "It builds trust in the product."
+ },
+ {
+  "q": "A market with only one seller is a",
+  "o": [
+   "oligopoly",
+   "perfect competition",
+   "monopoly",
+   "duopoly"
+  ],
+  "a": 2,
+  "e": "The seller controls price and supply."
+ },
+ {
+  "q": "A market with a few large sellers is an",
+  "o": [
+   "monopoly",
+   "perfect market",
+   "oligopoly",
+   "monopsony"
+  ],
+  "a": 2,
+  "e": "Each firm's actions affect the others."
+ },
+ {
+  "q": "Telephoning potential customers to sell a product is",
+  "o": [
+   "outdoor advertising",
+   "telemarketing",
+   "sponsorship",
+   "merchandising"
+  ],
+  "a": 1,
+  "e": "It is a form of direct marketing."
  }
 ]

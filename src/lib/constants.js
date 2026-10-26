@@ -112,3 +112,24 @@ export const LEGAL = {
 }
 
 export const LEGAL_UPDATED = '22 October 2026'
+
+/** The institutions listed on the home page. The real list comes from the database (Admin > Institutions); this copy is used until the database has the table. */
+export const DEFAULT_INSTITUTIONS = [
+  { slug: 'cms-grammar-school', name: 'CMS Grammar School', location: 'Bariga, Lagos State', note: 'Founded in 1859, the oldest secondary school in Nigeria' },
+  { slug: 'kings-college', name: "King's College", location: 'Lagos Island, Lagos State', note: null },
+  { slug: 'jambwise', name: 'JAMBwise', location: 'Online', note: null },
+  { slug: 'queens-college', name: "Queen's College", location: 'Yaba, Lagos State', note: null },
+  { slug: 'igbobi-college', name: 'Igbobi College', location: 'Yaba, Lagos State', note: null },
+  { slug: 'lagos-baptist-academy', name: 'Lagos Baptist Academy', location: 'Obanikoro, Lagos State', note: null },
+  { slug: 'grange-school', name: 'Grange School', location: 'Ikeja, Lagos State', note: null },
+  { slug: 'greensprings-school', name: 'Greensprings School', location: 'Anthony/Lekki, Lagos State', note: null },
+  { slug: 'atlantic-hall', name: 'Atlantic Hall', location: 'Poka, Epe, Lagos State', note: null },
+]
+
+/** Where people are sent when their password reset link does not arrive, and how long they wait first. */
+export const ADMIN_WHATSAPP = 'https://wa.me/message/BODI4HXFWC2MM1'
+export const RESET_WAIT_SECONDS = 120
+export const RESET_WHATSAPP_TEXT = "I'd like to reset my password"
+
+/** What a person on the institution side is called (they all use the teacher panel). */
+export const INST_TITLES = ['Teacher', 'Proprietor', 'Proprietress', 'Official']

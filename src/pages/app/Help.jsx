@@ -24,6 +24,13 @@ export default function Help() {
     try { setTickets(await api.myTickets()); setLoadError('') } catch (e) { setLoadError(e.message) }
   }, [])
   useEffect(() => { load() }, [load])
+  // a reply from a teacher or admin shows up without the student having to reload the page
+  useEffect(() => {
+    const t = setInterval(() => { if (document.visibilityState === 'visible') load() }, 30000)
+    const back = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', back)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', back) }
+  }, [load])
 
   const submit = (e) => {
     e.preventDefault()
@@ -42,7 +49,7 @@ export default function Help() {
   return (
     <>
       <h1>Customer Support</h1>
-      <p className="mut">Open a ticket and we will reply right here. You can also email <a href="mailto:support@jambwise.ng">support@jambwise.ng</a>.</p>
+      <p className="mut">Open a ticket and we will reply right here.</p>
 
       <div className="card">
         <h3><Icon name="plus" size={18} /> Open a new ticket</h3>

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo } from '../components/ui.jsx'
+import PasswordInput from '../components/PasswordInput.jsx'
+import ResetHelp from '../components/ResetHelp.jsx'
 import { useAction } from '../hooks.js'
 import { demoMode } from '../lib/supabase.js'
 import { DEMO_ADMIN, DEMO_STUDENT, DEMO_TEACHER } from '../lib/demo/accounts.js'
@@ -28,6 +30,7 @@ export default function Auth() {
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({ name: '', email: '', password: '' })
   const [notice, setNotice] = useState('')
+  const [sentAt, setSentAt] = useState(null) // when a reset link was last requested (starts the 2-minute wait)
   const [dest, setDest] = useState('') // where to go after a one-click demo login
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
@@ -42,6 +45,7 @@ export default function Auth() {
       if (mode === 'forgot') {
         if (!email.includes('@')) throw new Error('Enter a valid email address.')
         await sendReset(email)
+        setSentAt(Date.now())
         setNotice('If that email has an account, a reset link is on its way. Check your inbox and spam folder.')
         return
       }
@@ -97,12 +101,13 @@ export default function Auth() {
         {mode !== 'forgot' && (
           <>
             <label htmlFor="pw" className="sm">{mode === 'reset' ? 'New password' : 'Password'}</label>
-            <input id="pw" type="password" value={f.password} onChange={set('password')} placeholder="Password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+            <PasswordInput id="pw" value={f.password} onChange={set('password')} placeholder="Password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
           </>
         )}
         <ErrorLine>{error}</ErrorLine>
         {notice && <p className="notice" role="status">{notice}</p>}
-        <button className="btn w" disabled={busy}>{busy ? 'Please wait…' : button[mode] || button.login}</button>
+        {mode === 'forgot' && <ResetHelp startedAt={sentAt} />}
+        <button className="btn w" disabled={busy}>{busy ? 'Please wait…' : (mode === 'forgot' && sentAt ? 'Send the link again' : button[mode]) || button.login}</button>
         {(mode === 'login' || mode === 'signup') && (
           <>
             <div className="or-line"><span>or</span></div>

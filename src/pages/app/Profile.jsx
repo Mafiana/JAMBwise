@@ -60,7 +60,7 @@ export default function Profile() {
         subjects: f.subjects, avatar: f.avatar,
       })
       nav('/app/dashboard')
-    })
+    }, 'Profile saved')
   return (
     <>
       <h1>My Profile</h1>

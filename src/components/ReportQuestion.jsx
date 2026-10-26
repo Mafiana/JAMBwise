@@ -28,7 +28,7 @@ export default function ReportQuestion({ q }) {
     e.preventDefault()
     const { subject, body } = questionReport({ q, subjectName: SUBJECTS[q.subject]?.name || q.subject, reason, note })
     return run(async () => {
-      await api.sendMessage({ name: profile.full_name || 'Student', email: profile.email || user?.email || '', topic: 'question', subject, body, user_id: user.id })
+      await api.sendMessage({ name: profile.full_name || 'Student', email: profile.email || user?.email || '', topic: 'question', subject, body, user_id: user.id, question_id: q.id })
       reported.add(q.id)
       setDone(true)
     })

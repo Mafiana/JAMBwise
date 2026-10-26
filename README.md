@@ -147,6 +147,15 @@ Parents can see how a student is doing, without ever logging in as the student.
 
 Safeguards: 5 wrong tries per student ID per 15 minutes, 20 per device per hour (counted whether or not the ID exists, so nothing is revealed); one vague error message; the same CAPTCHA as the contact form; codes expire; only a short browser description is kept (no IP address). Database: run `supabase/migrate-parent.sql` once, after `migrate-notify.sql`. If you ran it before the admin bell existed, also run `supabase/migrate-parent-bell.sql` once: every admin then gets a bell notification when a parent signs in. Deploy the two functions: `supabase functions deploy parent-login` and `supabase functions deploy parent-report`. In demo mode, use ID `JW-2026-000002` and code `DEMO-2468` (shown in the demo banner).
 
+### Institutions (schools)
+
+The home page has a **For institutions** section under the parents box. A visitor picks an institution from the drop-down and presses the button to reach that school's own login page (`/institution/<school>`). The nine starting institutions are CMS Grammar School, King's College, JAMBwise, Queen's College, Igbobi College, Lagos Baptist Academy, Grange School, Greensprings School and Atlantic Hall.
+
+- **Admin > Institutions**: add, rename and delete institutions, see how many staff and students each has, and add or remove people. You can also choose an institution when you add a student or teacher, on a student's **Manage** tab, and in **Teachers > Edit**. Every assignment is saved in the database (`profiles.institution_id`).
+- **Teacher, proprietor, proprietress or official**: all four use the teacher panel. Pick the title when you assign them. Once assigned to an institution they see only that institution's students, scores, exam logs and support tickets (the database enforces it, not just the screen). Staff with no institution see every student, as before. Admins always see everything.
+- **Students** assigned to an institution log in on that school's page too and go to their normal dashboard. The institution page refuses anyone who is not linked to that school, and tells admins to use the main login.
+- Database already running? Run `supabase/migrate-institutions.sql` once, after `migrate-teacher-scope.sql` (safe to repeat). It also puts the teacher `mpatience@gmail.com` and the student named Samuel Admin into JAMBwise. New projects get everything from `schema.sql`. No Edge Function changes.
+
 ### Sign in with Google
 
 The login and signup pages have a "Continue with Google" button. It needs a one-time setup, and no SQL or Edge Function:
@@ -245,7 +254,7 @@ src/lib/        supabase.js (real or demo backend), api.js (all server calls, of
 src/context/    Auth, Theme, Exam (practice and exam state)
 src/pages/      Landing, Auth, Legal, and app/* screens
 public/         sw.js (offline), manifest.webmanifest, icons
-supabase/       schema.sql, migrate-admin-panel.sql, migrate-mock-lock.sql, migrate-exam-controls.sql, migrate-roles.sql, migrate-notify.sql, migrate-parent.sql, migrate-subjects.sql, seed-questions.sql, questions/*.json, functions/*
+supabase/       schema.sql, migrate-admin-panel.sql, migrate-mock-lock.sql, migrate-exam-controls.sql, migrate-roles.sql, migrate-notify.sql, migrate-parent.sql, migrate-institutions.sql, migrate-subjects.sql, seed-questions.sql, questions/*.json, functions/*
 tests/          unit tests and database security tests
 ```
 
