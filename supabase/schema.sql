@@ -1344,3 +1344,68 @@ begin
 end $$;
 revoke execute on function public.report_question(bigint, text, text) from public, anon;
 grant execute on function public.report_question(bigint, text, text) to authenticated;
+
+-- ───────────── Admin > Mail (migrate-mail.sql) ─────────────
+alter table public.messages drop constraint if exists messages_topic_check;
+alter table public.messages add constraint messages_topic_check check (topic in ('general','payment','pin','bug','question','suspended','other'));
+
+-- every admin's bell rings when new mail arrives
+create or replace function public.notify_mail() returns trigger language plpgsql security definer set search_path = public as $$
+declare adm record; txt text;
+begin
+  if new.user_id is not null and new.topic <> 'suspended' then return new; end if;   -- ordinary student tickets are not mail
+  txt := coalesce(nullif(new.name, ''), 'Someone') || ': ' || left(coalesce(nullif(new.subject, ''), new.body), 160);
+  begin   -- a problem with the bell must never lose the message itself
+    for adm in select id from public.profiles where is_admin loop
+      perform public.notify_user(adm.id, 'mail', case when new.topic = 'suspended' then 'Message from a suspended account' else 'New mail' end, txt, '/app/admin/mail');
+    end loop;
+  exception when others then
+    raise warning 'notify_mail skipped: %', sqlerrm;
+  end;
+  return new;
+end $$;
+drop trigger if exists notify_mail on public.messages;
+create trigger notify_mail after insert on public.messages for each row execute function public.notify_mail();
+
+-- ───────────── teachers in charge see ExamHall scores (migrate-hall-scores.sql) ─────────────
+drop policy if exists att_read on public.attempts;
+create policy att_read on public.attempts for select to authenticated
+  using ((public.is_staff() and public.staff_sees(user_id)) or (user_id = auth.uid() and kind in ('practice','mock')));
+
+create or replace function public.admin_exam_events(p_kind text, p_user uuid default null) returns table (user_id uuid, type text, occurred_at timestamptz, detail text)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query select e.user_id, e.type, e.occurred_at, e.detail from public.exam_events e
+    where e.kind = p_kind and (p_user is null or e.user_id = p_user) and public.staff_sees(e.user_id) order by e.occurred_at;
+end $$;
+revoke execute on function public.admin_exam_events(text, uuid) from public, anon;
+grant execute on function public.admin_exam_events(text, uuid) to authenticated;
+grant select on public.attempts to authenticated;
+
+-- ───────────── teachers see students only (migrate-teacher-students.sql) ─────────────
+drop function if exists public.admin_students();
+create function public.admin_students() returns table (
+  id uuid, reg_number text, email text, full_name text, course text, school text, plan text,
+  plan_expires timestamptz, suspended boolean, created_at timestamptz, questions bigint, correct bigint, mocks bigint,
+  is_admin boolean, last_active timestamptz, is_teacher boolean, institution_id uuid, institution text, inst_title text)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  return query
+    select p.id, p.reg_number, p.email, p.full_name, p.course, p.school, p.plan, p.plan_expires, p.suspended, p.created_at,
+           coalesce(sum(a.total), 0)::bigint, coalesce(sum(a.correct), 0)::bigint,
+           count(a.id) filter (where a.mock_score is not null)::bigint,
+           p.is_admin, max(a.created_at), p.is_teacher, p.institution_id, i.name, p.inst_title
+      from public.profiles p
+      left join public.attempts a on a.user_id = p.id
+      left join public.institutions i on i.id = p.institution_id
+     where public.is_admin() or (not p.is_admin and not p.is_teacher and public.staff_sees(p.id))
+     group by p.id, i.name order by p.created_at desc limit 2000;
+end $$;
+revoke execute on function public.admin_students() from public, anon;
+grant execute on function public.admin_students() to authenticated;
+
+drop policy if exists profiles_read on public.profiles;
+create policy profiles_read on public.profiles for select to authenticated
+  using (id = auth.uid() or public.is_admin() or (public.is_staff() and not is_admin and not is_teacher and public.staff_sees(id)));

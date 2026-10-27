@@ -125,7 +125,7 @@ const tableRows = (name) =>
 const log = (action, detail) =>
   db.audit.unshift({ id: db.nextAudit++, actor: me(), actor_email: profileOf(me())?.email, action, detail: String(detail).slice(0, 500), created_at: new Date().toISOString() })
 
-const MSG_TOPICS = ['general', 'payment', 'pin', 'bug', 'question', 'other']
+const MSG_TOPICS = ['general', 'payment', 'pin', 'bug', 'question', 'suspended', 'other']
 const EMAIL = /^[^@\s]+@[^@\s]+$/
 const HOUR = 36e5
 const DAY = 24 * HOUR
@@ -158,6 +158,10 @@ function messageLimit(r, abuseKey) {
 function addMessage(r, abuseKey = null) {
   const row = { id: db.nextMessage++, name: r.name.trim(), email: r.email.trim(), topic: r.topic || 'general', subject: r.subject?.trim() || null, body: r.body.trim(), user_id: r.user_id || null, status: 'new', abuse_key: abuseKey, created_at: new Date().toISOString() }
   db.messages.unshift(row)
+  if (!row.user_id || row.topic === 'suspended') {   // mail: every admin's bell rings
+    const txt = (row.name || 'Someone') + ': ' + (row.subject || row.body).slice(0, 160)
+    db.profiles.filter((p) => p.is_admin).forEach((adm) => notify(adm.id, 'mail', row.topic === 'suspended' ? 'Message from a suspended account' : 'New mail', txt, '/app/admin/mail'))
+  }
   return row
 }
 const validQuestion = (r) =>
@@ -174,7 +178,7 @@ function from(name) {
     let list = (tableRows(name) || []).slice()
     if (name === 'questions') list = list.filter((x) => hasAccess(x.subject) || isStaff())
     if (name === 'profiles') list = list.filter((x) => x.id === uid || isAdmin() || (isStaff() && !x.is_admin && !x.is_teacher && staffSees(x.id)))
-    if (name === 'attempts') list = list.filter((x) => (isStaff() && staffSees(x.user_id)) || (x.user_id === uid && x.kind !== 'hall'))   // ExamHall scores are admin-only
+    if (name === 'attempts') list = list.filter((x) => (isStaff() && staffSees(x.user_id)) || (x.user_id === uid && x.kind !== 'hall'))   // staff see every kind (teachers: their own institution); a student never sees their ExamHall score here
     if (name === 'access_pins' || name === 'audit_log') list = isAdmin() ? list : []
     if (name === 'messages') list = list.filter((x) => (isStaff() && (staffSees(x.user_id) || x.assigned_to === uid)) || (x.user_id && x.user_id === uid))
     if (name === 'message_replies') list = list.filter((x) => db.messages.some((m) => m.id === x.message_id && ((isStaff() && (staffSees(m.user_id) || m.assigned_to === uid)) || m.user_id === uid)))

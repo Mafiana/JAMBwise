@@ -85,7 +85,7 @@ export const LEGAL = {
       ['Parent access', ['A student can make a parent code in Settings and share it, with their Student ID, with a parent or guardian. Someone who has both can sign in on the home page and see the student\'s scores, subjects, mock results and activity for 60 minutes. They cannot see the student\'s email, messages or password, and they cannot change anything.', 'The code lasts 7 days. The student can renew it or switch it off at any time, and is told each time someone signs in. We record the name the parent entered, their relationship to the student, the time and a short browser description (for example Chrome on Android), including failed attempts, so that admins can spot misuse. Parents can only try a few times before being locked out for a while.']],
       ['Young users', ['Many candidates are under 18. If you are under 18, please use JAMBwise with the knowledge of a parent or guardian.']],
       ['Changes to this policy', ['If we change this policy in a way that matters, we will update the date at the top of this page and, where appropriate, tell you in the app.']],
-      ['Contact us', ['Questions or requests about your data: use the Contact page or email support@jambwise.ng.']],
+      ['Contact us', ['Questions or requests about your data: use the Contact page.']],
     ],
   },
   terms: {
@@ -106,7 +106,7 @@ export const LEGAL = {
       ['Ending your account', ['You can delete your account at any time in Settings. We may suspend or end access if these terms are broken. Payment records are kept for accounting.']],
       ['Changes to these terms', ['We may update these terms. If we make an important change we will update the date on this page. Continuing to use JAMBwise after a change means you accept the new terms.']],
       ['Governing law', ['These terms are governed by the laws of the Federal Republic of Nigeria.']],
-      ['Contact us', ['Questions about these terms: use the Contact page or email support@jambwise.ng.']],
+      ['Contact us', ['Questions about these terms: use the Contact page.']],
     ],
   },
 }

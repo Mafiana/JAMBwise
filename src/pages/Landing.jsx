@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { ThemeToggle, Logo, PlanCard, ErrorLine } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
 import FaqList from '../components/FaqList.jsx'
+import ContactBlock from '../components/ContactBlock.jsx'
 import ParentForm from '../components/ParentForm.jsx'
 import InstitutionPicker from '../components/InstitutionPicker.jsx'
 import { HOW, SUBJECT_KEYS } from '../lib/constants.js'
@@ -96,9 +97,10 @@ export default function Landing() {
             <a href="#how" onClick={go('how')}>How it works</a>
             <a href="#pricing" onClick={go('pricing')}>Pricing</a>
             <a href="#faq" onClick={go('faq')}>FAQ</a>
+            <a href="#contact" onClick={go('contact')}>Contact</a>
             <a href="#parents" onClick={go('parents')}>Parents</a>
             <a href="#institutions" onClick={go('institutions')}>Institutions</a>
-            <Link to="/contact" onClick={() => setMenu(false)}>Contact</Link>
+            <a href="#contact" onClick={go('contact')}>Contact</a>
             <div className="mnav-acts">
               <ThemeToggle />
               {session ? <Link className="btn" to="/app/dashboard">Open app</Link> : <><Link className="btn ghost" to="/auth/login">Log in</Link><Link className="btn" to="/auth/signup">Get started</Link></>}
@@ -199,10 +201,18 @@ export default function Landing() {
         <div className="faq-grid">
           <div className="band-head" style={{ marginBottom: 0 }}>
             <h2>Questions, answered</h2>
-            <p>Can't find what you need? <Link to="/contact">Contact us</Link> or email support@jambwise.ng.</p>
+            <p>Can't find what you need? <a href="#contact" onClick={go('contact')}>Contact us</a> and we will reply by email.</p>
           </div>
           <FaqList />
         </div>
+      </section>
+
+      <section className="wrap band contact" id="contact" style={{ paddingTop: 16 }}>
+        <div className="band-head">
+          <h2>Contact us</h2>
+          <p>Questions about a PIN, a payment or your account? Send us a message and we will reply by email, usually within a day.</p>
+        </div>
+        <ContactBlock />
       </section>
 
       <section className="wrap">
@@ -221,7 +231,7 @@ export default function Landing() {
               <p>Practice and CBT mocks for JAMB / UTME candidates in Nigeria. An independent platform, not affiliated with JAMB.</p>
             </div>
             <div><h4>Product</h4><a href="#how" onClick={go('how')}>How it works</a><a href="#pricing" onClick={go('pricing')}>Pricing</a><a href="#faq" onClick={go('faq')}>FAQ</a><a href="#parents" onClick={go('parents')}>For parents</a><a href="#institutions" onClick={go('institutions')}>For institutions</a></div>
-            <div><h4>Account</h4><Link to="/auth/login">Log in</Link><Link to="/auth/signup">Sign up</Link><Link to="/contact">Contact us</Link></div>
+            <div><h4>Account</h4><Link to="/auth/login">Log in</Link><Link to="/auth/signup">Sign up</Link><a href="#contact" onClick={go('contact')}>Contact us</a></div>
             <div><h4>Legal</h4><Link to="/privacy">Privacy policy</Link><Link to="/terms">Terms and conditions</Link></div>
           </div>
           <div className="legal-line">© {new Date().getFullYear()} JAMBwise.</div>

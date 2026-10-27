@@ -779,6 +779,7 @@ do $$ begin
 end $$;
 reset role;
 insert into public.attempts(user_id,subject,correct,total,kind) values ((select id from t_ids where name='insta'),'eng',9,10,'practice'),((select id from t_ids where name='instb'),'eng',4,10,'practice');
+insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values ((select id from t_ids where name='insta'),'eng',30,40,'hall',301),((select id from t_ids where name='instb'),'eng',20,40,'hall',250);
 insert into public.messages(name,email,topic,body,user_id,status) values ('A','insta@x.com','general','ticket from school A',(select id from t_ids where name='insta'),'new'),('B','instb@x.com','general','ticket from school B',(select id from t_ids where name='instb'),'new');
 -- the assigned teacher sees only school A
 select pg_temp.as_user((select id from t_ids where name='instt'));
@@ -790,8 +791,10 @@ do $$ begin
   assert (select count(*) from public.admin_students() where is_admin or is_teacher) = 0, 'still no admins or teachers in the list';
   assert (select institution from public.admin_students() where email = 'insta@x.com') = 'Test College A', 'the list names the institution';
   assert (select count(*) from public.profiles where email = 'instb@x.com') = 0, 'cannot read another school''s profile directly';
-  assert (select count(*) from public.attempts where user_id = (select id from t_ids where name='insta')) = 1, 'reads own student''s results';
+  assert (select count(*) from public.attempts where user_id = (select id from t_ids where name='insta') and kind = 'practice') = 1, 'reads own student''s results';
   assert (select count(*) from public.attempts where user_id = (select id from t_ids where name='instb')) = 0, 'cannot read another school''s results';
+  assert (select count(*) from public.attempts where kind = 'hall' and mock_score = 301) = 1, 'the teacher in charge reads their student''s ExamHall score';
+  assert (select count(*) from public.attempts where kind = 'hall' and mock_score = 250) = 0, 'but not another school''s ExamHall score';
   assert (select count(*) from public.messages where body = 'ticket from school A') = 1, 'sees own school''s tickets';
   assert (select count(*) from public.messages where body = 'ticket from school B') = 0, 'cannot read another school''s tickets';
   assert public.my_institution() = (select id from t_inst where name='a'), 'knows their institution';
@@ -897,6 +900,19 @@ end $$;
 select pg_temp.as_user((select id from t_ids where name='tutor'));
 select pg_temp.as_user((select id from t_ids where name='admin'));
 do $$ begin assert (select count(*) from public.notifications where user_id = auth.uid() and kind = 'question') = 1, 'the admins hear about built-in question reports'; end $$;
+-- mail: a guest message (sent by the Edge Function with the service role) and a suspended student's message ring every admin's bell
+create temp table t_mail0 as select (select count(*) from public.notifications where kind = 'mail') as n;
+grant all on t_mail0 to authenticated;
+reset role; set local role service_role;
+insert into public.messages (name, email, topic, subject, body) values ('Guest Gina', 'gina@example.com', 'general', 'Hello', 'A message from the contact page');
+reset role; set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+insert into public.messages (name, email, topic, subject, body, user_id) values ('Paid', 'paid@x.com', 'suspended', 'Suspended account', 'Please unsuspend me, it was a mistake', auth.uid());
+select pg_temp.as_user((select id from t_ids where name='admin'));
+do $$ begin
+  assert (select count(*) from public.notifications where user_id = auth.uid() and kind = 'mail') = (select n from t_mail0) + 2, 'admins are told about guest mail and suspended-account mail';
+  assert (select count(*) from public.messages where user_id is null or topic = 'suspended') >= 2, 'admins read the mail';
+end $$;
 reset role;
 
 -- ===== anon =====

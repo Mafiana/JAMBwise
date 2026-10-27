@@ -994,3 +994,15 @@ main>.card+.card,main>.card+.notice,main>.notice+.card{margin-top:14px}
 @keyframes donefade{from{opacity:0}to{opacity:1}}
 @keyframes donepop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.done-back,.done-box{animation:none}}
+
+/* Admin > Mail: a blinking envelope while there is unread mail */
+.nv .mail-blink{color:var(--bad);animation:mailblink 1.1s ease-in-out infinite}
+.nv-n{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--bad);color:#fff;font-size:12px;display:inline-grid;place-items:center}
+@keyframes mailblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.nv .mail-blink{animation:none}}
+
+/* ExamHall instructions box */
+.hall-ins{margin:6px 0 14px;padding-left:20px}
+.hall-ins li{margin:5px 0}
+.hall-ins.warn li::marker{color:var(--bad)}
+.price-wait{opacity:.35}

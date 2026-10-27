@@ -10,7 +10,7 @@ create index if not exists messages_assigned_idx on public.messages (assigned_to
 
 -- make sure a "question" ticket is an allowed topic (older databases may not have it)
 alter table public.messages drop constraint if exists messages_topic_check;
-alter table public.messages add constraint messages_topic_check check (topic in ('general','payment','pin','bug','question','other'));
+alter table public.messages add constraint messages_topic_check check (topic in ('general','payment','pin','bug','question','suspended','other'));
 
 -- the uploader is always the real signed-in person: nobody can claim a question as someone else's
 create or replace function public.stamp_question_owner() returns trigger language plpgsql security definer set search_path = public as $$

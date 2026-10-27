@@ -16,7 +16,7 @@ function Side({ s }) {
   const confirm = useConfirm()
   const answered = (s.marks || []).filter((m) => m != null).length
   const leave = async (toDash) => {
-    if (!s.done && answered > 0 && !(await confirm({ title: 'Quit this practice?', message: 'Your answers in this session will not be saved.', confirmLabel: 'Quit practice' }))) return
+    if (!s.done && !(await confirm({ title: 'Quit this practice?', message: answered > 0 ? 'Warning: your answers in this session will not be saved.' : 'Warning: you are about to leave this practice session.', confirmLabel: 'Quit practice', cancelLabel: 'Keep practising' }))) return
     endPractice()
     if (toDash) nav('/app/dashboard')
   }

@@ -494,21 +494,21 @@ export async function sendMessage({ name, email, topic, subject, body, user_id, 
   if (!user_id) {
     await callFn('contact-submit', {
       ...row, website: website || '', captchaToken: captcha?.turnstile || captcha?.token || '', captchaAnswer: captcha?.answer || '',
-    }, 'The contact form is not available right now. Please email support@jambwise.ng.')
+    }, 'The contact form is not available right now. Please try again later.')
     return
   }
   if (question_id) {
     // a question report goes to whoever uploaded that question (teacher or admin); if the database has not been updated yet, fall back to an ordinary ticket
     const { error } = await supabase.rpc('report_question', { p_question: question_id, p_subject: row.subject || null, p_body: row.body })
     if (!error) return
-    if (!/PGRST20[25]|42883|schema cache|does not exist/i.test(String(error.code || '') + ' ' + String(error.message || ''))) { if (!/rate_limited/.test(error.message || '')) console.error('report_question failed:', error); fail(error, 'Your report could not be sent. Please try again or email support@jambwise.ng.') }
+    if (!/PGRST20[25]|42883|schema cache|does not exist/i.test(String(error.code || '') + ' ' + String(error.message || ''))) { if (!/rate_limited/.test(error.message || '')) console.error('report_question failed:', error); fail(error, 'Your report could not be sent. Please try again in a few minutes.') }
   }
   const { error } = await supabase.from('messages').insert({ ...row, user_id })
-  if (error) { if (!/rate_limited/.test(error.message || '')) console.error('sending the message failed:', error); fail(error, 'Your message could not be sent. Please try again or email support@jambwise.ng.') }
+  if (error) { if (!/rate_limited/.test(error.message || '')) console.error('sending the message failed:', error); fail(error, 'Your message could not be sent. Please try again in a few minutes.') }
 }
 
 /** A question for the built-in CAPTCHA: { question, token }. */
-export const getCaptcha = () => callFn('contact-challenge', {}, 'The contact form is not available right now. Please email support@jambwise.ng.')
+export const getCaptcha = () => callFn('contact-challenge', {}, 'The contact form is not available right now. Please try again later.')
 
 // ── support tickets (a ticket is a row in `messages`; the conversation is in `message_replies`) ──
 export async function myTickets() {

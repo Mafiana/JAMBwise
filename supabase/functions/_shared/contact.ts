@@ -80,7 +80,8 @@ export async function handleSubmit(req: Request, deps: ContactDeps): Promise<Res
   if (err) {
     const m = String(err.message || '')
     if (m.startsWith('rate_limited:')) return reply(req, { error: m.slice('rate_limited:'.length).trim() }, 429)
-    return reply(req, { error: 'Your message could not be sent. Please email support@jambwise.ng instead.' }, 500)
+    console.error('contact-submit insert failed:', m, (err as { code?: string }).code ?? '')   // shows in Supabase > Edge Functions > contact-submit > Logs
+    return reply(req, { error: 'Your message could not be sent. Please try again in a few minutes.' }, 500)
   }
   return reply(req, { ok: true })
 }

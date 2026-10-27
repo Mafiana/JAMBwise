@@ -43,6 +43,7 @@ const Teachers = lazy(() => import('./pages/app/admin/Teachers.jsx'))
 const Institutions = lazy(() => import('./pages/app/admin/Institutions.jsx'))
 const StaffChatPage = lazy(() => import('./pages/app/admin/Chat.jsx'))
 const Online = lazy(() => import('./pages/app/admin/Online.jsx'))
+const Mail = lazy(() => import('./pages/app/admin/Mail.jsx'))
 const Activity = lazy(() => import('./pages/app/admin/Activity.jsx'))
 /** Admins start on Overview, teachers on Students. */
 function AdminHome() { const { isAdmin } = useAuth(); return <Navigate to={isAdmin ? 'overview' : 'students'} replace /> }
@@ -93,6 +94,7 @@ export default function App() {
                       <Route path="payments" element={<AdminOnly><Payments /></AdminOnly>} />
                       <Route path="questions" element={<Questions />} />
                       <Route path="messages" element={<Messages />} />
+                      <Route path="mail" element={<AdminOnly><Mail /></AdminOnly>} />
                       <Route path="settings" element={<AdminOnly><PriceSettings /></AdminOnly>} />
                       <Route path="activity" element={<AdminOnly><Activity /></AdminOnly>} />
                       <Route path="*" element={<AdminHome />} />

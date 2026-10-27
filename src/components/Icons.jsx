@@ -35,6 +35,7 @@ const P = {
   chevl: 'm15 6-6 6 6 6',
   chevr: 'm9 6 6 6-6 6',
   send: 'M21 3 3 10.500l6.500 2.500L12 20l9-17ZM9.500 13 21 3',
+  mail: 'M3 6h18v12H3zM3.5 6.5 12 13l8.5-6.5',
   inbox: 'M4 13l2-8h12l2 8M4 13v6h16v-6M4 13h5l1 2h4l1-2h5',
   flag: 'M5 21V4m0 0h11l-2 4 2 4H5',
   download: 'M12 4v11m0 0 4-4m-4 4-4-4M5 20h14',

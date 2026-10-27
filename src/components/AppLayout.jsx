@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useExam } from '../context/ExamContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -8,6 +8,8 @@ import Icon from './Icons.jsx'
 import NotificationBell from './NotificationBell.jsx'
 import OfflineBanner from './OfflineBanner.jsx'
 import Prefetch from './Prefetch.jsx'
+import * as api from '../lib/api.js'
+import { isMail, playChime } from '../lib/utils.js'
 
 const NAV = [
   ['dashboard', 'Dashboard', 'home'],
@@ -37,6 +39,7 @@ const ADMIN_NAV = [
   ['pins', 'Access PINs', 'key', true],
   ['payments', 'Payments', 'card', true],
   ['questions', 'Questions', 'book'],
+  ['mail', 'Mail', 'mail', true],
   ['messages', 'Support tickets', 'inbox'],
   ['settings', 'Prices', 'settings', true],
   ['online', 'Who is online', 'users'],
@@ -72,12 +75,34 @@ function usePhone() {
   return phone
 }
 
+/** How many unread messages are waiting in Admin > Mail (checked every 10 seconds, and again when the admin opens a page). Admins only. */
+function useMailCount(enabled, pathname) {
+  const [n, setN] = useState(0)
+  const prev = useRef(null)
+  useEffect(() => {
+    if (!enabled) { setN(0); return undefined }
+    let alive = true
+    const load = () => api.adminMessages().then((rows) => {
+      if (!alive) return
+      const c = rows.filter((m) => isMail(m) && m.status === 'new').length
+      if (prev.current != null && c > prev.current) playChime()   // a new message arrived while the admin was here
+      prev.current = c
+      setN(c)
+    }).catch(() => {})
+    load()
+    const t = setInterval(() => { if (document.visibilityState === 'visible') load() }, 10000)
+    return () => { alive = false; clearInterval(t) }
+  }, [enabled, pathname])
+  return n
+}
+
 export default function AppLayout() {
   const { pathname } = useLocation()
   const inAdmin = pathname.startsWith('/app/admin')
   const inExam = /^\/app\/(mock|examhall)/.test(pathname)   // exam pages are full width: no menu to wander off to
   const { profile, plan, isAdmin, isTeacher, isStaff, signOut } = useAuth()
   const phone = usePhone()
+  const mailN = useMailCount(isAdmin && isStaff, pathname)
   const [drawer, setDrawer] = useState(false)   // the menu on phones
   useEffect(() => { setDrawer(false) }, [pathname])
   useEffect(() => {
@@ -92,8 +117,9 @@ export default function AppLayout() {
   }, [drawer])
   const link = ([to, label, icon], base = '/app/') => (
     <NavLink key={to} to={`${base}${to}`} className={({ isActive }) => 'nv' + (isActive ? ' on' : '')}>
-      <Icon name={icon} />
+      <Icon name={icon} className={to === 'mail' && mailN > 0 ? 'mail-blink' : undefined} />
       <span>{label}</span>
+      {to === 'mail' && mailN > 0 && <b className="nv-n" aria-label={`${mailN} unread`}>{mailN > 9 ? '9+' : mailN}</b>}
     </NavLink>
   )
   return (

@@ -33,13 +33,20 @@ export function useMyExam(uid, kind) {
 
 /** Plans with live prices from the database; falls back to the built-in prices if the request fails. */
 export function usePlans() {
-  const [prices, setPrices] = useState(null)
+  // the last prices we got are remembered, so a reload shows the right price straight away; with nothing remembered yet the price stays blank until it arrives (never the old built-in one)
+  const [prices, setPrices] = useState(() => { try { return JSON.parse(localStorage.getItem('jw_plan_prices') || 'null') } catch { return null } })
+  const [failed, setFailed] = useState(false)
   useEffect(() => {
     let alive = true
-    api.getPlans().then((rows) => alive && setPrices(Object.fromEntries(rows.map((r) => [r.id, r.price_kobo])))).catch(() => {})
+    api.getPlans().then((rows) => {
+      const next = Object.fromEntries(rows.map((r) => [r.id, r.price_kobo]))
+      if (!alive) return
+      setPrices(next)
+      try { localStorage.setItem('jw_plan_prices', JSON.stringify(next)) } catch { /* private window */ }
+    }).catch(() => alive && setFailed(true))
     return () => { alive = false }
   }, [])
-  return PLANS.map((p) => ({ ...p, kobo: prices?.[p.id] ?? p.kobo }))
+  return PLANS.map((p) => ({ ...p, kobo: p.id === 'free' ? 0 : prices?.[p.id] ?? (failed ? p.kobo : null) }))
 }
 
 /** Re-renders every second while `active`, for countdowns. */

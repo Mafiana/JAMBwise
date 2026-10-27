@@ -83,7 +83,7 @@ export default function NotificationBell() {
               {items.map((n) => (
                 <li key={n.id}>
                   <button type="button" className={'bell-item' + (n.read_at ? '' : ' new')} onClick={() => go(n)}>
-                    <span className="bell-ic" aria-hidden="true"><Icon name={n.kind === 'chat' ? 'chat' : n.kind === 'parent' ? 'eye' : n.kind === 'teacher' ? 'users' : n.kind === 'question' ? 'flag' : n.kind === 'ticket' ? 'inbox' : 'trophy'} size={16} /></span>
+                    <span className="bell-ic" aria-hidden="true"><Icon name={n.kind === 'chat' ? 'chat' : n.kind === 'parent' ? 'eye' : n.kind === 'teacher' ? 'users' : n.kind === 'question' ? 'flag' : n.kind === 'ticket' ? 'inbox' : n.kind === 'mail' ? 'mail' : 'trophy'} size={16} /></span>
                     <span className="bell-tx"><b>{n.title}</b>{n.body && <span>{n.body}</span>}<em>{ago(n.created_at)}</em></span>
                   </button>
                 </li>

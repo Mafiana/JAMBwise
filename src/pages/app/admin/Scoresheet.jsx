@@ -145,6 +145,7 @@ export default function Scoresheet() {
           </button>
         ))}
       </div>
+      {!isAdmin && <p className="sm" role="status">You see the CBT Mock and ExamHall scores of the students you are in charge of{' '}(your institution's students, or every student if you are not assigned to one).</p>}
       <div className="stat-grid">
         <div className="card st"><b>{st.count}</b><span>students have written {exam.label}</span></div>
         <div className="card st"><b>{st.average}</b><span>average score (out of 400)</span></div>

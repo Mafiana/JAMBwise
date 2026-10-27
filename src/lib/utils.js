@@ -234,3 +234,25 @@ export function studentReport(attempts) {
     subjects: Object.values(by).map((s) => ({ ...s, pct: s.total ? Math.round((s.correct / s.total) * 100) : 0 })).sort((a, b) => b.total - a.total),
   }
 }
+
+/** A short two-note chime made in the browser (no sound file). Browsers only allow sound after the person has clicked or typed once on the page; before that it stays silent. */
+let chimeCtx = null
+if (typeof window !== 'undefined') {
+  const unlock = () => { try { chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)(); chimeCtx.resume() } catch { /* no sound available */ } }
+  ;['pointerdown', 'keydown', 'touchstart'].forEach((e) => window.addEventListener(e, unlock, { once: true, passive: true }))
+}
+export function playChime() {
+  try {
+    if (!chimeCtx || chimeCtx.state !== 'running') return
+    const t0 = chimeCtx.currentTime
+    ;[[880, 0], [1175, 0.16]].forEach(([f, d]) => {
+      const o = chimeCtx.createOscillator(); const g = chimeCtx.createGain()
+      o.type = 'sine'; o.frequency.value = f
+      g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.25, t0 + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.45)
+      o.connect(g); g.connect(chimeCtx.destination); o.start(t0 + d); o.stop(t0 + d + 0.5)
+    })
+  } catch { /* ignore */ }
+}
+
+/** Mail is what people send to support@jambwise.ng without a signed-in ticket: the contact form and the suspended-account box. */
+export const isMail = (m) => !m.user_id || m.topic === 'suspended'

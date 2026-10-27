@@ -13,7 +13,9 @@ import { useInstitutions } from './InstitutionAssign.jsx'
 
 export default function Students() {
   const { user, isAdmin } = useAuth()
-  const { data, error, loading, reload } = useLoad(api.adminStudents)
+  const { data: all, error, loading, reload } = useLoad(api.adminStudents)
+  // a teacher sees students only: never an admin or another teacher (the database already hides them; this keeps it true on an older database too)
+  const data = useMemo(() => (all && !isAdmin ? all.filter((s) => !s.is_admin && !s.is_teacher) : all), [all, isAdmin])
   const [q, setQ] = useState('')
   const [planF, setPlanF] = useState('all')
   const [instF, setInstF] = useState('all')

@@ -12,7 +12,7 @@ export default function TicketThread({ ticket, staff = false, onChange }) {
   const [loadError, setLoadError] = useState('')
   const [text, setText] = useState('')
   const { busy, error, setError, run } = useAction()
-  const canReply = Boolean(ticket.user_id)   // a guest (not signed in) can only be answered by email
+  const canReply = Boolean(ticket.user_id) && ticket.topic !== 'suspended'   // a guest, or a suspended account, can only be answered by email
 
   const load = useCallback(async () => {
     try { setReplies(await api.ticketReplies(ticket.id)); setLoadError('') } catch (e) { setLoadError(e.message) }
@@ -45,7 +45,7 @@ export default function TicketThread({ ticket, staff = false, onChange }) {
           </div>
         </div>
       ) : (
-        <p className="sm">This person was not signed in, so replies go by email: <a href={`mailto:${ticket.email}?subject=${encodeURIComponent('Re: ' + (ticket.subject || 'your JAMBwise message'))}`}>{ticket.email}</a></p>
+        <p className="sm">Replies to this message go by email: <a href={`mailto:${ticket.email}?subject=${encodeURIComponent('Re: ' + (ticket.subject || 'your JAMBwise message'))}`}>{ticket.email}</a></p>
       )}
     </div>
   )

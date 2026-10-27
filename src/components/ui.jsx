@@ -80,8 +80,8 @@ export function PlanCard({ plan, current, hot, children }) {
       {hot && <span className="ribbon">Most popular</span>}
       <h3>{plan.name}</h3>
       <h2>
-        {plan.kobo ? naira(plan.kobo) : '₦0'}
-        <small>{plan.kobo ? 'per 30 days' : 'forever'}</small>
+        {plan.kobo == null ? <span className="price-wait" aria-label="Loading price">₦…</span> : plan.kobo ? naira(plan.kobo) : '₦0'}
+        <small>{plan.kobo == null ? '' : plan.kobo ? 'per 30 days' : 'forever'}</small>
       </h2>
       <ul>
         {plan.features.map((f) => (

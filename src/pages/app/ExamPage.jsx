@@ -1,6 +1,6 @@
 // The timed exam screen shared by CBT Mock and ExamHall. They are the same exam (same questions, calculator, timer, one attempt
-// each); the only difference is that a student may see their CBT Mock result, while ExamHall results are visible to admins only.
-import { useEffect, useState } from 'react'
+// each); the only difference is that a student may see their CBT Mock result, while ExamHall results are visible to admins and to the teachers in charge of the student.
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
@@ -9,7 +9,8 @@ import { ErrorLine, Loader, Lock, Portrait } from '../../components/ui.jsx'
 import Icon from '../../components/Icons.jsx'
 import ExamCalculator from '../../components/ExamCalculator.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
-import { PICKABLE, SUBJECTS } from '../../lib/constants.js'
+import Modal from '../../components/Modal.jsx'
+import { MOCK_PER_SUBJECT, PICKABLE, SECONDS_PER_QUESTION, SUBJECTS } from '../../lib/constants.js'
 import * as api from '../../lib/api.js'
 import { fmtTime } from '../../lib/utils.js'
 import { canFullscreen, enterFullscreen, fmtCountdown, fmtWhen, inFullscreen, leaveFullscreen, windowState } from '../../lib/integrity.js'
@@ -72,6 +73,49 @@ function HallRules({ win, state, now }) {
   )
 }
 
+/** The box shown before ExamHall opens: what to expect, the rules, and a Proceed button. */
+function HallInstructions({ win, chosen, busy, onProceed, onCancel, hall = true }) {
+  const questions = (chosen.length + 1) * MOCK_PER_SUBJECT   // English plus the three chosen subjects
+  const minutes = Math.round((questions * SECONDS_PER_QUESTION) / 60)
+  return (
+    <Modal title={hall ? 'ExamHall instructions' : 'CBT Mock instructions'} onClose={onCancel} wide>
+      <p className="sm" style={{ marginTop: 0 }}>Please read this carefully before you begin.</p>
+      <b>Instructions</b>
+      <ul className="sm hall-ins">
+        <li>You will answer English and your 3 chosen subjects: about <b>{questions} questions</b> in <b>{minutes} minutes</b>, at the real UTME pace of {SECONDS_PER_QUESTION} seconds a question.</li>
+        <li>Tap an option to answer. You move to the next question automatically, and you can use Previous, the question numbers or the subject tabs to go back and change an answer.</li>
+        <li>The calculator opens on a computer; you may use it any time.</li>
+        <li>Submit when you are done. If the time runs out, your exam is submitted for you.</li>
+        {hall
+          ? <li>You can sit ExamHall <b>once only</b>. Your score is shown to your teacher and the administrator, not to you until it is released.</li>
+          : <li>Your score out of 400 is shown as soon as you submit, with a review of every question. You can take the CBT Mock again to practise.</li>}
+      </ul>
+      <b>Warning</b>
+      <ul className="sm hall-ins warn">
+        {hall ? (
+          <>
+            <li>The exam opens in full screen. Stay on it until you submit.</li>
+            <li>Switching tabs or apps, or leaving full screen, is recorded and shown to your administrator.</li>
+            <li>{win?.maxViolations > 0 ? `After ${win.maxViolations} warnings your exam is submitted automatically.` : 'You will be warned each time you leave the exam screen.'}</li>
+            <li>The timer cannot be paused. If your page closes by accident, open ExamHall again and carry on where you stopped.</li>
+            {win?.closes != null && <li>ExamHall closes at <b>{fmtWhen(win.closes - (win.offset || 0))}</b>, and your exam ends then at the latest.</li>}
+          </>
+        ) : (
+          <>
+            <li>Treat it like the real exam: stay on this page until you submit.</li>
+            <li>The timer cannot be paused, and the exam is submitted for you when the time runs out.</li>
+            <li>Do not refresh or close the page while the exam is running.</li>
+          </>
+        )}
+      </ul>
+      <div className="modal-actions">
+        <button type="button" className="btn ghost" onClick={onCancel} disabled={busy}>Cancel</button>
+        <button type="button" className="btn" onClick={onProceed} disabled={busy}>{busy ? 'Preparing your exam…' : 'Proceed'}</button>
+      </div>
+    </Modal>
+  )
+}
+
 function Picker({ cfg, kind }) {
   const { profile, saveProfile, user } = useAuth()
   const { startMock } = useExam()
@@ -88,6 +132,7 @@ function Picker({ cfg, kind }) {
   const now = useNow(hall)
   const state = win ? windowState(win, now + win.offset) : 'open'
   const chosen = profile.subjects || []
+  const [ins, setIns] = useState(false)   // the instructions box (ExamHall)
   const toggle = (k) => {
     const next = chosen.includes(k) ? chosen.filter((x) => x !== k) : chosen.length < 3 ? [...chosen, k] : chosen
     if (next !== chosen) run(() => saveProfile({ subjects: next }))
@@ -111,11 +156,16 @@ function Picker({ cfg, kind }) {
       {hall && <HallRules win={win} state={state} now={now} />}
       <ErrorLine>{error}</ErrorLine>
       <button className="btn" disabled={chosen.length !== 3 || busy || state !== 'open'} onClick={() => {
-        if (hall && canFullscreen()) enterFullscreen()                 // must happen inside the click, before any waiting
-        run(async () => { try { await startMock(chosen, kind) } catch (e) { leaveFullscreen(); throw e } })
+        setIns(true)                                                   // both exams: show the instructions first
       }}>
         {busy ? 'Preparing your exam…' : cfg.start}
       </button>
+      {ins && (
+        <HallInstructions hall={hall} win={win} chosen={chosen} busy={busy} onCancel={() => setIns(false)} onProceed={() => {
+          if (hall && canFullscreen()) enterFullscreen()                       // must happen inside the click, before any waiting
+          run(async () => { try { await startMock(chosen, kind) } catch (e) { if (hall) leaveFullscreen(); setIns(false); throw e } })
+        }} />
+      )}
     </>
   )
 }
@@ -144,6 +194,14 @@ function Running({ m }) {
   const inSubject = m.qs.filter((z) => z.subject === cur.subject).length
   const last = m.i === m.qs.length - 1
   const unanswered = m.qs.length - Object.keys(m.a).length
+  // choosing an answer moves on to the next question after a short beat, so the choice is seen; moving by hand cancels it
+  const adv = useRef(null)
+  useEffect(() => () => clearTimeout(adv.current), [m.i])
+  const choose = (j) => {
+    answerMock(j)
+    clearTimeout(adv.current)
+    if (!last) { const to = m.i + 1; adv.current = setTimeout(() => gotoMock(to), 350) }
+  }
   const submit = async () => {
     if (unanswered === 0 || await confirm({
       title: 'Submit your exam?',
@@ -200,7 +258,7 @@ function Running({ m }) {
         <div className="mut">Question {m.i - first + 1} of {inSubject}</div>
         <h3>{cur.body}</h3>
         {cur.options.map((o, j) => (
-          <button key={j} className={'opt ' + (m.a[m.i] === j ? 'sel' : '')} onClick={() => answerMock(j)} aria-pressed={m.a[m.i] === j}>
+          <button key={j} className={'opt ' + (m.a[m.i] === j ? 'sel' : '')} onClick={() => choose(j)} aria-pressed={m.a[m.i] === j}>
             <span className="k">{'ABCD'[j]}</span><span>{o}</span>
           </button>
         ))}
