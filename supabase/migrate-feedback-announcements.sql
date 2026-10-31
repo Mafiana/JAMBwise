@@ -137,6 +137,10 @@ create or replace function public.admin_delete_announcement(p_id bigint) returns
 language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception 'not allowed'; end if;
+  -- take back the bell notifications this announcement sent (matched by text and send time)
+  delete from public.notifications n using public.announcements a
+   where a.id = p_id and n.kind = 'announce' and n.title = left(a.title, 200) and n.body = left(a.body, 500)
+     and n.created_at between a.created_at - interval '2 minutes' and a.created_at + interval '2 minutes';
   delete from public.announcements where id = p_id;
 end $$;
 revoke execute on function public.admin_delete_announcement(bigint) from public, anon;

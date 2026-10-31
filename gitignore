@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+.env.local
+.DS_Store
+# Supabase CLI link details (project id, database address): keep out of the public repo
+supabase/.temp

@@ -1,4 +1,4 @@
--- JAMB wise: admin panel + support tickets update for a database you ALREADY created with an older schema.sql.
+-- JAMBwise: admin panel, support tickets, question reports, spam protection and bulk import update for a database you ALREADY created with an older schema.sql.
 -- Safe to run more than once. Supabase > SQL Editor > New query > paste all of this > Run.
 -- (Starting a brand-new project? Skip this and run schema.sql instead.)
 
@@ -7,11 +7,12 @@ create table if not exists public.messages (
   id bigserial primary key,
   name text not null check (char_length(name) between 1 and 100),
   email text not null check (char_length(email) between 3 and 200 and email ~ '^[^@\s]+@[^@\s]+$'),
-  topic text not null default 'general' check (topic in ('general','payment','pin','bug','other')),
+  topic text not null default 'general' check (topic in ('general','payment','pin','bug','question','other')),
   subject text check (char_length(subject) <= 120),
   body text not null check (char_length(body) between 5 and 2000),
   user_id uuid references auth.users on delete set null,   -- set when a signed-in student opens a ticket; they can then follow it
   status text not null default 'new' check (status in ('new','read','answered','resolved')),
+  abuse_key text,   -- one-way hash of the sender's network address, used only to rate-limit spam
   created_at timestamptz not null default now()
 );
 
@@ -40,6 +41,11 @@ create table if not exists public.audit_log (
 alter table public.messages add column if not exists subject text check (char_length(subject) <= 120);
 alter table public.messages drop constraint if exists messages_status_check;
 alter table public.messages add constraint messages_status_check check (status in ('new','read','answered','resolved'));
+alter table public.messages drop constraint if exists messages_topic_check;
+alter table public.messages add constraint messages_topic_check check (topic in ('general','payment','pin','bug','question','other'));
+alter table public.messages add column if not exists abuse_key text;
+create index if not exists messages_user_idx on public.messages (user_id, created_at desc);
+create index if not exists messages_abuse_idx on public.messages (abuse_key, created_at desc);
 
 
 alter table public.messages enable row level security;
@@ -186,10 +192,90 @@ begin
   if public.is_admin() then perform public.admin_log('ticket.resolve', '#' || p_id); end if;
 end $$;
 
+-- Spam protection for tickets and contact messages. Runs before every insert, whoever sends it.
+--   students: 5 tickets an hour (10 question reports an hour), 25 a day
+--   guests (sent through the contact-submit Edge Function): 3 an hour per email, 10 an hour per network address,
+--           and 120 an hour across the whole site, so a flood cannot bury real tickets
+--   nobody may send the same text twice in a day. Admins are never limited.
+create or replace function public.limit_ticket_rate() returns trigger language plpgsql security definer set search_path = public as $$
+declare ip text; n int; lim int;
+begin
+  if public.is_admin() then return new; end if;
+  if new.abuse_key is null then
+    begin
+      ip := trim(split_part(coalesce((nullif(current_setting('request.headers', true), '')::json) ->> 'x-forwarded-for', ''), ',', 1));
+    exception when others then ip := '';
+    end;
+    if ip <> '' then new.abuse_key := md5(ip); end if;
+  end if;
+  if exists (select 1 from public.messages where lower(email) = lower(new.email) and body = new.body and created_at > now() - interval '1 day') then
+    raise exception 'rate_limited: You already sent this message. We will reply soon.';
+  end if;
+  if new.user_id is not null then
+    select count(*) into n from public.messages where user_id = new.user_id and created_at > now() - interval '1 hour';
+    lim := case when new.topic = 'question' then 10 else 5 end;
+    if n >= lim then
+      raise exception 'rate_limited: You are sending messages too quickly. Please try again in a little while.';
+    end if;
+    select count(*) into n from public.messages where user_id = new.user_id and created_at > now() - interval '1 day';
+    if n >= 25 then raise exception 'rate_limited: Daily limit reached. Please try again tomorrow.'; end if;
+  else
+    select count(*) into n from public.messages where user_id is null and lower(email) = lower(new.email) and created_at > now() - interval '1 hour';
+    if n >= 3 then raise exception 'rate_limited: Too many messages from this email address. Please try again later.'; end if;
+    if new.abuse_key is not null then
+      select count(*) into n from public.messages where abuse_key = new.abuse_key and created_at > now() - interval '1 hour';
+      if n >= 10 then raise exception 'rate_limited: Too many messages from your network. Please try again later.'; end if;
+    end if;
+    select count(*) into n from public.messages where user_id is null and created_at > now() - interval '1 hour';
+    if n >= 120 then raise exception 'rate_limited: Support is very busy right now. Please try again later.'; end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists limit_ticket_rate on public.messages;
+create trigger limit_ticket_rate before insert on public.messages
+  for each row execute function public.limit_ticket_rate();
+
+-- Bulk question import (the admin Questions tab sends up to 500 rows at a time). Rows that are invalid are skipped,
+-- questions that already exist in that subject are skipped, and the whole import is one line in the activity log.
+create or replace function public.admin_import_questions(p_rows jsonb) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare r jsonb; ins int := 0; dup int := 0; bad int := 0; n int; ok boolean;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if jsonb_typeof(p_rows) is distinct from 'array' or jsonb_array_length(p_rows) not between 1 and 500 then
+    raise exception 'send between 1 and 500 questions at a time';
+  end if;
+  perform set_config('jw.bulk', '1', true);   -- tells the audit trigger not to log every single row
+  for r in select value from jsonb_array_elements(p_rows) loop
+    ok := jsonb_typeof(r) = 'object'
+      and (r->>'subject') in ('eng','mat','phy','chm','bio','gov','eco','com','agr')
+      and char_length(btrim(coalesce(r->>'body', ''))) between 1 and 1000
+      and jsonb_typeof(r->'options') = 'array' and jsonb_array_length(r->'options') = 4
+      and (r->>'answer') ~ '^[0-3]$'
+      and char_length(coalesce(r->>'explanation', '')) <= 1000;
+    if ok then
+      ok := not exists (select 1 from jsonb_array_elements(r->'options') o
+                         where jsonb_typeof(o) <> 'string' or char_length(btrim(o #>> '{}')) not between 1 and 300);
+    end if;
+    if not ok then bad := bad + 1; continue; end if;
+    insert into public.questions (subject, body, options, answer, explanation)
+    values (r->>'subject', btrim(r->>'body'),
+            (select jsonb_agg(btrim(o.v #>> '{}') order by o.i) from jsonb_array_elements(r->'options') with ordinality as o(v, i)),
+            (r->>'answer')::int, nullif(btrim(coalesce(r->>'explanation', '')), ''))
+    on conflict (subject, body) do nothing;
+    get diagnostics n = row_count;
+    if n = 1 then ins := ins + 1; else dup := dup + 1; end if;
+  end loop;
+  perform set_config('jw.bulk', '', true);
+  perform public.admin_log('question.import', ins || ' added, ' || dup || ' duplicates skipped, ' || bad || ' invalid');
+  return jsonb_build_object('inserted', ins, 'duplicates', dup, 'invalid', bad);
+end $$;
+
 -- Price and question edits are made straight from the admin screens, so a trigger writes them to the log.
 create or replace function public.log_content_change() returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then return coalesce(new, old); end if;   -- seeding / SQL editor: not an admin action
+  if current_setting('jw.bulk', true) = '1' then return coalesce(new, old); end if;   -- bulk import logs one summary line instead
   if tg_table_name = 'plans' then
     perform public.admin_log('plan.price', new.id || ' -> ' || new.price_kobo);
   else
@@ -210,7 +296,8 @@ grant execute on function public.is_admin(), public.is_paid(), public.has_access
 grant execute on function public.admin_make_pin(text, text, int), public.admin_make_pins(text, int, int),
   public.admin_set_student(uuid, text, text, text, boolean), public.admin_set_plan(uuid, text, int),
   public.admin_set_role(uuid, boolean), public.admin_reset_progress(uuid),
-  public.admin_students(), public.admin_stats(), public.ticket_reply(bigint, text), public.ticket_close(bigint) to authenticated;
+  public.admin_students(), public.admin_stats(), public.admin_import_questions(jsonb),
+  public.ticket_reply(bigint, text), public.ticket_close(bigint) to authenticated;
 -- admin_log and new_pin_code stay internal (revoked above): only the admin_* functions call them.
 grant execute on function public.redeem_pin(text, uuid), public.fulfil_payment(text, int) to service_role;
 
@@ -234,9 +321,11 @@ create policy q_admin_del on public.questions for delete to authenticated using 
 
 create policy plans_admin_upd on public.plans for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- contact form: anyone may send (user_id, if given, must be their own); only admins read / triage / delete
-create policy msg_send on public.messages for insert to anon, authenticated
-  with check (status = 'new' and (user_id is null or user_id = auth.uid()));
+-- tickets: only admins triage / delete; a student reads their own
+-- Guests (not signed in) cannot write to this table at all: their messages go through the contact-submit Edge Function,
+-- which checks a CAPTCHA first. Signed-in students may only open tickets as themselves, and the rate limit above applies.
+create policy msg_send on public.messages for insert to authenticated
+  with check (status = 'new' and user_id = auth.uid());
 create policy msg_read on public.messages for select to authenticated using (public.is_admin() or user_id = auth.uid());
 create policy reply_read on public.message_replies for select to authenticated using (
   public.is_admin() or exists (select 1 from public.messages m where m.id = message_id and m.user_id = auth.uid()));
@@ -260,8 +349,8 @@ grant usage on sequence public.attempts_id_seq to authenticated;
 grant insert, update, delete on public.questions to authenticated;
 grant usage on sequence public.questions_id_seq to authenticated;
 grant update (name, price_kobo) on public.plans to authenticated;
-grant insert (name, email, topic, subject, body, user_id) on public.messages to anon, authenticated;
-grant usage on sequence public.messages_id_seq to anon, authenticated;
+grant insert (name, email, topic, subject, body, user_id) on public.messages to authenticated;
+grant usage on sequence public.messages_id_seq to authenticated;
 grant select, delete on public.messages to authenticated;
 grant update (status) on public.messages to authenticated;
 grant select on public.audit_log to authenticated;

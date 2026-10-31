@@ -36,6 +36,13 @@ test('takes the newest mock when an old one exists (after an admin allowed a ret
   const m = latestMocks(later).find((x) => x.user_id === 'b')
   assert.equal(m.total, 350); assert.equal(m.subjects.length, 1)
 })
+test('CBT Mock and ExamHall are kept apart', () => {
+  const both = [...rows, { id: 20, user_id: 'a', subject: 'eng', correct: 20, total: 20, kind: 'hall', mock_score: 380, created_at: t0 }, { id: 21, user_id: 'a', subject: 'phy', correct: 10, total: 20, kind: 'hall', mock_score: null, created_at: t1 }]
+  assert.deepEqual(buildScoresheet(students, both, 'hall').map((r) => [r.name, r.total]), [['Ada Obi', 380]])
+  assert.equal(breakdown(buildScoresheet(students, both, 'hall')[0]), 'ENG 20/20   PHY 10/20')
+  assert.deepEqual(buildScoresheet(students, both, 'mock').map((r) => r.total), [290, 200, 200]) // the hall row does not leak in
+  assert.deepEqual(buildScoresheet(students, both).map((r) => r.total), [290, 200, 200]) // default is CBT Mock
+})
 test('stats', () => {
   assert.deepEqual(scoreStats(buildScoresheet(students, rows)), { count: 3, average: 230, highest: 290, over300: 0 })
   assert.deepEqual(scoreStats([]), { count: 0, average: 0, highest: 0, over300: 0 })
