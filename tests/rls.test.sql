@@ -662,14 +662,13 @@ do $$ declare reg text; code text; r jsonb; tok text; rep jsonb; begin
   assert public.parent_report(tok) is null, 'logging out ends the session';
 end $$;
 reset role;
+-- the earlier tickets above also rang the admin's bell; clear them so the bell's newest-30 list shows what the next tests look for
+delete from public.notifications where kind = 'ticket';
 -- the admin's bell rings for a parent sign-in, once for the same parent and student within 30 minutes
-select pg_temp.as_user((select id from t_ids where name='admin'));
-set local role authenticated;
-do $$ begin
-  assert (select count(*) from public.my_notifications() where kind = 'parent' and link = '/app/admin/parents') = 1, 'admin told when a parent signs in';
-  assert (select body from public.my_notifications() where kind = 'parent' limit 1) like 'Mrs Okoro (Mother) viewed Paid Student%', 'the notification names the parent and the student';
+do $$ declare adm uuid := (select id from t_ids where name='admin'); begin   -- read the table directly: the bell only lists the newest 30
+  assert (select count(*) from public.notifications where user_id = adm and kind = 'parent' and link = '/app/admin/parents') = 1, 'admin told when a parent signs in';
+  assert (select body from public.notifications where user_id = adm and kind = 'parent' limit 1) like 'Mrs Okoro (Mother) viewed Paid Student%', 'the notification names the parent and the student';
 end $$;
-reset role;
 select pg_temp.as_user((select id from t_ids where name='admin'));
 set local role authenticated;
 select public.admin_set_results_released('hall', true);
@@ -1062,6 +1061,80 @@ update public.coupons set used_count = 0, active = false where code = 'SAVE20';
 do $$ begin assert not (select valid from public.coupon_quote('SAVE20', 'student')), 'a switched-off code stops working'; end $$;
 update public.coupons set active = true, expires_at = now() - interval '1 minute' where code = 'SAVE20';
 do $$ begin assert not (select valid from public.coupon_quote('SAVE20', 'student')), 'an expired code stops working'; end $$;
+
+-- ===== PIN expiry reminder (last 3 days) =====
+reset role;
+update public.profiles set plan='student', plan_expires=now() + interval '2 days 5 hours' where email='efgh2345@pin.jambwise.ng';
+update public.profiles set plan='student', plan_expires=now() + interval '2 days' where email='paid@x.com';
+select pg_temp.as_user((select id from public.profiles where email='efgh2345@pin.jambwise.ng'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.my_notifications() where kind = 'pin') = 1, 'PIN student with under 3 days gets a reminder';
+  assert (select count(*) from public.my_notifications() where kind = 'pin') = 1, 'no second reminder within 12 hours';
+  assert (select body from public.my_notifications() where kind = 'pin') like '%2 days 4 hours%' or (select body from public.my_notifications() where kind = 'pin') like '%2 days 5 hours%', 'reminder says how long is left';
+  assert (select body from public.my_notifications() where kind = 'pin') like '%Customer Support%' and (select body from public.my_notifications() where kind = 'pin') like '%tutor%', 'reminder points to Customer Support or the tutor';
+  assert (select link from public.my_notifications() where kind = 'pin') = '/app/help', 'reminder links to Customer Support';
+end $$;
+reset role;
+update public.notifications set created_at = now() - interval '13 hours' where kind = 'pin';
+set local role authenticated;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'pin') = 2, 'a new reminder after 12 hours'; end $$;
+reset role;
+update public.profiles set plan_expires = now() + interval '5 days' where email='efgh2345@pin.jambwise.ng';
+delete from public.notifications where kind = 'pin';
+select pg_temp.as_user((select id from public.profiles where email='efgh2345@pin.jambwise.ng'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'pin') = 0, 'no reminder with more than 3 days left'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'pin') = 0, 'a card-paying student (not a PIN account) gets no PIN reminder'; end $$;
+reset role;
+
+-- ===== a student's support ticket rings the admin's bell =====
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+insert into public.messages (name, email, topic, body, user_id) values ('Free Student', 'free@x.com', 'general', 'I need help with my account please', auth.uid());
+reset role;
+do $$ begin assert (select count(*) from public.notifications n join public.profiles p on p.id = n.user_id where p.is_admin and n.kind = 'ticket' and n.title = 'New support ticket' and n.link = '/app/admin/messages') >= 1, 'admin is notified of a new student ticket'; end $$;
+
+-- a signed-in student using the Contact page sends mail (not a ticket), and the student can still read it
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+insert into public.messages (name, email, topic, body, user_id, via_contact) values ('Free Student', 'free@x.com', 'general', 'Sent from the Contact page while signed in', auth.uid(), true);
+do $$ begin assert (select count(*) from public.messages where via_contact and user_id = auth.uid()) = 1, 'the student can read their own contact message'; end $$;
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications n join public.profiles p on p.id = n.user_id where p.is_admin and n.kind = 'mail' and n.body like '%Sent from the Contact page while signed in%') >= 1, 'admin gets a Mail notification for a signed-in Contact page message';
+  assert (select count(*) from public.notifications n where n.kind = 'ticket' and n.body like '%Sent from the Contact page%') = 0, 'a Contact page message is not announced as a ticket';
+end $$;
+
+-- ===== Novel: students read, only admins write =====
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_save_novel('Test Novel', 'data:image/jpeg;base64,AAAA', 'n.pdf', 1234, 'data:application/pdf;base64,JVBERi0=');
+do $$ declare r jsonb; begin
+  r := public.admin_import_novel_questions('[{"body":"Q1?","options":["a","b","c","d"],"answer":1,"explanation":"e"},{"body":"Q1?","options":["a","b","c","d"],"answer":1},{"body":"Bad","options":["a","b"],"answer":0}]'::jsonb);
+  assert (r->>'inserted')::int = 1 and (r->>'duplicates')::int = 1 and (r->>'invalid')::int = 1, 'novel import counts: ' || r::text;
+  assert (select title from public.get_novel()) = 'Test Novel', 'admin sees the novel';
+  perform public.admin_save_novel('Renamed', null, null, null, null);
+  assert (select has_file from public.get_novel()), 'saving with no new file keeps the old one';
+  assert (select cover from public.get_novel()) like 'data:image%', 'saving with no new cover keeps the old one';
+end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+do $$ begin
+  assert (select title from public.get_novel()) = 'Renamed', 'a student can read the novel info';
+  assert public.get_novel_file() like 'data:application/pdf%', 'a student can read the novel file';
+  assert (select count(*) from public.get_novel_questions()) = 1, 'a student can read the questions';
+end $$;
+select pg_temp.expect_fail($$select public.admin_save_novel('Hacked', null, null, null, null)$$, 'student cannot save the novel');
+select pg_temp.expect_fail($$select public.admin_import_novel_questions('[]'::jsonb)$$, 'student cannot import novel questions');
+select pg_temp.expect_fail($$select public.admin_clear_novel_questions()$$, 'student cannot clear novel questions');
+select pg_temp.expect_fail($$select * from public.novel$$, 'student cannot read the novel table directly');
+select pg_temp.expect_fail($$select * from public.novel_questions$$, 'student cannot read novel_questions directly');
+reset role;
 
 -- ===== account deletion keeps payments, clears PIN references =====
 delete from auth.users where email='other@x.com';

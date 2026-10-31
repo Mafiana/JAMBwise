@@ -1,12 +1,12 @@
 // Helpers for the Syllabus pages: reading a chosen PDF, and showing one that came back from the database.
 export const MAX_PDF_BYTES = 3 * 1024 * 1024
 
-/** A chosen PDF as { data: 'data:application/pdf;base64,...', name, size }. Rejects anything that is not a PDF under 3 MB. */
-export function fileToPdf(file) {
+/** A chosen PDF as { data: 'data:application/pdf;base64,...', name, size }. Rejects anything that is not a PDF under 3 MB (or `maxBytes`). */
+export function fileToPdf(file, maxBytes = MAX_PDF_BYTES) {
   return new Promise((resolve, reject) => {
     if (!file) return reject(new Error('Please choose a PDF file.'))
     if (!(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return reject(new Error('Please choose a PDF file.'))
-    if (file.size > MAX_PDF_BYTES) return reject(new Error('That PDF is too big. Choose one under 3 MB.'))
+    if (file.size > maxBytes) return reject(new Error(`That PDF is too big. Choose one under ${Math.round(maxBytes / 1048576)} MB.`))
     const r = new FileReader()
     r.onerror = () => reject(new Error('Could not read that file.'))
     r.onload = () => {

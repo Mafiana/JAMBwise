@@ -288,7 +288,10 @@ export async function adminStudents() {
 export async function adminPins() {
   const { data, error } = await supabase.from('access_pins').select('*').order('created_at', { ascending: false }).limit(200)
   if (error) fail(error, 'Could not load PINs.')
-  return data
+  // when each used PIN's access ends = that student's plan end date (so the list can say Active or Expired)
+  let ends = new Map()
+  try { ends = new Map((await adminStudents()).map((x) => [x.id, x.plan_expires])) } catch { /* the status falls back to "Used" */ }
+  return data.map((x) => ({ ...x, expires_at: x.used_by ? ends.get(x.used_by) ?? null : null, has_status: x.used_by ? ends.has(x.used_by) : true }))
 }
 
 export async function adminMakePin(plan, name, days) {
@@ -399,6 +402,51 @@ export async function adminAddSyllabus({ subject, fileName, size, data }) {
 export async function adminDeleteSyllabus(id) {
   const { error } = await supabase.rpc('admin_delete_syllabus', { p_id: id })
   if (error) fail(error, 'Could not delete the syllabus.')
+}
+
+// ── novel (cover, PDF to read online, questions) ──
+const novelFail = (error, text) => fail(error, syllabusReady(error) ? text : 'The Novel is not switched on yet. Run supabase/migrate-novel.sql in the Supabase SQL Editor, then try again.')
+/** The novel without its PDF: { title, cover, file_name, size_bytes, has_file, questions, updated_at }. */
+export async function getNovel() {
+  const { data, error } = await supabase.rpc('get_novel')
+  if (error) {
+    if (isNetworkError(error)) throw new Error(friendly(error) || 'No internet connection.')
+    throw new Error(syllabusReady(error) ? 'Could not load the novel.' : 'The novel is not available yet. Please check back soon.')
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  return row ? { ...row, questions: Number(row.questions) || 0 } : { title: 'Novel', cover: null, file_name: null, size_bytes: 0, has_file: false, questions: 0 }
+}
+/** The novel PDF as a data: URL (only for the reader on screen; it is never offered as a download). */
+export async function getNovelFile() {
+  const { data, error } = await supabase.rpc('get_novel_file')
+  if (error || !data) fail(error || { message: 'missing' }, 'Could not open the novel.')
+  return data
+}
+export async function getNovelQuestions() {
+  const { data, error } = await supabase.rpc('get_novel_questions')
+  if (error) fail(error, 'Could not load the novel questions.')
+  return (data || []).map((r) => ({ ...r, options: Array.isArray(r.options) ? r.options : [] }))
+}
+/** Saves the title, and the cover / PDF when they were changed (pass null to leave them as they are). */
+export async function adminSaveNovel({ title, cover = null, fileName = null, size = null, data = null }) {
+  const { error } = await supabase.rpc('admin_save_novel', { p_title: title, p_cover: cover, p_file_name: fileName, p_size: size, p_data: data })
+  if (error) novelFail(error, 'Could not save the novel.')
+}
+/** Adds questions (rows with body, options, answer 0-3, explanation), 500 at a time. Returns { inserted, duplicates, invalid }. */
+export async function adminImportNovelQuestions(rows) {
+  const total = { inserted: 0, duplicates: 0, invalid: 0 }
+  for (let i = 0; i < rows.length; i += 500) {
+    const { data, error } = await supabase.rpc('admin_import_novel_questions', { p_rows: rows.slice(i, i + 500) })
+    if (error) novelFail(error, 'The import stopped part-way. Questions already saved were kept; save again to add the rest.')
+    total.inserted += data?.inserted || 0
+    total.duplicates += data?.duplicates || 0
+    total.invalid += data?.invalid || 0
+  }
+  return total
+}
+export async function adminClearNovelQuestions() {
+  const { error } = await supabase.rpc('admin_clear_novel_questions')
+  if (error) fail(error, 'Could not remove the questions.')
 }
 
 /** Saves the ExamHall (or CBT Mock) sitting window. Pass null for "no limit". `opens`/`closes` are Date or ISO strings. */
@@ -624,7 +672,7 @@ export function touchPresence() { return Promise.resolve(supabase.rpc('touch_pre
  * Signed-in students open tickets directly (the database limits how fast). A visitor who is not signed in goes through the
  * contact-submit Edge Function, which checks the CAPTCHA: `captcha` is { token, answer } (built-in) or { turnstile } (Cloudflare).
  */
-export async function sendMessage({ name, email, topic, subject, body, user_id, captcha, website, question_id }) {
+export async function sendMessage({ name, email, topic, subject, body, user_id, captcha, website, question_id, via_contact }) {
   const row = { name: name.trim(), email: email.trim(), topic, body: body.trim() }
   if (subject?.trim()) row.subject = subject.trim()
   if (!user_id) {
@@ -639,7 +687,8 @@ export async function sendMessage({ name, email, topic, subject, body, user_id, 
     if (!error) return
     if (!/PGRST20[25]|42883|schema cache|does not exist/i.test(String(error.code || '') + ' ' + String(error.message || ''))) { if (!/rate_limited/.test(error.message || '')) console.error('report_question failed:', error); fail(error, 'Your report could not be sent. Please try again in a few minutes.') }
   }
-  const { error } = await supabase.from('messages').insert({ ...row, user_id })
+  let { error } = await supabase.from('messages').insert({ ...row, user_id, ...(via_contact ? { via_contact: true } : {}) })
+  if (error && via_contact && /via_contact|schema cache|permission denied/i.test(error.message || '')) ({ error } = await supabase.from('messages').insert({ ...row, user_id }))   // database not updated yet: send it as an ordinary ticket
   if (error) { if (!/rate_limited/.test(error.message || '')) console.error('sending the message failed:', error); fail(error, 'Your message could not be sent. Please try again in a few minutes.') }
 }
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ThemeToggle, Logo, PlanCard, ErrorLine } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
+import HeroMockup from '../components/HeroMockup.jsx'
 import FaqList from '../components/FaqList.jsx'
 import ContactBlock from '../components/ContactBlock.jsx'
 import ParentForm from '../components/ParentForm.jsx'
@@ -120,6 +121,7 @@ export default function Landing() {
             </div>
             <p className="fine">English and Maths are free forever. No card needed.</p>
           </div>
+          <HeroMockup />
         </div>
       </section>
 

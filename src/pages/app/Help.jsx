@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Icon from '../../components/Icons.jsx'
+import Modal from '../../components/Modal.jsx'
 import TicketThread from '../../components/TicketThread.jsx'
 import { ErrorLine } from '../../components/ui.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -61,7 +62,6 @@ export default function Help() {
           <label htmlFor="tb">What happened?</label>
           <textarea id="tb" rows={4} maxLength={2000} value={f.body} onChange={set('body')} placeholder="Tell us what you tried and what you saw. For payments, include your Paystack reference." />
           <ErrorLine>{error}</ErrorLine>
-          {made && !error && <p className="sm ok" role="status">{made}</p>}
           <button className="btn" disabled={busy} style={{ marginTop: 8 }}>{busy ? 'Sending…' : 'Submit ticket'}</button>
         </form>
       </div>
@@ -80,6 +80,12 @@ export default function Help() {
           {open === t.id && <TicketThread ticket={t} onChange={load} />}
         </div>
       ))}
+      {made && !error && (
+        <Modal title="Ticket sent" onClose={() => setMade('')}>
+          <p>{made}</p>
+          <div className="modal-actions"><button className="btn" onClick={() => setMade('')}><Icon name="check" size={16} /> OK</button></div>
+        </Modal>
+      )}
     </>
   )
 }

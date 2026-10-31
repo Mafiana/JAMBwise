@@ -9,7 +9,6 @@ import { AnnouncementBanner } from './Announcements.jsx'
 import NotificationBell from './NotificationBell.jsx'
 import OfflineBanner from './OfflineBanner.jsx'
 import Prefetch from './Prefetch.jsx'
-import PinExpired from './PinExpired.jsx'
 import * as api from '../lib/api.js'
 import { isMail, playChime } from '../lib/utils.js'
 
@@ -22,6 +21,7 @@ const NAV = [
   ['planner', 'Study Planner', 'planner'],
   ['progress', 'My Progress', 'chart'],
   ['syllabus', 'Syllabus', 'book'],
+  ['novel', 'Novel', 'book'],
 ]
 const MORE = [
   ['profile', 'My Profile', 'user'],
@@ -45,6 +45,7 @@ const ADMIN_NAV = [
   ['payments', 'Payments', 'card', true],
   ['questions', 'Questions', 'book'],
   ['syllabus', 'Syllabus', 'book'],
+  ['novel', 'Novel', 'book'],
   ['mail', 'Mail', 'mail', true],
   ['messages', 'Support tickets', 'inbox'],
   ['settings', 'Prices', 'settings', true],
@@ -156,7 +157,6 @@ function useSheetCount(enabled, pathname, uid) {
 
 export default function AppLayout() {
   const { pathname } = useLocation()
-  const inAdmin = pathname.startsWith('/app/admin')
   const inExam = /^\/app\/(mock|examhall)/.test(pathname)   // exam pages are full width: no menu to wander off to
   const { profile, plan, isAdmin, isTeacher, isStaff, signOut } = useAuth()
   const phone = usePhone()
@@ -201,31 +201,23 @@ export default function AppLayout() {
             {!phone && <span className="tools"><NotificationBell /><ThemeToggle /></span>}
             <button type="button" className="burger on-app close-x" onClick={() => setDrawer(false)} aria-label="Close menu"><Icon name="close" size={22} /></button>
           </div>
-          {isStaff && (inAdmin || isTeacher) ? (
+          {isStaff ? (
             <>
               {ADMIN_NAV.filter((n) => (isAdmin || !n[3]) && (!n[4] || !isAdmin)).map((n) => link(n, '/app/admin/'))}
               <div className="nv-sep" />
-              {isTeacher
-                ? <>{link(['profile', 'My Profile', 'user'])}{link(['settings', 'Settings', 'settings'])}</>
-                : <NavLink to="/app/dashboard" className="nv"><Icon name="arrow" /><span>Back to student view</span></NavLink>}
+              {link(['profile', 'My Profile', 'user'])}{link(['settings', 'Settings', 'settings'])}
             </>
           ) : (
             <>
               {NAV.map((n) => link(n))}
               <div className="nv-sep" />
               {MORE.map((n) => link(n))}
-              {isStaff && (
-                <>
-                  <div className="nv-sep" />
-                  {link(['admin', isAdmin ? 'Admin' : 'Teacher panel', 'shield'])}
-                </>
-              )}
             </>
           )}
           <div className="who">
             <Avatar profile={profile} />
             <b>{profile.full_name}</b>
-            <span><span className="tag">{isTeacher ? (profile.inst_title || 'Teacher').toLowerCase() : plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
+            <span><span className="tag">{isAdmin ? 'admin' : isTeacher ? (profile.inst_title || 'Teacher').toLowerCase() : plan}</span> <Link to="/" onClick={signOut}>Log out</Link></span>
           </div>
         </aside>}
         <main className="main">
@@ -233,7 +225,6 @@ export default function AppLayout() {
           {!inExam && <AnnouncementBanner />}
           <ExamBanner />
           <Prefetch />
-          {!inExam && <PinExpired />}
           <Outlet />
         </main>
       </div>

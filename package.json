@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/utils.test.js tests/seed.test.js tests/importQuestions.test.js tests/contact.test.js tests/sw.test.js tests/calc.test.js tests/integrity.test.js tests/scoresheet.test.js",
+    "test": "node --test tests/utils.test.js tests/seed.test.js tests/importQuestions.test.js tests/contact.test.js tests/sw.test.js tests/calc.test.js tests/integrity.test.js tests/scoresheet.test.js tests/novel.test.js",
     "seed": "node scripts/build-seed.mjs"
   },
   "dependencies": {

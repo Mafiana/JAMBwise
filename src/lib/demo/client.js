@@ -159,11 +159,14 @@ function messageLimit(r, abuseKey) {
 }
 
 function addMessage(r, abuseKey = null) {
-  const row = { id: db.nextMessage++, name: r.name.trim(), email: r.email.trim(), topic: r.topic || 'general', subject: r.subject?.trim() || null, body: r.body.trim(), user_id: r.user_id || null, status: 'new', abuse_key: abuseKey, created_at: new Date().toISOString() }
+  const row = { id: db.nextMessage++, name: r.name.trim(), email: r.email.trim(), topic: r.topic || 'general', subject: r.subject?.trim() || null, body: r.body.trim(), user_id: r.user_id || null, via_contact: Boolean(r.via_contact), status: 'new', abuse_key: abuseKey, created_at: new Date().toISOString() }
   db.messages.unshift(row)
-  if (!row.user_id || row.topic === 'suspended') {   // mail: every admin's bell rings
+  if (!row.user_id || row.topic === 'suspended' || row.via_contact) {   // mail: every admin's bell rings
     const txt = (row.name || 'Someone') + ': ' + (row.subject || row.body).slice(0, 160)
     db.profiles.filter((p) => p.is_admin).forEach((adm) => notify(adm.id, 'mail', row.topic === 'suspended' ? 'Message from a suspended account' : 'New mail', txt, '/app/admin/mail'))
+  } else if (row.topic !== 'question') {   // a student's support ticket: every admin's bell rings too
+    const txt = (row.name || 'A student') + ': ' + (row.subject || row.body).slice(0, 160)
+    db.profiles.filter((p) => p.is_admin).forEach((adm) => notify(adm.id, 'ticket', 'New support ticket', txt, '/app/admin/messages'))
   }
   return row
 }
@@ -307,6 +310,18 @@ function notify(userId, kind, title, body, link) {
     if (open) { Object.assign(open, { title, body: body.slice(0, 500), created_at: new Date().toISOString() }); return }
   }
   db.notifications.push({ id: db.nextNotif++, user_id: userId, kind, title: title.slice(0, 200), body: body.slice(0, 500), link, read_at: null, created_at: new Date().toISOString() })
+}
+/** Same rule as pin_expiry_reminder() in schema.sql: a PIN student with under 3 days left gets a bell message, at most one every 12 hours. */
+function pinReminder() {
+  const p = profileOf(me())
+  if (!p || p.is_admin || p.is_teacher || p.plan === 'free' || !p.plan_expires) return
+  if (!String(p.email || '').toLowerCase().endsWith('@pin.jambwise.ng')) return
+  const ms = new Date(p.plan_expires).getTime() - Date.now()
+  if (ms <= 0 || ms > 3 * 864e5) return
+  if (db.notifications.some((n) => n.user_id === p.id && n.kind === 'pin' && Date.now() - new Date(n.created_at).getTime() < 12 * 36e5)) return
+  const secs = Math.floor(ms / 1000), d = Math.floor(secs / 86400), h = Math.floor((secs % 86400) / 3600), m = Math.floor((secs % 3600) / 60)
+  const left = d > 0 ? `${d} day${d === 1 ? '' : 's'} ${h} hour${h === 1 ? '' : 's'}` : h > 0 ? `${h} hour${h === 1 ? '' : 's'} ${m} min` : `${m} min`
+  notify(p.id, 'pin', 'Your access PIN is about to expire', `Your access PIN ends in ${left}. Please contact the Admin in the Customer Support section, or contact your tutor, to get a new PIN.`, '/app/help')
 }
 const canSeeThread = (teacherId) => isAdmin() || (isStaff() && teacherId === me())
 
@@ -490,6 +505,56 @@ const rpcs = {
       notify(s.submitted_by, 'review', 'Question not approved', 'Your question was not approved.' + (why ? ' Reason: ' + why : ''), '/app/admin/questions')
     }
   },
+  get_novel() {
+    if (!me()) throw new Error('JWT expired')
+    const n = db.novel || {}
+    return [{ title: n.title || 'Novel', cover: n.cover || null, file_name: n.file_name || null, size_bytes: n.size_bytes || 0, has_file: Boolean(n.data), questions: (db.novelQuestions || []).length, updated_at: n.updated_at || null }]
+  },
+  get_novel_file() {
+    if (!me()) throw new Error('JWT expired')
+    return (db.novel || {}).data || null
+  },
+  get_novel_questions() {
+    if (!me()) throw new Error('JWT expired')
+    return (db.novelQuestions || []).map((q) => ({ ...q }))
+  },
+  admin_save_novel(a) {
+    adminOnly()
+    const title = String(a.p_title || '').trim()
+    if (title.length < 1 || title.length > 120) throw new Error('Enter the novel title (up to 120 characters).')
+    if (a.p_cover != null && (!/^data:image\/[a-z+]+;base64,/.test(a.p_cover) || a.p_cover.length > 400000)) throw new Error('The cover picture is not valid or is too big.')
+    if (a.p_data != null && !String(a.p_data).startsWith('data:application/pdf;base64,')) throw new Error('Please choose a PDF file.')
+    if (a.p_data != null && a.p_data.length > 11200000) throw new Error('That PDF is too big. Choose one under 8 MB.')
+    const n = db.novel || {}
+    db.novel = {
+      title, cover: a.p_cover ?? n.cover ?? null,
+      file_name: a.p_data != null ? String(a.p_file_name || '').slice(0, 200) : n.file_name ?? null,
+      size_bytes: a.p_data != null ? a.p_size || 0 : n.size_bytes || 0,
+      data: a.p_data ?? n.data ?? null, updated_at: new Date().toISOString(),
+    }
+    log('novel.save', title)
+    return null
+  },
+  admin_import_novel_questions(a) {
+    adminOnly()
+    const rows = Array.isArray(a.p_rows) ? a.p_rows : []
+    if (rows.length < 1 || rows.length > 500) throw new Error('send between 1 and 500 questions at a time')
+    db.novelQuestions = db.novelQuestions || []
+    db.nextNovelQ = db.nextNovelQ || 1
+    let inserted = 0, duplicates = 0, invalid = 0
+    for (const r of rows) {
+      const body = String(r?.body || '').trim()
+      const options = Array.isArray(r?.options) ? r.options.map((o) => String(o ?? '').trim()) : []
+      const ok = body.length >= 1 && body.length <= 1000 && options.length === 4 && options.every((o) => o.length >= 1 && o.length <= 300) && /^[0-3]$/.test(String(r?.answer)) && String(r?.explanation || '').length <= 1000
+      if (!ok) { invalid++; continue }
+      if (db.novelQuestions.some((q) => q.body === body)) { duplicates++; continue }
+      db.novelQuestions.push({ id: db.nextNovelQ++, body, options, answer: Number(r.answer), explanation: String(r.explanation || '').trim() || null })
+      inserted++
+    }
+    log('novel.questions', `${inserted} added, ${duplicates} duplicates skipped, ${invalid} invalid`)
+    return { inserted, duplicates, invalid }
+  },
+  admin_clear_novel_questions() { adminOnly(); db.novelQuestions = []; log('novel.questions.clear', 'all removed'); return null },
   list_syllabi() {
     if (!me()) throw new Error('JWT expired')
     return (db.syllabi || []).map(({ data, ...rest }) => rest).sort((a, b) => a.subject.localeCompare(b.subject))
@@ -612,6 +677,7 @@ const rpcs = {
   },
   my_notifications() {
     if (!me()) throw new Error('not allowed')
+    pinReminder()
     return db.notifications.filter((n) => n.user_id === me()).sort((a, b) => (a.created_at < b.created_at ? 1 : -1) || b.id - a.id).slice(0, 30).map((n) => ({ ...n }))
   },
   mark_notifications_read(a) {

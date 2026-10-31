@@ -1,9 +1,10 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useState } from 'react'
 import * as api from '../lib/api.js'
 import { useAction } from '../hooks.js'
 import { ErrorLine, Spinner } from './ui.jsx'
+import { pinExpired } from '../lib/utils.js'
 
 /** On the suspended-account screen: a box to write to support. It arrives in Admin > Mail. */
 function SuspendedMessage() {
@@ -31,7 +32,7 @@ function SuspendedMessage() {
 
 /** Everything under /app needs a signed-in, not-suspended student. */
 export function RequireAuth() {
-  const { session, booting, profile, profileError, refreshProfile, signOut } = useAuth()
+  const { session, user, booting, profile, profileError, refreshProfile, signOut } = useAuth()
   const loc = useLocation()
   if (booting) return <Spinner />
   if (!session) return <Navigate to="/auth/login" replace state={{ from: loc.pathname + loc.search }} />
@@ -55,6 +56,21 @@ export function RequireAuth() {
         </div>
       </div>
     )
+  // an access PIN whose time has run out: nothing in the app opens until the Admin or the Tutor gives a new PIN
+  if (pinExpired(user, profile))
+    return (
+      <div className="wrap">
+        <div className="card auth c pin-lock">
+          <h2>Your access PIN has expired</h2>
+          <p className="mut">The time on your PIN has ended, so your access to JAMBwise is locked.</p>
+          <p>To continue, please <b>contact the Admin</b> or <b>your Tutor</b> for a new PIN.</p>
+          <div className="modal-actions" style={{ marginTop: 14 }}>
+            <button className="btn ghost" onClick={signOut}>Log out</button>
+            <Link className="btn" to="/contact">Contact Admin</Link>
+          </div>
+        </div>
+      </div>
+    )
   return <Outlet />
 }
 
@@ -66,8 +82,8 @@ export function RequireAdmin({ children }) {
 
 /** Student pages (practice, mocks, planner, plans...). A teacher has no student side, so they go to their panel. */
 export function StudentOnly({ children }) {
-  const { isTeacher } = useAuth()
-  if (isTeacher) return <Navigate to="/app/admin" replace />
+  const { isStaff } = useAuth()
+  if (isStaff) return <Navigate to="/app/admin" replace />   // the Admin and teachers have no student side
   return children
 }
 

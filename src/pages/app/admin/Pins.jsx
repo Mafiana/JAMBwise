@@ -21,7 +21,14 @@ export default function Pins() {
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{loadError}</ErrorLine>
   const used = (x) => Boolean(x.used_by || x.used_at)
-  const shown = data.filter((x) => filter === 'all' || (filter === 'used') === used(x))
+  // unused | active | expired | used (used, but the student's account is gone or could not be read)
+  const state = (x) => {
+    if (!used(x)) return 'unused'
+    if (!x.used_by || !x.has_status) return 'used'
+    return x.expires_at && new Date(x.expires_at) <= new Date() ? 'expired' : 'active'
+  }
+  const shown = data.filter((x) => filter === 'all' || filter === state(x) || (filter === 'active' && state(x) === 'used'))
+  const tally = (k) => data.filter((x) => state(x) === k).length
   const make = () => run(async () => {
     const n = Math.max(1, Math.min(100, Number(count) || 1))
     const d = Math.max(1, Math.min(3650, Number(days) || 365))
@@ -53,22 +60,23 @@ export default function Pins() {
 
       <div className="adm-filters">
         <select aria-label="Filter PINs" value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="all">All PINs</option><option value="unused">Unused</option><option value="used">Used</option>
+          <option value="all">All PINs</option><option value="unused">Unused</option><option value="active">Active</option><option value="expired">Expired</option>
         </select>
         <button className="btn" onClick={() => downloadText('jambwise-pins.csv', toCsv(shown, [
           { label: 'PIN', value: (x) => x.pin }, { label: 'Plan', value: (x) => x.plan }, { label: 'Days', value: (x) => x.days },
-          { label: 'For', value: (x) => x.student_name }, { label: 'Status', value: (x) => (used(x) ? 'used' : 'unused') }, { label: 'Created', value: (x) => x.created_at },
+          { label: 'For', value: (x) => x.student_name }, { label: 'Status', value: (x) => state(x) }, { label: 'Access ends', value: (x) => x.expires_at || '' }, { label: 'Created', value: (x) => x.created_at },
         ]))}>Export CSV</button>
-        <span className="sm">{data.filter((x) => !used(x)).length} unused of {data.length}</span>
+        <span className="sm">{tally('unused')} unused · {tally('active')} active · {tally('expired')} expired · {data.length} in all</span>
       </div>
       <div className="card tw">
         <table>
-          <thead><tr><th>PIN</th><th>Plan</th><th>Days</th><th>For</th><th>Status</th><th>Created</th><th /></tr></thead>
+          <thead><tr><th>PIN</th><th>Plan</th><th>Days</th><th>For</th><th>Status</th><th>Access ends</th><th>Created</th><th /></tr></thead>
           <tbody>
             {shown.map((x) => (
               <tr key={x.pin}>
                 <td><b className="mono">{x.pin}</b></td><td>{x.plan}</td><td>{x.days}</td><td>{x.student_name || '–'}</td>
-                <td>{used(x) ? `Used ${fmtDate(x.used_at)}` : 'Unused'}</td><td>{fmtDate(x.created_at)}</td>
+                <td><span className={'tag pin-' + state(x)}>{{ unused: 'Unused', active: 'Active', expired: 'Expired', used: 'Used' }[state(x)]}</span>{used(x) && <div className="sm">Used {fmtDate(x.used_at)}</div>}</td>
+                <td>{state(x) === 'expired' ? <b className="pin-late">{fmtDate(x.expires_at)}</b> : x.expires_at ? fmtDate(x.expires_at) : '–'}</td><td>{fmtDate(x.created_at)}</td>
                 <td>
                   <CopyButton text={x.pin} label={'PIN ' + x.pin} />{' '}
                   {!used(x) && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this PIN?', message: `${x.pin} will stop working immediately.`, confirmLabel: 'Delete PIN' })) && run(async () => { await api.adminDeletePin(x.pin); await reload() })}>Delete</button>}

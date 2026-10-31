@@ -313,4 +313,4 @@ export function playChime() {
 }
 
 /** Mail is what people send to support@jambwise.ng without a signed-in ticket: the contact form and the suspended-account box. */
-export const isMail = (m) => !m.user_id || m.topic === 'suspended'
+export const isMail = (m) => !m.user_id || m.topic === 'suspended' || Boolean(m.via_contact)

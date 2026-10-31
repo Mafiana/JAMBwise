@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import Icon from '../../components/Icons.jsx'
 import { SubjectBadge } from '../../components/SubjectIcon.jsx'
+import { useConfirm } from '../../components/Confirm.jsx'
 import { ErrorLine, Lock } from '../../components/ui.jsx'
 import { SUBJECTS } from '../../lib/constants.js'
 import { daysUntil, weakest } from '../../lib/utils.js'
@@ -26,6 +27,7 @@ export default function Planner() {
   const [date, setDate] = useState(profile.exam_date || '')
   const [hours, setHours] = useState(profile.study_hours || 3)
   const [saved, setSaved] = useState(false)
+  const confirm = useConfirm()
   const key = `jw_plan_${user?.id}_${weekKey()}`
   const [done, setDone] = useState(() => load(key))
   if (level < 2) return <Lock title="Study Planner" plan="Pro" />
@@ -48,6 +50,14 @@ export default function Planner() {
       await saveProfile({ exam_date: date || null, study_hours: Math.min(10, Math.max(1, Number(hours) || 3)) })
       setSaved(true)
     }, 'Plan saved')
+  const remove = async () => {
+    if (!(await confirm({ title: 'Delete your study plan?', message: 'This clears your exam date, resets your daily hours to 3 and unticks this week. Your subjects and practice history are not touched.', confirmLabel: 'Delete plan' }))) return
+    await run(async () => {
+      await saveProfile({ exam_date: null, study_hours: 3 })
+      setDate(''); setHours(3); setSaved(false); setDone([]); store(key, [])
+    }, 'Plan deleted')
+  }
+  const hasPlan = hasDate || h !== 3 || done.length > 0
   const weekHours = h * 6                       // six study days and the mock day
   const pct = Math.round((done.length / 7) * 100)
   const weeks = left > 0 ? Math.ceil(left / 7) : 0
@@ -93,7 +103,10 @@ export default function Planner() {
           </div>
         </div>
         <ErrorLine>{error}</ErrorLine>
-        <button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : saved ? 'Saved ✓' : 'Save plan'}</button>
+        <div className="row-btns">
+          <button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : saved ? 'Saved ✓' : 'Save plan'}</button>
+          <button className="btn danger" onClick={remove} disabled={busy || !hasPlan}><Icon name="trash" size={16} /> Delete plan</button>
+        </div>
       </section>
 
       <div className="plan-headrow"><h3>Your week</h3><span className="sm">about {weekHours}h in total</span></div>

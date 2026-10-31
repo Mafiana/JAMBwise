@@ -29,7 +29,7 @@ export default function ContactBlock() {
     if (!session && !captcha) return setError('Please answer the quick check below, so we know you are not a robot.')
     return run(async () => {
       try {
-        await api.sendMessage({ ...f, user_id: session?.user?.id, captcha })
+        await api.sendMessage({ ...f, user_id: session?.user?.id, captcha, via_contact: Boolean(session) })
         setSent(true)
       } catch (err) {
         if (err.captcha) { setCaptcha(null); setCaptchaKey((k) => k + 1) }   // the check was refused: show a new one

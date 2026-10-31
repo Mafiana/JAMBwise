@@ -12,6 +12,7 @@ import { ConfirmProvider } from './components/Confirm.jsx'
 import { DoneProvider } from './components/Done.jsx'
 import Landing from './pages/Landing.jsx'
 import Auth from './pages/Auth.jsx'
+import AdminLogin from './pages/AdminLogin.jsx'
 import Contact from './pages/Contact.jsx'
 import Legal from './pages/Legal.jsx'
 import Institution from './pages/Institution.jsx'
@@ -28,6 +29,8 @@ import Help from './pages/app/Help.jsx'
 
 // Only admins ever open these, so they load on demand.
 const Syllabus = lazy(() => import('./pages/app/Syllabus.jsx'))
+const Novel = lazy(() => import('./pages/app/Novel.jsx'))
+const AdminNovel = lazy(() => import('./pages/app/admin/Novel.jsx'))
 const AdminSyllabus = lazy(() => import('./pages/app/admin/Syllabus.jsx'))
 const Rate = lazy(() => import('./pages/app/Rate.jsx'))
 const Announcements = lazy(() => import('./pages/app/Announcements.jsx'))
@@ -67,6 +70,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth/:mode" element={<Auth />} />
+                <Route path="/admin" element={<AdminLogin />} />
                 <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
                 <Route path="/privacy" element={<Legal kind="privacy" />} />
                 <Route path="/terms" element={<Legal kind="terms" />} />
@@ -85,6 +89,7 @@ export default function App() {
                     <Route path="planner" element={<StudentOnly><Planner /></StudentOnly>} />
                     <Route path="progress" element={<StudentOnly><Progress /></StudentOnly>} />
                     <Route path="syllabus" element={<StudentOnly><Syllabus /></StudentOnly>} />
+                    <Route path="novel" element={<StudentOnly><Novel /></StudentOnly>} />
                     <Route path="rate" element={<StudentOnly><Rate /></StudentOnly>} />
                     <Route path="announcements" element={<StudentOnly><Announcements /></StudentOnly>} />
                     <Route path="profile" element={<Profile />} />
@@ -105,6 +110,7 @@ export default function App() {
                       <Route path="payments" element={<AdminOnly><Payments /></AdminOnly>} />
                       <Route path="questions" element={<Questions />} />
                       <Route path="syllabus" element={<AdminSyllabus />} />
+                      <Route path="novel" element={<AdminNovel />} />
                       <Route path="feedback" element={<AdminOnly><AdminFeedback /></AdminOnly>} />
                       <Route path="announcements" element={<AdminAnnouncements />} />
                       <Route path="rate" element={<TeacherRate />} />
