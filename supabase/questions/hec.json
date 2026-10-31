@@ -1,0 +1,431 @@
+[
+ {
+  "q": "Which nutrient is the main body-building food?",
+  "o": [
+   "Protein",
+   "Carbohydrate",
+   "Fat",
+   "Water"
+  ],
+  "a": 0,
+  "e": "Protein builds and repairs body cells."
+ },
+ {
+  "q": "Kwashiorkor is mainly caused by a lack of",
+  "o": [
+   "iron",
+   "protein",
+   "vitamin C",
+   "iodine"
+  ],
+  "a": 1,
+  "e": "Children who do not get enough protein develop kwashiorkor."
+ },
+ {
+  "q": "A lack of vitamin C in the diet causes",
+  "o": [
+   "rickets",
+   "beriberi",
+   "scurvy",
+   "night blindness"
+  ],
+  "a": 2,
+  "e": "Scurvy shows as bleeding gums and slow healing of wounds."
+ },
+ {
+  "q": "Rickets in children is caused by a lack of vitamin",
+  "o": [
+   "A",
+   "C",
+   "K",
+   "D"
+  ],
+  "a": 3,
+  "e": "Vitamin D helps the body use calcium to make strong bones."
+ },
+ {
+  "q": "Which mineral salt prevents goitre?",
+  "o": [
+   "Iodine",
+   "Iron",
+   "Calcium",
+   "Sodium"
+  ],
+  "a": 0,
+  "e": "A lack of iodine makes the thyroid gland swell, which is goitre."
+ },
+ {
+  "q": "Anaemia is mainly caused by a lack of",
+  "o": [
+   "calcium",
+   "iron",
+   "iodine",
+   "fluoride"
+  ],
+  "a": 1,
+  "e": "Iron is needed to make haemoglobin in the red blood cells."
+ },
+ {
+  "q": "Which of these foods is rich in carbohydrate?",
+  "o": [
+   "Egg",
+   "Fish",
+   "Yam",
+   "Groundnut oil"
+  ],
+  "a": 2,
+  "e": "Yam, cassava, rice and bread give energy as carbohydrate."
+ },
+ {
+  "q": "Beriberi is caused by a lack of vitamin",
+  "o": [
+   "A",
+   "C",
+   "D",
+   "B1 (thiamine)"
+  ],
+  "a": 3,
+  "e": "Thiamine is found in whole grains, beans and meat."
+ },
+ {
+  "q": "Which of these is a moist method of cooking?",
+  "o": [
+   "Boiling",
+   "Grilling",
+   "Roasting",
+   "Frying"
+  ],
+  "a": 0,
+  "e": "Boiling, steaming and stewing cook food in water or steam."
+ },
+ {
+  "q": "Cooking food in hot fat or oil is called",
+  "o": [
+   "boiling",
+   "frying",
+   "steaming",
+   "stewing"
+  ],
+  "a": 1,
+  "e": "Frying uses hot oil to cook and brown the food."
+ },
+ {
+  "q": "Cooking food gently in liquid just below boiling point is called",
+  "o": [
+   "grilling",
+   "roasting",
+   "simmering",
+   "baking"
+  ],
+  "a": 2,
+  "e": "Simmering keeps the liquid barely bubbling."
+ },
+ {
+  "q": "Which of these is a raising agent used in baking?",
+  "o": [
+   "Sugar",
+   "Salt",
+   "Margarine",
+   "Baking powder"
+  ],
+  "a": 3,
+  "e": "Baking powder gives off gas that makes cakes rise."
+ },
+ {
+  "q": "Which of these is a natural fibre that comes from a plant?",
+  "o": [
+   "Cotton",
+   "Nylon",
+   "Polyester",
+   "Acrylic"
+  ],
+  "a": 0,
+  "e": "Cotton comes from the cotton plant; the others are made in factories."
+ },
+ {
+  "q": "Which of these is a natural fibre from an animal?",
+  "o": [
+   "Cotton",
+   "Wool",
+   "Linen",
+   "Nylon"
+  ],
+  "a": 1,
+  "e": "Wool comes from the fleece of sheep."
+ },
+ {
+  "q": "Which of these is a synthetic fibre?",
+  "o": [
+   "Cotton",
+   "Silk",
+   "Nylon",
+   "Wool"
+  ],
+  "a": 2,
+  "e": "Nylon is made from chemicals."
+ },
+ {
+  "q": "The tool used to take body measurements for a garment is the",
+  "o": [
+   "ruler",
+   "pair of pinking shears",
+   "tracing wheel",
+   "tape measure"
+  ],
+  "a": 3,
+  "e": "A tape measure bends round the body, so it measures chest, waist and hips."
+ },
+ {
+  "q": "The part of a sewing machine that holds the fabric down while sewing is the",
+  "o": [
+   "presser foot",
+   "bobbin",
+   "needle bar",
+   "hand wheel"
+  ],
+  "a": 0,
+  "e": "The presser foot keeps the cloth flat against the feed dog."
+ },
+ {
+  "q": "Soap is made from fats or oils and",
+  "o": [
+   "an acid",
+   "an alkali",
+   "sugar",
+   "salt water"
+  ],
+  "a": 1,
+  "e": "Fat or oil reacts with an alkali such as caustic soda to make soap."
+ },
+ {
+  "q": "A family budget is a plan that compares",
+  "o": [
+   "rent with food",
+   "wants with needs only",
+   "income with expenditure",
+   "savings with debts only"
+  ],
+  "a": 2,
+  "e": "A budget shows the money coming in and how it will be spent."
+ },
+ {
+  "q": "Which of these is a fixed expense for a family?",
+  "o": [
+   "Medical emergencies",
+   "Gifts",
+   "Entertainment",
+   "House rent"
+  ],
+  "a": 3,
+  "e": "Rent stays the same each month, so it is fixed."
+ },
+ {
+  "q": "A family made up of a father, a mother and their children is called a",
+  "o": [
+   "nuclear family",
+   "extended family",
+   "polygamous family",
+   "single-parent family"
+  ],
+  "a": 0,
+  "e": "A nuclear family has only parents and children."
+ },
+ {
+  "q": "An extended family includes the parents, children and also",
+  "o": [
+   "neighbours",
+   "grandparents and other relatives",
+   "friends",
+   "teachers"
+  ],
+  "a": 1,
+  "e": "It stretches beyond parents and children to other relatives."
+ },
+ {
+  "q": "A balanced diet is one that contains",
+  "o": [
+   "only protein foods",
+   "only energy foods",
+   "all the classes of food in the right amounts",
+   "a lot of fat and sugar"
+  ],
+  "a": 2,
+  "e": "It supplies all nutrients in the amounts the body needs."
+ },
+ {
+  "q": "Drying is a method of food preservation because it",
+  "o": [
+   "adds salt to the food",
+   "kills all vitamins",
+   "makes the food sweet",
+   "removes the water that micro-organisms need"
+  ],
+  "a": 3,
+  "e": "Without water, bacteria and moulds cannot grow."
+ },
+ {
+  "q": "Keeping food in a refrigerator helps to",
+  "o": [
+   "slow the growth of micro-organisms",
+   "kill all germs at once",
+   "add vitamins to the food",
+   "make the food softer"
+  ],
+  "a": 0,
+  "e": "Cold slows down spoilage but does not stop it completely."
+ },
+ {
+  "q": "Food poisoning is commonly caused by",
+  "o": [
+   "vitamins",
+   "bacteria",
+   "fibre",
+   "minerals"
+  ],
+  "a": 1,
+  "e": "Bacteria such as Salmonella grow in badly handled food."
+ },
+ {
+  "q": "Which of these insects spreads cholera and typhoid by touching food?",
+  "o": [
+   "Butterfly",
+   "Bee",
+   "Housefly",
+   "Ladybird"
+  ],
+  "a": 2,
+  "e": "Houseflies carry germs from dirt onto food."
+ },
+ {
+  "q": "Which of these foods is a good source of vitamin A?",
+  "o": [
+   "Rice",
+   "Sugar",
+   "Salt",
+   "Carrot"
+  ],
+  "a": 3,
+  "e": "Carrots and palm oil contain carotene, which the body turns into vitamin A."
+ },
+ {
+  "q": "Roughage in the diet helps to prevent",
+  "o": [
+   "constipation",
+   "scurvy",
+   "goitre",
+   "rickets"
+  ],
+  "a": 0,
+  "e": "Fibre helps food move through the bowel."
+ },
+ {
+  "q": "Which nutrient gives the most energy per gram?",
+  "o": [
+   "Protein",
+   "Fat",
+   "Carbohydrate",
+   "Vitamin"
+  ],
+  "a": 1,
+  "e": "Fat gives about 9 kilocalories a gram; carbohydrate and protein give about 4."
+ },
+ {
+  "q": "Fruits and vegetables are called protective foods because they",
+  "o": [
+   "give the most energy",
+   "build muscles",
+   "supply vitamins and minerals that protect the body from disease",
+   "supply fat"
+  ],
+  "a": 2,
+  "e": "Vitamins and minerals protect against deficiency diseases."
+ },
+ {
+  "q": "A pressure cooker is useful because it",
+  "o": [
+   "cooks food without heat",
+   "stores food for years",
+   "removes all nutrients",
+   "cooks food faster and saves fuel"
+  ],
+  "a": 3,
+  "e": "Steam under pressure raises the cooking temperature."
+ },
+ {
+  "q": "In weaving, the warp threads run",
+  "o": [
+   "lengthwise",
+   "crosswise",
+   "diagonally",
+   "in circles"
+  ],
+  "a": 0,
+  "e": "The weft threads cross the warp from side to side."
+ },
+ {
+  "q": "The selvedge of a fabric is",
+  "o": [
+   "the cut end",
+   "the firm finished edge",
+   "the pattern marking",
+   "the hem"
+  ],
+  "a": 1,
+  "e": "It runs down both lengthwise edges and does not fray."
+ },
+ {
+  "q": "A paper pattern in dressmaking is used as",
+  "o": [
+   "a lining",
+   "a type of stitch",
+   "a guide for cutting out the garment",
+   "a measuring tape"
+  ],
+  "a": 2,
+  "e": "The pieces are pinned to the cloth and cut round."
+ },
+ {
+  "q": "Starch is used in laundry work to",
+  "o": [
+   "remove all stains",
+   "soften the water",
+   "kill insects",
+   "make fabrics stiff and keep them clean longer"
+  ],
+  "a": 3,
+  "e": "Starch gives collars and uniforms a crisp finish."
+ },
+ {
+  "q": "A consumer is a person who",
+  "o": [
+   "buys and uses goods and services",
+   "makes goods in a factory",
+   "sells goods in a shop",
+   "imports goods only"
+  ],
+  "a": 0,
+  "e": "Consumers use the goods and services that producers supply."
+ },
+ {
+  "q": "In Nigeria, the agency that regulates food, drugs and packaged water is",
+  "o": [
+   "NNPC",
+   "NAFDAC",
+   "NERC",
+   "FRSC"
+  ],
+  "a": 1,
+  "e": "NAFDAC protects consumers by checking the quality of food and drugs."
+ },
+ {
+  "q": "Using family resources wisely to reach family goals is called",
+  "o": [
+   "home decoration",
+   "budgeting only",
+   "home management",
+   "consumer protection"
+  ],
+  "a": 2,
+  "e": "It means planning, organising and controlling resources such as time, money and energy."
+ }
+]

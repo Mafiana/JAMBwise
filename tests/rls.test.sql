@@ -249,7 +249,43 @@ do $$ begin assert (select count(*) from public.my_notifications() where kind = 
 reset role;
 select pg_temp.as_user((select id from t_ids where name='tutor'));
 set local role authenticated;
-insert into public.questions(subject, body, options, answer) values ('eng','Teacher added this?','["a","b","c","d"]'::jsonb,2);
+select pg_temp.expect_fail($$insert into public.questions(subject, body, options, answer) values ('eng','Direct teacher insert','["a","b","c","d"]'::jsonb,2)$$, 'teacher cannot add live questions directly');
+-- a teacher's new question waits for the admin to accept it
+select public.submit_question('eng','Teacher added this?','["a","b","c","d"]'::jsonb,2,'because');
+select pg_temp.expect_fail($$select public.submit_question('eng','Teacher added this?','["a","b","c","d"]'::jsonb,2,'')$$, 'the same question twice');
+select pg_temp.expect_fail($$select public.submit_question('eng','','["a","b","c","d"]'::jsonb,2,'')$$, 'an empty question');
+select pg_temp.expect_fail($$select public.submit_question('eng','Three options','["a","b","c"]'::jsonb,2,'')$$, 'three options');
+do $$ begin
+  assert (select count(*) from public.questions where body = 'Teacher added this?') = 0, 'not live until accepted';
+  assert (select count(*) from public.my_question_submissions() where status = 'pending') = 1, 'teacher sees it pending';
+end $$;
+select pg_temp.expect_fail($$select * from public.admin_pending_questions()$$, 'teacher reads the review list');
+select pg_temp.expect_fail($$select public.admin_review_question(1, true, null)$$, 'teacher accepts their own question');
+select public.submit_question('eng','Teacher second try?','["a","b","c","d"]'::jsonb,1,null);
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ declare a bigint; b bigint; begin
+  assert (select count(*) from public.admin_pending_questions()) = 2, 'admin sees both waiting';
+  assert (select count(*) from public.my_notifications() where kind = 'review') >= 1, 'admin is notified';
+  select id into a from public.admin_pending_questions() where body = 'Teacher added this?';
+  select id into b from public.admin_pending_questions() where body = 'Teacher second try?';
+  perform public.admin_review_question(a, true, null);
+  perform public.admin_review_question(b, false, 'Option B is also correct');
+  assert (select count(*) from public.questions where body = 'Teacher added this?') = 1, 'accepted question is live';
+  assert (select created_by from public.questions where body = 'Teacher added this?') = (select id from t_ids where name = 'tutor'), 'the teacher is the uploader';
+  assert (select count(*) from public.questions where body = 'Teacher second try?') = 0, 'declined question is not live';
+  assert (select count(*) from public.admin_pending_questions()) = 0, 'nothing left waiting';
+end $$;
+select pg_temp.expect_fail($$select public.admin_review_question(1, true, null)$$, 'reviewing the same question twice');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='tutor'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.my_notifications() where kind = 'review' and body like '%Approved and Added Successfully%') = 1, 'teacher told it was approved';
+  assert (select count(*) from public.my_notifications() where kind = 'review' and body like '%Option B is also correct%') = 1, 'teacher told why it was declined';
+  assert (select count(*) from public.my_question_submissions() where status = 'declined' and decline_reason is not null) = 1, 'teacher sees the reason';
+end $$;
 update public.questions set explanation = 'edited by teacher' where body = 'Teacher added this?';
 do $$ begin assert (select explanation from public.questions where body = 'Teacher added this?') = 'edited by teacher', 'teacher edits questions'; end $$;
 delete from public.questions where body = 'Teacher added this?';
@@ -873,9 +909,12 @@ end $$;
 -- question reports go to whoever uploaded the question
 reset role; update public.profiles set is_teacher = true, is_admin = false, institution_id = null where email = 'tutor@x.com'; set local role authenticated;
 select pg_temp.as_user((select id from t_ids where name='tutor'));
-insert into public.questions (subject, body, options, answer, explanation, created_by)
-  values ('eng', 'Report-routing test question?', '["a","b","c","d"]'::jsonb, 1, 'x', (select id from t_ids where name='paid'));
-do $$ begin assert (select created_by from public.questions where body = 'Report-routing test question?') = auth.uid(), 'the uploader is stamped by the server, not chosen by the client'; end $$;
+select public.submit_question('eng', 'Report-routing test question?', '["a","b","c","d"]'::jsonb, 1, 'x');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_review_question((select id from public.admin_pending_questions() where body = 'Report-routing test question?'), true, null);
+do $$ begin assert (select created_by from public.questions where body = 'Report-routing test question?') = (select id from t_ids where name = 'tutor'), 'an accepted question is stamped with the teacher who wrote it'; end $$;
 select pg_temp.as_user((select id from t_ids where name='paid'));
 select public.report_question((select id from public.questions where body = 'Report-routing test question?'), 'Report: routing test', 'Question #1' || E'\n' || 'A. a');
 select public.report_question((select id from public.questions where subject = 'eng' and created_by is null limit 1), 'Report: seeded', 'Question #2 text');
@@ -921,6 +960,108 @@ do $$ begin assert (select count(*) from public.plans)=3,'anon reads plans'; end
 select pg_temp.expect_fail($$select * from public.profiles$$, 'anon reads profiles');
 select pg_temp.expect_fail($$select * from public.questions$$, 'anon reads questions');
 reset role;
+
+-- ===== Rate & suggest, and announcements =====
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+select public.submit_feedback(4, 'feature', 'add X and O');
+select public.submit_feedback(null, 'bug', 'there is a bug');
+select pg_temp.expect_fail($$select public.submit_feedback(null, 'feedback', '   ')$$, 'feedback with nothing in it');
+select pg_temp.expect_fail($$select public.submit_feedback(6, 'feedback', 'x')$$, 'a 6 star rating');
+select pg_temp.expect_fail($$select public.submit_feedback(3, 'praise', 'x')$$, 'an unknown kind');
+select pg_temp.expect_fail($$select * from public.feedback$$, 'reading the feedback table directly');
+select pg_temp.expect_fail($$select * from public.admin_feedback()$$, 'a student reading all feedback');
+select public.submit_feedback(5, 'feedback', 'three');
+select public.submit_feedback(5, 'feedback', 'four');
+select public.submit_feedback(5, 'feedback', 'five');
+select pg_temp.expect_fail($$select public.submit_feedback(5, 'feedback', 'six')$$, 'more than 5 in a day');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ declare f bigint; begin
+  assert (select count(*) from public.admin_feedback()) = 5, 'admin reads all feedback';
+  assert (select count(*) from public.my_notifications() where kind = 'feedback') >= 5, 'admin is notified of feedback';
+  select id into f from public.admin_feedback() where kind = 'bug';
+  perform public.admin_set_feedback_status(f, 'done');
+  assert (select status from public.admin_feedback() where id = f) = 'done', 'marked done';
+  perform public.admin_set_feedback_status(f, 'new');
+  assert (select status from public.admin_feedback() where id = f) = 'new', 'reopened';
+  assert (select name is not null and email is not null from public.admin_feedback() where id = f), 'the sender is named';
+end $$;
+-- announcements: one private, one public
+select public.admin_send_announcement('Private hello', 'Only for you', 'private', array[(select id from t_ids where name='paid')]);
+select public.admin_send_announcement('Public hello', 'For everyone', 'all', null);
+select pg_temp.expect_fail($$select public.admin_send_announcement('x', 'y', 'private', null)$$, 'private to nobody');
+select pg_temp.expect_fail($$select public.admin_send_announcement('', 'y', 'all', null)$$, 'no title');
+do $$ begin assert (select count(*) from public.admin_announcements()) = 2, 'admin sees what was sent'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.my_announcements()) = 2, 'the addressed student sees both';
+  assert (select count(*) from public.my_notifications() where kind = 'announce') = 2, 'and gets both in the bell';
+end $$;
+select pg_temp.expect_fail($$select public.admin_send_announcement('x', 'y', 'all', null)$$, 'a student sending an announcement');
+select pg_temp.expect_fail($$select * from public.admin_announcements()$$, 'a student listing sent announcements');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+do $$ begin
+  assert (select count(*) from public.my_announcements()) = 1, 'someone else sees only the public one';
+  assert (select title from public.my_announcements()) = 'Public hello', 'and it is the public one';
+end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_delete_announcement((select id from public.admin_announcements() where title = 'Private hello'));
+do $$ begin assert (select count(*) from public.admin_announcements()) = 1, 'an announcement can be deleted'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'announce') = 1, 'deleting an announcement also removes its bell notification'; end $$;
+reset role;
+
+-- ===== discount codes =====
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_save_coupon('save20', 20, 'all', now() + interval '3 days', 2);
+select public.admin_save_coupon('PROONLY', 50, 'pro', null, null);
+select pg_temp.expect_fail($$select public.admin_save_coupon('SAVE20', 10, 'all', null, null)$$, 'a duplicate code');
+select pg_temp.expect_fail($$select public.admin_save_coupon('x', 10, 'all', null, null)$$, 'a too-short code');
+select pg_temp.expect_fail($$select public.admin_save_coupon('BIG', 95, 'all', null, null)$$, 'a 95 percent discount');
+select pg_temp.expect_fail($$select public.admin_save_coupon('OLD', 10, 'all', now() - interval '1 day', null)$$, 'an end date in the past');
+do $$ begin assert (select count(*) from public.admin_coupons()) = 2, 'admin lists codes'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+select pg_temp.expect_fail($$select * from public.coupons$$, 'a student reading the coupons table');
+select pg_temp.expect_fail($$select * from public.admin_coupons()$$, 'a student listing codes');
+select pg_temp.expect_fail($$select public.admin_save_coupon('MINE', 90, 'all', null, null)$$, 'a student making a code');
+do $$ declare q record; lp int; begin
+  select price_kobo into lp from public.plans where id = 'student';
+  select * into q from public.coupon_quote(' save20 ', 'student');
+  assert q.valid and q.percent = 20 and q.list_kobo = lp and q.final_kobo = lp - q.discount_kobo and q.final_kobo < lp, 'a valid code lowers the price';
+  assert q.final_kobo % 100 = 0, 'the price is in whole naira';
+  assert not (select valid from public.coupon_quote('NOPE', 'student')), 'an unknown code';
+  assert not (select valid from public.coupon_quote('PROONLY', 'student')), 'a pro-only code on the student plan';
+  assert (select valid from public.coupon_quote('PROONLY', 'pro')), 'a pro-only code on the pro plan';
+  assert not (select valid from public.coupon_quote('SAVE20', 'free')), 'no code on the free plan';
+end $$;
+reset role;
+-- a payment with a code counts as a use, once
+insert into public.payments (reference, user_id, plan, amount_kobo, coupon_id, discount_kobo)
+  select 'RCP1', (select id from t_ids where name='paid'), 'student', (select final_kobo from public.coupon_quote('SAVE20','student')), (select id from public.coupons where code='SAVE20'), (select discount_kobo from public.coupon_quote('SAVE20','student'));
+select public.fulfil_payment('RCP1', (select amount_kobo from public.payments where reference='RCP1'));
+select public.fulfil_payment('RCP1', (select amount_kobo from public.payments where reference='RCP1'));
+do $$ begin assert (select used_count from public.coupons where code='SAVE20') = 1, 'a paid code is counted once'; end $$;
+update public.coupons set used_count = 2 where code = 'SAVE20';
+do $$ begin assert not (select valid from public.coupon_quote('SAVE20', 'student')), 'a fully used code stops working'; end $$;
+update public.coupons set used_count = 0, active = false where code = 'SAVE20';
+do $$ begin assert not (select valid from public.coupon_quote('SAVE20', 'student')), 'a switched-off code stops working'; end $$;
+update public.coupons set active = true, expires_at = now() - interval '1 minute' where code = 'SAVE20';
+do $$ begin assert not (select valid from public.coupon_quote('SAVE20', 'student')), 'an expired code stops working'; end $$;
 
 -- ===== account deletion keeps payments, clears PIN references =====
 delete from auth.users where email='other@x.com';

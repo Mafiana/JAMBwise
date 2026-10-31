@@ -26,13 +26,26 @@ Deno.serve(async (req) => {
 
   // app_metadata.pin = true is what lets this account use the reserved PIN email domain
   // (a database trigger blocks everyone else). Clients cannot set app_metadata.
+  // Some Supabase versions set app_metadata only after the row is inserted, which the guard trigger would reject,
+  // so the email is also reserved for a moment (the trigger accepts a fresh reservation).
+  await db.from('pin_reservations').delete().eq('email', email)
+  await db.from('pin_reservations').insert({ email })
   const { data: created, error } = await db.auth.admin.createUser({
     email,
     password: code,
     email_confirm: true,
     app_metadata: { pin: 'true' },
   })
-  if (error || !created?.user) return reply(req, { error: 'Could not activate this PIN. Ask your tutor for help.' }, 400)
+  await db.from('pin_reservations').delete().eq('email', email)
+  if (error || !created?.user) {
+    console.error('pin-activate createUser failed:', error?.code, error?.status, error?.message)
+    const m = String(error?.message ?? '')
+    const why = /password/i.test(m) ? ' (the Supabase password rules reject the PIN: lower "Minimum password length" to 6 in Authentication → Providers → Email)'
+      : /already|exists|registered/i.test(m) ? ' (an account for this PIN already exists but is not linked: delete the user ' + email + ' in Authentication → Users, then try again)'
+      : /database error|trigger|profile/i.test(m) ? ' (a database trigger failed while creating the profile: check Logs → Postgres)'
+      : ''
+    return reply(req, { error: 'Could not activate this PIN. Ask your tutor for help.' + why + (m ? ' [' + m + ']' : '') }, 400)
+  }
 
   // Plan, expiry and name are applied, and the PIN is marked used, in one database transaction.
   const { error: redeemErr } = await db.rpc('redeem_pin', { p_pin: code, p_user: created.user.id })

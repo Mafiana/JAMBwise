@@ -80,6 +80,7 @@ export function PlanCard({ plan, current, hot, children }) {
       {hot && <span className="ribbon">Most popular</span>}
       <h3>{plan.name}</h3>
       <h2>
+        {plan.was ? <s className="price-was" aria-label={`Was ${naira(plan.was)}`}>{naira(plan.was)}</s> : null}
         {plan.kobo == null ? <span className="price-wait" aria-label="Loading price">₦…</span> : plan.kobo ? naira(plan.kobo) : '₦0'}
         <small>{plan.kobo == null ? '' : plan.kobo ? 'per 30 days' : 'forever'}</small>
       </h2>

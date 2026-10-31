@@ -9,7 +9,7 @@ import { Empty, fmtDateTime, Pagination, useLoad, TabLoader } from './shared.jsx
 const LABEL = {
   'pin.create': 'Made a PIN', 'pin.bulk': 'Made PINs in bulk', 'student.edit': 'Edited a student', 'student.suspend': 'Suspended a student',
   'student.plan': 'Changed a plan', 'student.reset': 'Reset progress', 'mock.retake': 'Allowed a CBT Mock retake', 'hall.retake': 'Allowed an ExamHall retake', 'hall.schedule': 'Set the ExamHall schedule', 'hall.release': 'Released ExamHall results to students', 'hall.unrelease': 'Hid ExamHall results from students', 'role.teacher': 'Made a teacher', 'role.admin': 'Made an admin', 'role.student': 'Removed staff access', 'mock.schedule': 'Set the CBT Mock schedule', 'student.delete': 'Deleted a student', 'student.create': 'Added a student', 'teacher.create': 'Added a teacher', 'password.reset': 'Reset a password', 'parent.revoke': 'Switched off parent access', 'admin.grant': 'Made an admin',
-  'admin.revoke': 'Removed an admin', 'login.admin': 'Admin signed in', 'login.teacher': 'Teacher signed in', 'login.student': 'Student signed in', 'parent.login': 'Parent signed in', 'parent.denied': 'Parent sign-in refused', 'institution.add': 'Added an institution', 'institution.edit': 'Edited an institution', 'institution.delete': 'Deleted an institution', 'institution.assign': 'Assigned someone to an institution', 'question.add': 'Added a question', 'question.edit': 'Edited a question', 'question.delete': 'Deleted a question', 'plan.price': 'Changed a price', 'ticket.reply': 'Replied to a ticket', 'ticket.resolve': 'Resolved a ticket',
+  'admin.revoke': 'Removed an admin', 'login.admin': 'Admin signed in', 'login.teacher': 'Teacher signed in', 'login.student': 'Student signed in', 'parent.login': 'Parent signed in', 'parent.denied': 'Parent sign-in refused', 'institution.add': 'Added an institution', 'institution.edit': 'Edited an institution', 'institution.delete': 'Deleted an institution', 'institution.assign': 'Assigned someone to an institution', 'syllabus.add': 'Added a syllabus', 'syllabus.delete': 'Deleted a syllabus', 'question.add': 'Added a question', 'question.edit': 'Edited a question', 'question.delete': 'Deleted a question', 'plan.price': 'Changed a price', 'ticket.reply': 'Replied to a ticket', 'ticket.resolve': 'Resolved a ticket',
 }
 const label = (a) => LABEL[a] || a
 const isSignIn = (a) => /^login\.|^parent\.(login|denied)$/.test(a)
@@ -110,7 +110,7 @@ export default function Activity() {
         </select>
         {filtered && <button className="btn ghost" onClick={clear}>Clear filters</button>}
         <button className="btn" onClick={refresh} disabled={refreshing} aria-busy={refreshing}><Icon name="refresh" size={16} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
-        <button className="btn ghost" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
+        <button className="btn" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
       </div>
       {refreshing && <Loader size="sm" label="Refreshing the list…" />}
       <p className="sm">Updated {at.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}. {matches.length} of {data.length} entries: every sign-in by admins, teachers, students and parents, and everything admins change. The log is written by the server and cannot be edited.{data.length >= 2000 ? ' Showing the latest 2000.' : ''}</p>

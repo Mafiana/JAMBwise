@@ -16,15 +16,18 @@ import mkt from '../../../supabase/questions/mkt.json'
 import lit from '../../../supabase/questions/lit.json'
 import irk from '../../../supabase/questions/irk.json'
 import crk from '../../../supabase/questions/crk.json'
+import hec from '../../../supabase/questions/hec.json'
+import cst from '../../../supabase/questions/cst.json'
+import geo from '../../../supabase/questions/geo.json'
 
 import { DEFAULT_INSTITUTIONS } from '../constants.js'
 import { DB_KEY, DEMO_ADMIN, DEMO_PARENT, DEMO_PIN, DEMO_STUDENT, DEMO_TEACHER, SESSION_KEY } from './accounts.js'
 
-const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk']
+const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
 const PROFILE_EDITABLE = ['full_name', 'course', 'school', 'avatar', 'subjects', 'exam_date', 'study_hours']
 
 let nextQuestion = 1
-const questions = Object.entries({ eng, mat, phy, chm, bio, gov, eco, com, agr, acc, mkt, lit, irk, crk }).flatMap(([subject, list]) =>
+const questions = Object.entries({ eng, mat, phy, chm, bio, gov, eco, com, agr, acc, mkt, lit, irk, crk, hec, cst, geo }).flatMap(([subject, list]) =>
   list.map((q) => ({ id: nextQuestion++, subject, body: q.q, options: q.o, answer: q.a, explanation: q.e })),
 )
 
@@ -251,7 +254,7 @@ function from(name) {
         return { data: null, error: null }
       }
       if (name === 'questions') {
-        if (!isStaff()) return err('permission denied')
+        if (!isAdmin()) return err('permission denied')   // teachers send questions for review instead
         const out = []
         for (const r of rows) {
           if (!validQuestion(r)) return err('invalid question')
@@ -360,6 +363,159 @@ const randomPin = () => {
 }
 const rpcs = {
   report_question(a) { return reportQuestion(a) },
+  coupon_quote(a) {
+    if (!me()) throw new Error('JWT expired')
+    const cd = String(a.p_code || '').trim().toUpperCase()
+    const plan = db.plans.find((x) => x.id === a.p_plan)
+    const lp = plan?.price_kobo || 0
+    const no = (message) => [{ valid: false, message, coupon_id: null, code: cd, percent: 0, list_kobo: lp, discount_kobo: 0, final_kobo: lp }]
+    if (!lp) return no('Unknown plan.')
+    const c = (db.coupons || []).find((x) => x.code === cd)
+    if (!c || !c.active) return no('That code is not valid.')
+    if (c.expires_at && new Date(c.expires_at) <= new Date()) return no('That code has expired.')
+    if (c.max_uses != null && c.used_count >= c.max_uses) return no('That code has been fully used.')
+    if (c.plan !== 'all' && c.plan !== a.p_plan) return no('That code is for the ' + c.plan[0].toUpperCase() + c.plan.slice(1) + ' plan only.')
+    const final = Math.max(10000, Math.round((lp * (100 - c.percent)) / 100 / 100) * 100)
+    return [{ valid: true, message: c.percent + '% off applied.', coupon_id: c.id, code: c.code, percent: c.percent, list_kobo: lp, discount_kobo: lp - final, final_kobo: final }]
+  },
+  admin_coupons() { adminOnly(); return (db.coupons || []).slice().sort((a, b) => (a.created_at < b.created_at ? 1 : -1)) },
+  admin_save_coupon(a) {
+    adminOnly()
+    const code = String(a.p_code || '').trim().toUpperCase()
+    if (!/^[A-Z0-9_-]{3,20}$/.test(code)) throw new Error('The code must be 3 to 20 letters or numbers (no spaces).')
+    if (!Number.isInteger(a.p_percent) || a.p_percent < 1 || a.p_percent > 90) throw new Error('The discount must be from 1% to 90%.')
+    if (!['all', 'student', 'pro'].includes(a.p_plan)) throw new Error('Choose a plan.')
+    if (a.p_expires && new Date(a.p_expires) <= new Date()) throw new Error('The end date must be in the future.')
+    if (a.p_max_uses != null && a.p_max_uses < 1) throw new Error('The use limit must be at least 1.')
+    db.coupons = db.coupons || []
+    if (db.coupons.some((c) => c.code === code)) throw new Error(`A code named ${code} already exists.`)
+    const row = { id: db.coupons.reduce((n, c) => Math.max(n, c.id), 0) + 1, code, percent: a.p_percent, plan: a.p_plan, expires_at: a.p_expires || null, max_uses: a.p_max_uses ?? null, used_count: 0, active: true, created_at: new Date().toISOString() }
+    db.coupons.push(row)
+    log('coupon.add', `${code} ${a.p_percent}% ${a.p_plan}`)
+    return row.id
+  },
+  admin_set_coupon_active(a) { adminOnly(); const c = (db.coupons || []).find((x) => x.id === a.p_id); if (c) c.active = Boolean(a.p_active) },
+  admin_delete_coupon(a) { adminOnly(); db.coupons = (db.coupons || []).filter((x) => x.id !== a.p_id) },
+  submit_feedback(a) {
+    if (!me()) throw new Error('JWT expired')
+    const msg = String(a.p_message || '').trim()
+    if (!['feedback', 'feature', 'bug'].includes(a.p_kind)) throw new Error('Choose Feedback, Feature idea or Bug.')
+    if (a.p_rating != null && !(a.p_rating >= 1 && a.p_rating <= 5)) throw new Error('The rating must be from 1 to 5 stars.')
+    if (a.p_rating == null && !msg) throw new Error('Please give a star rating or write a message.')
+    db.feedback = db.feedback || []
+    if (db.feedback.filter((f) => f.user_id === me() && Date.now() - new Date(f.created_at) < 864e5).length >= 5) throw new Error('You have sent several already today. Thank you! Please try again tomorrow.')
+    const row = { id: db.feedback.reduce((n, f) => Math.max(n, f.id), 0) + 1, user_id: me(), rating: a.p_rating ?? null, kind: a.p_kind, message: msg || null, status: 'new', created_at: new Date().toISOString() }
+    db.feedback.push(row)
+    const p = profileOf(me())
+    const label = { feature: 'a feature idea', bug: 'a bug report', feedback: 'feedback' }[a.p_kind]
+    db.profiles.filter((x) => x.is_admin).forEach((x) => notify(x.id, 'feedback', 'New ' + { feature: 'feature idea', bug: 'bug report', feedback: 'feedback' }[a.p_kind], `${p?.full_name || 'Someone'} sent ${label}${a.p_rating ? ` (${a.p_rating} stars)` : ''}.`, '/app/admin/feedback'))
+    return row.id
+  },
+  admin_feedback() {
+    adminOnly()
+    return (db.feedback || []).map((f) => { const p = profileOf(f.user_id); return { ...f, name: p?.full_name || null, email: p?.email || null, role: p?.is_teacher ? 'teacher' : 'student' } }).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+  },
+  admin_set_feedback_status(a) {
+    adminOnly()
+    const f = (db.feedback || []).find((x) => x.id === a.p_id)
+    if (f && ['new', 'done'].includes(a.p_status)) f.status = a.p_status
+  },
+  admin_delete_feedback(a) { adminOnly(); db.feedback = (db.feedback || []).filter((x) => x.id !== a.p_id) },
+  admin_send_announcement(a) {
+    adminOnly()
+    const title = String(a.p_title || '').trim(); const body = String(a.p_body || '').trim()
+    if (!title || title.length > 120) throw new Error('Write a title (up to 120 characters).')
+    if (!body || body.length > 2000) throw new Error('Write the message (up to 2000 characters).')
+    if (!['all', 'private'].includes(a.p_audience)) throw new Error('Choose who should get it.')
+    db.announcements = db.announcements || []
+    const ids = a.p_audience === 'private' ? (a.p_user_ids || []).filter((id) => profileOf(id)) : []
+    if (a.p_audience === 'private' && !ids.length) throw new Error('Choose at least one person.')
+    const row = { id: db.announcements.reduce((n, x) => Math.max(n, x.id), 0) + 1, title, body, audience: a.p_audience, recipients: ids, created_at: new Date().toISOString() }
+    db.announcements.push(row)
+    const to = a.p_audience === 'all' ? db.profiles.filter((p) => !p.is_admin && !p.suspended) : ids.map(profileOf).filter((p) => p && !p.is_admin)
+    to.forEach((p) => notify(p.id, 'announce', title, body, p.is_teacher ? '/app/admin/announcements' : '/app/announcements'))
+    return row.id
+  },
+  admin_announcements() {
+    adminOnly()
+    return (db.announcements || []).map((x) => ({ id: x.id, title: x.title, body: x.body, audience: x.audience, recipients: x.audience === 'all' ? null : x.recipients.map((id) => profileOf(id)?.full_name || profileOf(id)?.email), created_at: x.created_at })).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+  },
+  admin_delete_announcement(a) {
+    adminOnly()
+    const x = (db.announcements || []).find((y) => y.id === a.p_id)
+    if (x) db.notifications = db.notifications.filter((n) => !(n.kind === 'announce' && n.title === x.title && n.body === x.body.slice(0, 500)))
+    db.announcements = (db.announcements || []).filter((y) => y.id !== a.p_id)
+  },
+  my_announcements() {
+    if (!me()) throw new Error('JWT expired')
+    return (db.announcements || []).filter((x) => x.audience === 'all' || x.recipients.includes(me())).map(({ recipients, ...r }) => r).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+  },
+  submit_question(a) {
+    if (!isStaff()) throw new Error('not allowed')
+    if (isAdmin()) throw new Error('Admins add questions directly.')
+    const body = String(a.p_body || '').trim()
+    if (!body || body.length > 1000) throw new Error('Write the question (up to 1000 characters).')
+    if (!Array.isArray(a.p_options) || a.p_options.length !== 4 || a.p_options.some((o) => !String(o).trim())) throw new Error('Fill in all four options.')
+    if (!Number.isInteger(a.p_answer) || a.p_answer < 0 || a.p_answer > 3) throw new Error('Choose the correct option.')
+    if (!SUBJECTS.includes(a.p_subject)) throw new Error('Choose a subject.')
+    db.qSubs = db.qSubs || []
+    if (allQuestions().some((x) => x.subject === a.p_subject && x.body === body)) throw new Error('That question already exists in this subject.')
+    if (db.qSubs.some((s) => s.status === 'pending' && s.subject === a.p_subject && s.body === body)) throw new Error('That question is already waiting for review.')
+    const row = { id: db.qSubs.reduce((n, s) => Math.max(n, s.id), 0) + 1, submitted_by: me(), subject: a.p_subject, body, options: a.p_options.map((o) => String(o).trim()), answer: a.p_answer, explanation: String(a.p_explanation || '').trim() || null, status: 'pending', decline_reason: null, created_at: new Date().toISOString(), reviewed_at: null }
+    db.qSubs.push(row)
+    const who = profileOf(me())?.full_name || 'A teacher'
+    db.profiles.filter((p) => p.is_admin).forEach((p) => notify(p.id, 'review', 'Question to review', `${who} added a question in ${a.p_subject.toUpperCase()} and it is waiting for your review.`, '/app/admin/questions?review=1'))
+    return row.id
+  },
+  my_question_submissions() {
+    return (db.qSubs || []).filter((s) => s.submitted_by === me()).map(({ options, answer, explanation, ...r }) => r).sort((x, y) => (x.created_at < y.created_at ? 1 : -1))
+  },
+  admin_pending_questions() {
+    adminOnly()
+    return (db.qSubs || []).filter((s) => s.status === 'pending').map((s) => ({ ...s, teacher_name: profileOf(s.submitted_by)?.full_name || null }))
+  },
+  admin_review_question(a) {
+    adminOnly()
+    const s = (db.qSubs || []).find((x) => x.id === a.p_id && x.status === 'pending')
+    if (!s) throw new Error('This question has already been reviewed.')
+    if (a.p_approve) {
+      if (allQuestions().some((x) => x.subject === s.subject && x.body === s.body)) throw new Error('That question already exists in this subject. Decline it instead.')
+      db.qEdits.added.push({ id: db.qEdits.next++, subject: s.subject, body: s.body, options: s.options, answer: s.answer, explanation: s.explanation, created_by: s.submitted_by })
+      Object.assign(s, { status: 'approved', reviewed_at: new Date().toISOString() })
+      notify(s.submitted_by, 'review', 'Question approved', 'Your question has been Approved and Added Successfully.', '/app/admin/questions')
+      log('question.add', s.body.slice(0, 40))
+    } else {
+      const why = String(a.p_reason || '').trim().slice(0, 300) || null
+      Object.assign(s, { status: 'declined', decline_reason: why, reviewed_at: new Date().toISOString() })
+      notify(s.submitted_by, 'review', 'Question not approved', 'Your question was not approved.' + (why ? ' Reason: ' + why : ''), '/app/admin/questions')
+    }
+  },
+  list_syllabi() {
+    if (!me()) throw new Error('JWT expired')
+    return (db.syllabi || []).map(({ data, ...rest }) => rest).sort((a, b) => a.subject.localeCompare(b.subject))
+  },
+  get_syllabus(a) {
+    if (!me()) throw new Error('JWT expired')
+    return (db.syllabi || []).find((s) => s.id === a.p_id)?.data || null
+  },
+  admin_add_syllabus(a) {
+    adminOnly()
+    const subject = String(a.p_subject || '').trim()
+    if (subject.length < 2 || subject.length > 80) throw new Error('Enter the subject name (2 to 80 characters).')
+    if (!String(a.p_data || '').startsWith('data:application/pdf;base64,')) throw new Error('Please choose a PDF file.')
+    if (a.p_data.length > 4400000) throw new Error('That PDF is too big. Choose one under 3 MB.')
+    db.syllabi = db.syllabi || []
+    const old = db.syllabi.find((s) => s.subject.toLowerCase() === subject.toLowerCase())
+    const row = { id: old ? old.id : (db.syllabi.reduce((n, s) => Math.max(n, s.id), 0) + 1), subject, file_name: String(a.p_file_name || '').slice(0, 200), size_bytes: a.p_size || 0, data: a.p_data, created_at: new Date().toISOString() }
+    db.syllabi = db.syllabi.filter((s) => s !== old).concat(row)
+    log('syllabus.add', subject)
+    return row.id
+  },
+  admin_delete_syllabus(a) {
+    adminOnly()
+    const s = (db.syllabi || []).find((x) => x.id === a.p_id)
+    if (s) { db.syllabi = db.syllabi.filter((x) => x !== s); log('syllabus.delete', s.subject) }
+  },
   exam_window(a) {
     const w = db.examSettings[a.p_kind] || {}
     return { opens_at: w.opens_at || null, closes_at: w.closes_at || null, max_violations: w.max_violations ?? 3, results_released: Boolean(w.results_released), server_now: new Date().toISOString() }
@@ -717,14 +873,22 @@ const functions = {
     return { data: { email }, error: null }
   },
   // Demo: there is no Paystack, so the payment "succeeds" straight away.
-  'paystack-init'({ plan }) {
+  'paystack-init'({ plan, coupon }) {
     const planRow = db.plans.find((x) => x.id === plan)
     if (!planRow || !planRow.price_kobo) return fnError('Unknown plan.')
+    let amount = planRow.price_kobo
+    let used = null
+    if (coupon) {
+      const q = rpcs.coupon_quote({ p_code: coupon, p_plan: plan })[0]
+      if (!q.valid) return fnError(q.message)
+      amount = q.final_kobo; used = (db.coupons || []).find((c) => c.id === q.coupon_id)
+    }
     const p = profileOf(me())
     const reference = 'JWDEMO' + Math.random().toString(36).slice(2, 10).toUpperCase()
     const base = p.plan_expires && new Date(p.plan_expires) > new Date() ? new Date(p.plan_expires) : new Date()
     base.setDate(base.getDate() + 30)
-    db.payments.push({ reference, user_id: p.id, plan, amount_kobo: planRow.price_kobo, status: 'paid', paid_at: new Date().toISOString(), created_at: new Date().toISOString() })
+    db.payments.push({ reference, user_id: p.id, plan, amount_kobo: amount, discount_kobo: planRow.price_kobo - amount, status: 'paid', paid_at: new Date().toISOString(), created_at: new Date().toISOString() })
+    if (used) used.used_count += 1
     Object.assign(p, { plan, plan_expires: base.toISOString() })
     save()
     return { data: { url: `${location.origin}/app/billing?reference=${reference}`, reference }, error: null }

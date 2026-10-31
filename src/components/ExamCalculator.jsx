@@ -3,7 +3,7 @@ import { CALC_START, keyFromEvent, press } from '../lib/calc.js'
 
 // Same key layout as the calculator inside the real JAMB CBT. "=" is two keys wide.
 const KEYS = [
-  ['7', '7'], ['8', '8'], ['9', '9'], ['/', '/'], ['C', 'C'],
+  ['7', '7'], ['8', '8'], ['9', '9'], ['/', '/'], ['C', 'DEL'],
   ['4', '4'], ['5', '5'], ['6', '6'], ['*', '×'], ['sqrt', '√'],
   ['1', '1'], ['2', '2'], ['3', '3'], ['-', '-'], ['sq', 'x²'],
   ['0', '0'], ['.', '.'], ['+', '+'], ['=', '='],

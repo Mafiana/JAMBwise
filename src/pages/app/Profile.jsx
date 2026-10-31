@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { Avatar, ErrorLine } from '../../components/ui.jsx'
 import { PICKABLE, SUBJECTS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
+import PinCountdown from '../../components/PinCountdown.jsx'
 
 /** Crops the picture to a 200x200 square JPEG so it is small enough to store with the profile. */
 function toAvatar(file) {
@@ -63,6 +64,7 @@ export default function Profile() {
     }, 'Profile saved')
   return (
     <>
+      <PinCountdown />
       <h1>My Profile</h1>
       <p className="mut">{isTeacher ? 'Your name and photo, as the admin and students see them.' : 'Complete your profile so JAMBwise can track your preparation.'}</p>
       <div className="card">

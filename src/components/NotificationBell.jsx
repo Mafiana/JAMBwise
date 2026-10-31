@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as api from '../lib/api.js'
 import Icon from './Icons.jsx'
+import { playChime } from '../lib/utils.js'
 
 const ago = (d) => {
   const s = Math.max(0, (Date.now() - new Date(d).getTime()) / 1000)
@@ -22,12 +23,20 @@ export default function NotificationBell() {
   const navigate = useNavigate()
   const unread = items.filter((n) => !n.read_at).length
 
+  const top = useRef(null)   // the newest notification id we have already seen; null until the first load
   const load = useCallback(async () => {
-    try { setItems(await api.getNotifications()) } catch { /* offline or not ready: keep what we have */ }
+    try {
+      const rows = await api.getNotifications()
+      const newest = rows.reduce((m, n) => Math.max(m, Number(n.id) || 0), 0)
+      // a new unread notification arrived while the app is open: play the sound (never on the first load)
+      if (top.current != null && rows.some((n) => !n.read_at && (Number(n.id) || 0) > top.current)) playChime()
+      top.current = Math.max(top.current ?? 0, newest)
+      setItems(rows)
+    } catch { /* offline or not ready: keep what we have */ }
   }, [])
   useEffect(() => {
     load()
-    const t = setInterval(() => { if (!document.hidden) load() }, 30000)
+    const t = setInterval(() => { if (!document.hidden) load() }, 10000)
     const again = () => load()
     window.addEventListener('focus', again)
     window.addEventListener('jw-notify', again)
@@ -83,7 +92,7 @@ export default function NotificationBell() {
               {items.map((n) => (
                 <li key={n.id}>
                   <button type="button" className={'bell-item' + (n.read_at ? '' : ' new')} onClick={() => go(n)}>
-                    <span className="bell-ic" aria-hidden="true"><Icon name={n.kind === 'chat' ? 'chat' : n.kind === 'parent' ? 'eye' : n.kind === 'teacher' ? 'users' : n.kind === 'question' ? 'flag' : n.kind === 'ticket' ? 'inbox' : n.kind === 'mail' ? 'mail' : 'trophy'} size={16} /></span>
+                    <span className="bell-ic" aria-hidden="true"><Icon name={n.kind === 'chat' ? 'chat' : n.kind === 'parent' ? 'eye' : n.kind === 'teacher' ? 'users' : n.kind === 'question' ? 'flag' : n.kind === 'review' ? 'check' : n.kind === 'announce' ? 'announce' : n.kind === 'feedback' ? 'star' : n.kind === 'ticket' ? 'inbox' : n.kind === 'mail' ? 'mail' : 'trophy'} size={16} /></span>
                     <span className="bell-tx"><b>{n.title}</b>{n.body && <span>{n.body}</span>}<em>{ago(n.created_at)}</em></span>
                   </button>
                 </li>

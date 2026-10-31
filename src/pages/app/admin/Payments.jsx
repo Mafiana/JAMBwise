@@ -29,7 +29,7 @@ export default function Payments() {
         <select aria-label="Filter payments" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="all">All payments</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="failed">Failed</option>
         </select>
-        <button className="btn ghost" onClick={() => downloadText('jambwise-payments.csv', toCsv(rows, [
+        <button className="btn" onClick={() => downloadText('jambwise-payments.csv', toCsv(rows, [
           { label: 'Reference', value: (p) => p.reference }, { label: 'Student', value: name }, { label: 'Email', value: (p) => data.who[p.user_id]?.email },
           { label: 'Plan', value: (p) => p.plan }, { label: 'Amount (NGN)', value: (p) => p.amount_kobo / 100 }, { label: 'Status', value: (p) => p.status },
           { label: 'Date', value: (p) => p.paid_at || p.created_at },

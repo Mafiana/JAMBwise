@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { useProgress } from '../../hooks.js'
 import Icon from '../../components/Icons.jsx'
 import InstallApp from '../../components/InstallApp.jsx'
+import PinCountdown from '../../components/PinCountdown.jsx'
 import { daysUntil, firstName, streak } from '../../lib/utils.js'
 
 export default function Dashboard() {
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const profileDone = profile.course && profile.school
   return (
     <>
+      <PinCountdown compact />
       <h1>Hello, {firstName(profile.full_name)}</h1>
       <p className="mut">
         {days > 0 ? `${days} days to your exam. ` : 'Set your exam date in the Study Planner. '}

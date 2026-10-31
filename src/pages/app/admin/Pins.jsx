@@ -55,7 +55,7 @@ export default function Pins() {
         <select aria-label="Filter PINs" value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="all">All PINs</option><option value="unused">Unused</option><option value="used">Used</option>
         </select>
-        <button className="btn ghost" onClick={() => downloadText('jambwise-pins.csv', toCsv(shown, [
+        <button className="btn" onClick={() => downloadText('jambwise-pins.csv', toCsv(shown, [
           { label: 'PIN', value: (x) => x.pin }, { label: 'Plan', value: (x) => x.plan }, { label: 'Days', value: (x) => x.days },
           { label: 'For', value: (x) => x.student_name }, { label: 'Status', value: (x) => (used(x) ? 'used' : 'unused') }, { label: 'Created', value: (x) => x.created_at },
         ]))}>Export CSV</button>

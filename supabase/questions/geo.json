@@ -1,0 +1,442 @@
+[
+ {
+  "q": "The imaginary line of latitude marked 0° is the",
+  "o": [
+   "Equator",
+   "Tropic of Cancer",
+   "Prime Meridian",
+   "Tropic of Capricorn"
+  ],
+  "a": 0,
+  "e": "The Equator divides the earth into northern and southern hemispheres."
+ },
+ {
+  "q": "The line of longitude marked 0° is called the",
+  "o": [
+   "Equator",
+   "Prime Meridian",
+   "Tropic of Cancer",
+   "Arctic Circle"
+  ],
+  "a": 1,
+  "e": "It passes through Greenwich in London."
+ },
+ {
+  "q": "The earth rotates once on its axis in about",
+  "o": [
+   "12 hours",
+   "30 days",
+   "24 hours",
+   "365 days"
+  ],
+  "a": 2,
+  "e": "Rotation causes day and night."
+ },
+ {
+  "q": "The earth takes about how long to go round the sun once?",
+  "o": [
+   "24 hours",
+   "30 days",
+   "12 months exactly",
+   "365¼ days"
+  ],
+  "a": 3,
+  "e": "Revolution round the sun causes the seasons and the leap year."
+ },
+ {
+  "q": "Which river is the longest in Nigeria?",
+  "o": [
+   "River Niger",
+   "River Benue",
+   "River Kaduna",
+   "River Ogun"
+  ],
+  "a": 0,
+  "e": "The Niger flows through Nigeria into the Gulf of Guinea."
+ },
+ {
+  "q": "The Niger and the Benue meet at",
+  "o": [
+   "Jebba",
+   "Lokoja",
+   "Onitsha",
+   "Makurdi"
+  ],
+  "a": 1,
+  "e": "Lokoja is the confluence town in Kogi State."
+ },
+ {
+  "q": "The highest mountain in Nigeria is",
+  "o": [
+   "Mount Kilimanjaro",
+   "Mount Cameroon",
+   "Chappal Waddi",
+   "Obudu Plateau"
+  ],
+  "a": 2,
+  "e": "Chappal Waddi is on the Mambilla Plateau in Taraba State."
+ },
+ {
+  "q": "The Kainji Dam is built on the",
+  "o": [
+   "River Benue",
+   "River Kaduna",
+   "Lake Chad",
+   "River Niger"
+  ],
+  "a": 3,
+  "e": "It supplies hydro-electric power from the Niger."
+ },
+ {
+  "q": "Tin and columbite are mined mostly on the",
+  "o": [
+   "Jos Plateau",
+   "Niger Delta",
+   "Udi Hills",
+   "Mambilla Plateau"
+  ],
+  "a": 0,
+  "e": "The Jos Plateau is Nigeria's main tin-mining area."
+ },
+ {
+  "q": "Most of Nigeria's crude oil comes from the",
+  "o": [
+   "Jos Plateau",
+   "Niger Delta",
+   "Chad Basin",
+   "Sokoto Plain"
+  ],
+  "a": 1,
+  "e": "The Niger Delta has the main oil fields."
+ },
+ {
+  "q": "Nigeria's coal is found mainly at",
+  "o": [
+   "Jos",
+   "Kano",
+   "Enugu",
+   "Sokoto"
+  ],
+  "a": 2,
+  "e": "Coal has been mined in Enugu since the early 1900s."
+ },
+ {
+  "q": "The mangrove swamp forest in Nigeria is found",
+  "o": [
+   "on the Jos Plateau",
+   "in the far north",
+   "on high mountains",
+   "along the coast"
+  ],
+  "a": 3,
+  "e": "Salt-tolerant mangrove trees grow in the coastal creeks."
+ },
+ {
+  "q": "An instrument for measuring rainfall is the",
+  "o": [
+   "rain gauge",
+   "barometer",
+   "thermometer",
+   "anemometer"
+  ],
+  "a": 0,
+  "e": "The rain gauge collects rain in a measuring cylinder."
+ },
+ {
+  "q": "Air pressure is measured with a",
+  "o": [
+   "rain gauge",
+   "barometer",
+   "hygrometer",
+   "wind vane"
+  ],
+  "a": 1,
+  "e": "Falling air pressure often warns of rain."
+ },
+ {
+  "q": "Wind speed is measured with an",
+  "o": [
+   "barometer",
+   "hygrometer",
+   "anemometer",
+   "thermometer"
+  ],
+  "a": 2,
+  "e": "Cups on the anemometer spin faster in stronger wind."
+ },
+ {
+  "q": "The amount of water vapour in the air is measured with a",
+  "o": [
+   "barometer",
+   "anemometer",
+   "rain gauge",
+   "hygrometer"
+  ],
+  "a": 3,
+  "e": "It gives the relative humidity."
+ },
+ {
+  "q": "On a map with a scale of 1:50,000, 1 cm on the map represents",
+  "o": [
+   "0.5 km on the ground",
+   "5 km on the ground",
+   "50 m on the ground",
+   "50 km on the ground"
+  ],
+  "a": 0,
+  "e": "50,000 cm is 500 m, which is 0.5 km."
+ },
+ {
+  "q": "Contour lines on a map join places that have the same",
+  "o": [
+   "rainfall",
+   "height above sea level",
+   "population",
+   "temperature"
+  ],
+  "a": 1,
+  "e": "Close contour lines show a steep slope."
+ },
+ {
+  "q": "Granite is an example of an",
+  "o": [
+   "sedimentary rock",
+   "metamorphic rock",
+   "igneous rock",
+   "organic rock"
+  ],
+  "a": 2,
+  "e": "Igneous rocks form when magma cools and hardens."
+ },
+ {
+  "q": "Sandstone is an example of a",
+  "o": [
+   "igneous rock",
+   "metamorphic rock",
+   "volcanic rock",
+   "sedimentary rock"
+  ],
+  "a": 3,
+  "e": "Sedimentary rocks are made of layers of deposited material."
+ },
+ {
+  "q": "Marble is a",
+  "o": [
+   "metamorphic rock formed from limestone",
+   "igneous rock",
+   "sedimentary rock",
+   "rock formed from lava"
+  ],
+  "a": 0,
+  "e": "Heat and pressure change limestone into marble."
+ },
+ {
+  "q": "The harmattan is a",
+  "o": [
+   "rain-bearing wind from the Atlantic",
+   "dry, dusty wind from the Sahara",
+   "hot wind from the south",
+   "storm from the Indian Ocean"
+  ],
+  "a": 1,
+  "e": "It blows over Nigeria from about November to March."
+ },
+ {
+  "q": "The rain-bearing south-west winds that reach Nigeria come from the",
+  "o": [
+   "Sahara Desert",
+   "Indian Ocean",
+   "Atlantic Ocean",
+   "Mediterranean Sea"
+  ],
+  "a": 2,
+  "e": "They are warm and moist."
+ },
+ {
+  "q": "The Himalayas are an example of",
+  "o": [
+   "block mountains",
+   "volcanic mountains",
+   "residual mountains",
+   "fold mountains"
+  ],
+  "a": 3,
+  "e": "Fold mountains form when layers of rock are pushed together and buckled."
+ },
+ {
+  "q": "The highest mountain in Africa is",
+  "o": [
+   "Mount Kilimanjaro",
+   "Mount Kenya",
+   "Mount Cameroon",
+   "Chappal Waddi"
+  ],
+  "a": 0,
+  "e": "It is in Tanzania."
+ },
+ {
+  "q": "The longest river in Africa is the",
+  "o": [
+   "Niger",
+   "Nile",
+   "Congo",
+   "Zambezi"
+  ],
+  "a": 1,
+  "e": "The Nile flows north into the Mediterranean Sea."
+ },
+ {
+  "q": "The largest continent in the world is",
+  "o": [
+   "Africa",
+   "Europe",
+   "Asia",
+   "North America"
+  ],
+  "a": 2,
+  "e": "Asia covers about a third of the world's land."
+ },
+ {
+  "q": "The largest ocean in the world is the",
+  "o": [
+   "Atlantic Ocean",
+   "Indian Ocean",
+   "Arctic Ocean",
+   "Pacific Ocean"
+  ],
+  "a": 3,
+  "e": "It covers about a third of the earth's surface."
+ },
+ {
+  "q": "The largest hot desert in the world is the",
+  "o": [
+   "Sahara",
+   "Kalahari",
+   "Gobi",
+   "Namib"
+  ],
+  "a": 0,
+  "e": "The Sahara stretches across northern Africa."
+ },
+ {
+  "q": "Every 15° of longitude is equal to a time difference of",
+  "o": [
+   "15 minutes",
+   "1 hour",
+   "12 hours",
+   "24 hours"
+  ],
+  "a": 1,
+  "e": "The earth turns 360° in 24 hours, so 15° each hour."
+ },
+ {
+  "q": "Movement of people from villages to towns is called",
+  "o": [
+   "urban renewal",
+   "emigration only",
+   "rural-urban migration",
+   "commuting"
+  ],
+  "a": 2,
+  "e": "People move for jobs, schools and better services."
+ },
+ {
+  "q": "The place where a river begins is its",
+  "o": [
+   "mouth",
+   "tributary",
+   "estuary",
+   "source"
+  ],
+  "a": 3,
+  "e": "The mouth is where it enters the sea or a lake."
+ },
+ {
+  "q": "A bend in the course of a river is called a",
+  "o": [
+   "meander",
+   "delta",
+   "waterfall",
+   "gorge"
+  ],
+  "a": 0,
+  "e": "Meanders form on gentle slopes in the middle and lower course."
+ },
+ {
+  "q": "A delta is formed where a river",
+  "o": [
+   "begins in the mountains",
+   "drops its load of silt at its mouth",
+   "flows over a waterfall",
+   "dries up in a desert"
+  ],
+  "a": 1,
+  "e": "The Niger Delta is a big example."
+ },
+ {
+  "q": "Weathering is the",
+  "o": [
+   "carrying away of rock by a river",
+   "formation of new rocks",
+   "breaking up of rocks in the place where they are",
+   "melting of rocks inside the earth"
+  ],
+  "a": 2,
+  "e": "Erosion, by contrast, involves movement of the broken material."
+ },
+ {
+  "q": "The wearing away of a river bed and banks by the rock pieces the river carries is called",
+  "o": [
+   "evaporation",
+   "deposition",
+   "condensation",
+   "abrasion"
+  ],
+  "a": 3,
+  "e": "Rocks carried by the water scrape and grind the channel."
+ },
+ {
+  "q": "The capital city of Nigeria is",
+  "o": [
+   "Abuja",
+   "Lagos",
+   "Kano",
+   "Ibadan"
+  ],
+  "a": 0,
+  "e": "The capital moved from Lagos to Abuja in 1991."
+ },
+ {
+  "q": "The number of states in Nigeria is",
+  "o": [
+   "30",
+   "36",
+   "32",
+   "37"
+  ],
+  "a": 1,
+  "e": "There are 36 states and the Federal Capital Territory."
+ },
+ {
+  "q": "Which crop is grown mostly in the savanna of northern Nigeria?",
+  "o": [
+   "Cocoa",
+   "Oil palm",
+   "Groundnut",
+   "Rubber"
+  ],
+  "a": 2,
+  "e": "Groundnuts do well in the drier north; cocoa and oil palm need more rain."
+ },
+ {
+  "q": "Nigeria keeps which standard time?",
+  "o": [
+   "GMT",
+   "GMT + 3",
+   "GMT − 1",
+   "GMT + 1 (West Africa Time)"
+  ],
+  "a": 3,
+  "e": "It is one hour ahead of Greenwich Mean Time."
+ }
+]

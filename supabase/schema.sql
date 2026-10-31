@@ -23,7 +23,7 @@ create table public.profiles (
   plan text not null default 'free' references public.plans(id),
   plan_expires timestamptz,
   subjects text[] not null default '{mat,phy,chm}'
-    check (cardinality(subjects) <= 3 and subjects <@ array['mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk']),
+    check (cardinality(subjects) <= 3 and subjects <@ array['mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk','hec','cst','geo']),
   exam_date date,
   study_hours int not null default 3 check (study_hours between 1 and 10),
   is_admin boolean not null default false,
@@ -56,7 +56,7 @@ create table public.payments (
 create table public.attempts (
   id bigserial primary key,
   user_id uuid not null references auth.users on delete cascade,
-  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')),
+  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk','hec','cst','geo')),
   correct int not null check (correct >= 0),
   total int not null check (total between 1 and 200),
   kind text not null check (kind in ('practice','mock','hall')),
@@ -69,7 +69,7 @@ create index attempts_user_idx on public.attempts (user_id, created_at desc);
 
 create table public.questions (
   id bigserial primary key,
-  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')),
+  subject text not null check (subject in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk','hec','cst','geo')),
   body text not null,
   options jsonb not null check (jsonb_typeof(options) = 'array' and jsonb_array_length(options) = 4),
   answer int not null check (answer between 0 and 3),
@@ -148,9 +148,19 @@ end $$;
 
 -- Only the PIN Edge Function (which marks its users with app_metadata.pin = true; clients cannot set app_metadata)
 -- may create accounts on the reserved PIN email domain. Stops people squatting a PIN's account.
+create table public.pin_reservations (
+  email text primary key,
+  created_at timestamptz not null default now()
+);
+alter table public.pin_reservations enable row level security;
+revoke all on public.pin_reservations from anon, authenticated;
+grant all on public.pin_reservations to service_role;
 create function public.guard_pin_domain() returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if lower(new.email) like '%@pin.jambwise.ng' and coalesce(new.raw_app_meta_data->>'pin','') <> 'true' then
+  if lower(new.email) like '%@pin.jambwise.ng'
+     and coalesce(new.raw_app_meta_data->>'pin','') <> 'true'
+     and not exists (select 1 from public.pin_reservations r
+                      where r.email = lower(new.email) and r.created_at > now() - interval '2 minutes') then
     raise exception 'reserved email domain';
   end if;
   return new;
@@ -203,6 +213,7 @@ begin
   select * into pay from public.payments where reference = p_ref and status = 'pending' for update;
   if not found or pay.amount_kobo <> p_amount or pay.user_id is null then return false; end if;
   update public.payments set status = 'paid', paid_at = now() where reference = p_ref;
+  if pay.coupon_id is not null then update public.coupons set used_count = used_count + 1 where id = pay.coupon_id; end if;
   select greatest(coalesce(plan_expires, now()), now()) into base from public.profiles where id = pay.user_id;
   update public.profiles set plan = pay.plan, plan_expires = base + interval '30 days' where id = pay.user_id;
   return true;
@@ -452,7 +463,7 @@ begin
   perform set_config('jw.bulk', '1', true);   -- tells the audit trigger not to log every single row
   for r in select value from jsonb_array_elements(p_rows) loop
     ok := jsonb_typeof(r) = 'object'
-      and (r->>'subject') in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk')
+      and (r->>'subject') in ('eng','mat','phy','chm','bio','gov','eco','com','agr','acc','mkt','lit','irk','crk','hec','cst','geo')
       and char_length(btrim(coalesce(r->>'body', ''))) between 1 and 1000
       and jsonb_typeof(r->'options') = 'array' and jsonb_array_length(r->'options') = 4
       and (r->>'answer') ~ '^[0-3]$'
@@ -948,7 +959,7 @@ create policy att_insert on public.attempts for insert to authenticated with che
 create policy att_delete on public.attempts for delete to authenticated using (user_id = auth.uid() and kind = 'practice');
 
 create policy q_read on public.questions for select to authenticated using (public.has_access(subject) or public.is_staff());
-create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_staff());
+create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_admin());   -- teachers send questions for review instead (see the end of this file)
 create policy q_admin_upd on public.questions for update to authenticated using (public.is_staff()) with check (public.is_staff());
 create policy q_admin_del on public.questions for delete to authenticated using (public.is_admin());
 
@@ -1409,3 +1420,361 @@ grant execute on function public.admin_students() to authenticated;
 drop policy if exists profiles_read on public.profiles;
 create policy profiles_read on public.profiles for select to authenticated
   using (id = auth.uid() or public.is_admin() or (public.is_staff() and not is_admin and not is_teacher and public.staff_sees(id)));
+
+-- ───────────── teacher questions wait for admin review (migrate-question-review.sql) ─────────────
+create table if not exists public.question_submissions (
+  id bigserial primary key,
+  submitted_by uuid not null references public.profiles(id) on delete cascade,
+  subject text not null check (char_length(subject) between 2 and 10),
+  body text not null check (char_length(btrim(body)) between 1 and 1000),
+  options jsonb not null check (jsonb_typeof(options) = 'array' and jsonb_array_length(options) = 4),
+  answer int not null check (answer between 0 and 3),
+  explanation text check (char_length(explanation) <= 1000),
+  status text not null default 'pending' check (status in ('pending','approved','declined')),
+  decline_reason text check (char_length(decline_reason) <= 300),
+  reviewed_by uuid references public.profiles(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists question_submissions_status_idx on public.question_submissions (status, created_at);
+create index if not exists question_submissions_user_idx on public.question_submissions (submitted_by, created_at desc);
+alter table public.question_submissions enable row level security;   -- no policies: only the functions below can reach it
+revoke all on public.question_submissions from anon, authenticated;
+
+-- an approved question belongs to the teacher who wrote it (so reports about it go to that teacher)
+create or replace function public.stamp_question_owner() returns trigger language plpgsql security definer set search_path = public as $$
+declare owner text := nullif(current_setting('jw.owner', true), '');
+begin
+  if tg_op = 'INSERT' then
+    if owner is not null then new.created_by := owner::uuid;
+    elsif auth.uid() is not null then new.created_by := auth.uid(); end if;
+  else
+    new.created_by := old.created_by;
+  end if;
+  return new;
+end $$;
+
+-- teachers can no longer add live questions directly; they go through submit_question()
+drop policy if exists q_admin_ins on public.questions;
+create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_admin());
+
+-- teacher: send a question for review
+create or replace function public.submit_question(p_subject text, p_body text, p_options jsonb, p_answer int, p_explanation text) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare me record; new_id bigint; adm record; qbody text := btrim(coalesce(p_body, '')); opt jsonb;
+begin
+  if not public.is_staff() then raise exception 'not allowed'; end if;
+  if public.is_admin() then raise exception 'Admins add questions directly.'; end if;
+  select id, full_name into me from public.profiles where id = auth.uid();
+  if qbody = '' or char_length(qbody) > 1000 then raise exception 'Write the question (up to 1000 characters).'; end if;
+  if jsonb_typeof(p_options) is distinct from 'array' or jsonb_array_length(p_options) <> 4 then raise exception 'Fill in all four options.'; end if;
+  for opt in select value from jsonb_array_elements(p_options) loop
+    if jsonb_typeof(opt) <> 'string' or char_length(btrim(opt #>> '{}')) not between 1 and 300 then raise exception 'Fill in all four options.'; end if;
+  end loop;
+  if p_answer is null or p_answer not between 0 and 3 then raise exception 'Choose the correct option.'; end if;
+  if exists (select 1 from public.questions where subject = p_subject and body = qbody) then raise exception 'That question already exists in this subject.'; end if;
+  if exists (select 1 from public.question_submissions where status = 'pending' and subject = p_subject and body = qbody) then raise exception 'That question is already waiting for review.'; end if;
+  if (select count(*) from public.question_submissions where submitted_by = me.id and status = 'pending') >= 100 then raise exception 'You have many questions waiting for review. Please wait for the admin to review them.'; end if;
+  insert into public.question_submissions (submitted_by, subject, body, options, answer, explanation)
+  values (me.id, p_subject, qbody, (select jsonb_agg(btrim(o #>> '{}')) from jsonb_array_elements(p_options) o), p_answer, nullif(btrim(coalesce(p_explanation, '')), ''))
+  returning id into new_id;
+  for adm in select id from public.profiles where is_admin loop
+    perform public.notify_user(adm.id, 'review', 'Question to review', coalesce(nullif(me.full_name, ''), 'A teacher') || ' added a question in ' || upper(p_subject) || ' and it is waiting for your review.', '/app/admin/questions?review=1');
+  end loop;
+  return new_id;
+end $$;
+revoke execute on function public.submit_question(text, text, jsonb, int, text) from public, anon;
+grant execute on function public.submit_question(text, text, jsonb, int, text) to authenticated;
+
+-- teacher: my own submissions and what happened to them
+create or replace function public.my_question_submissions() returns table (id bigint, subject text, body text, status text, decline_reason text, created_at timestamptz, reviewed_at timestamptz)
+language sql security definer stable set search_path = public as $$
+  select s.id, s.subject, s.body, s.status, s.decline_reason, s.created_at, s.reviewed_at
+    from public.question_submissions s where s.submitted_by = auth.uid() order by s.created_at desc limit 100;
+$$;
+revoke execute on function public.my_question_submissions() from public, anon;
+grant execute on function public.my_question_submissions() to authenticated;
+
+-- admin: the questions waiting for review
+create or replace function public.admin_pending_questions() returns table (id bigint, subject text, body text, options jsonb, answer int, explanation text, submitted_by uuid, teacher_name text, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select s.id, s.subject, s.body, s.options, s.answer, s.explanation, s.submitted_by, p.full_name, s.created_at
+    from public.question_submissions s left join public.profiles p on p.id = s.submitted_by
+   where s.status = 'pending' order by s.created_at limit 500;
+end $$;
+revoke execute on function public.admin_pending_questions() from public, anon;
+grant execute on function public.admin_pending_questions() to authenticated;
+
+-- admin: Accept (puts the question live) or Decline (with an optional reason). The teacher is told either way.
+create or replace function public.admin_review_question(p_id bigint, p_approve boolean, p_reason text default null) returns void
+language plpgsql security definer set search_path = public as $$
+declare s record; n int; why text := nullif(btrim(coalesce(p_reason, '')), '');
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  select * into s from public.question_submissions where id = p_id and status = 'pending' for update;
+  if not found then raise exception 'This question has already been reviewed.'; end if;
+  if p_approve then
+    perform set_config('jw.owner', s.submitted_by::text, true);
+    insert into public.questions (subject, body, options, answer, explanation) values (s.subject, s.body, s.options, s.answer, s.explanation)
+    on conflict (subject, body) do nothing;
+    get diagnostics n = row_count;
+    perform set_config('jw.owner', '', true);
+    if n = 0 then raise exception 'That question already exists in this subject. Decline it instead.'; end if;
+    update public.question_submissions set status = 'approved', reviewed_by = auth.uid(), reviewed_at = now() where id = p_id;
+    perform public.notify_user(s.submitted_by, 'review', 'Question approved', 'Your question has been Approved and Added Successfully.', '/app/admin/questions');
+  else
+    update public.question_submissions set status = 'declined', decline_reason = left(why, 300), reviewed_by = auth.uid(), reviewed_at = now() where id = p_id;
+    perform public.notify_user(s.submitted_by, 'review', 'Question not approved', 'Your question was not approved.' || coalesce(' Reason: ' || why, ''), '/app/admin/questions');
+  end if;
+end $$;
+revoke execute on function public.admin_review_question(bigint, boolean, text) from public, anon;
+grant execute on function public.admin_review_question(bigint, boolean, text) to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── Rate & suggest and announcements (migrate-feedback-announcements.sql) ─────────────
+-- ───────────── Rate & suggest ─────────────
+create table if not exists public.feedback (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  rating int check (rating between 1 and 5),
+  kind text not null default 'feedback' check (kind in ('feedback','feature','bug')),
+  message text check (char_length(message) <= 2000),
+  status text not null default 'new' check (status in ('new','done')),
+  created_at timestamptz not null default now(),
+  check (rating is not null or char_length(btrim(coalesce(message, ''))) > 0)
+);
+create index if not exists feedback_created_idx on public.feedback (created_at desc);
+create index if not exists feedback_user_idx on public.feedback (user_id, created_at desc);
+alter table public.feedback enable row level security;     -- no policies: only the functions below reach it
+revoke all on public.feedback from anon, authenticated;
+
+create or replace function public.submit_feedback(p_rating int, p_kind text, p_message text) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare me record; msg text := nullif(btrim(coalesce(p_message, '')), ''); new_id bigint; adm record; kind_label text;
+begin
+  if auth.uid() is null then raise exception 'not allowed'; end if;
+  select id, full_name into me from public.profiles where id = auth.uid();
+  if me.id is null then raise exception 'not allowed'; end if;
+  if p_kind not in ('feedback','feature','bug') then raise exception 'Choose Feedback, Feature idea or Bug.'; end if;
+  if p_rating is not null and p_rating not between 1 and 5 then raise exception 'The rating must be from 1 to 5 stars.'; end if;
+  if p_rating is null and msg is null then raise exception 'Please give a star rating or write a message.'; end if;
+  if msg is not null and char_length(msg) > 2000 then raise exception 'Your message is too long (2000 characters at most).'; end if;
+  if (select count(*) from public.feedback where user_id = me.id and created_at > now() - interval '1 day') >= 5 then
+    raise exception 'You have sent several already today. Thank you! Please try again tomorrow.';
+  end if;
+  insert into public.feedback (user_id, rating, kind, message) values (me.id, p_rating, p_kind, msg) returning id into new_id;
+  kind_label := case p_kind when 'feature' then 'a feature idea' when 'bug' then 'a bug report' else 'feedback' end;
+  for adm in select id from public.profiles where is_admin loop
+    perform public.notify_user(adm.id, 'feedback', 'New ' || case p_kind when 'feature' then 'feature idea' when 'bug' then 'bug report' else 'feedback' end,
+      coalesce(nullif(me.full_name, ''), 'Someone') || ' sent ' || kind_label || coalesce(' (' || p_rating || ' stars)', '') || '.', '/app/admin/feedback');
+  end loop;
+  return new_id;
+end $$;
+revoke execute on function public.submit_feedback(int, text, text) from public, anon;
+grant execute on function public.submit_feedback(int, text, text) to authenticated;
+
+create or replace function public.admin_feedback() returns table (id bigint, user_id uuid, name text, email text, role text, rating int, kind text, message text, status text, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select f.id, f.user_id, p.full_name, p.email, case when p.is_teacher then 'teacher' else 'student' end, f.rating, f.kind, f.message, f.status, f.created_at
+    from public.feedback f left join public.profiles p on p.id = f.user_id order by f.created_at desc limit 2000;
+end $$;
+revoke execute on function public.admin_feedback() from public, anon;
+grant execute on function public.admin_feedback() to authenticated;
+
+create or replace function public.admin_set_feedback_status(p_id bigint, p_status text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_status not in ('new','done') then raise exception 'bad status'; end if;
+  update public.feedback set status = p_status where id = p_id;
+end $$;
+revoke execute on function public.admin_set_feedback_status(bigint, text) from public, anon;
+grant execute on function public.admin_set_feedback_status(bigint, text) to authenticated;
+
+create or replace function public.admin_delete_feedback(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  delete from public.feedback where id = p_id;
+end $$;
+revoke execute on function public.admin_delete_feedback(bigint) from public, anon;
+grant execute on function public.admin_delete_feedback(bigint) to authenticated;
+
+-- ───────────── Announcements ─────────────
+create table if not exists public.announcements (
+  id bigserial primary key,
+  title text not null check (char_length(btrim(title)) between 1 and 120),
+  body text not null check (char_length(btrim(body)) between 1 and 2000),
+  audience text not null check (audience in ('all','private')),
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+create table if not exists public.announcement_recipients (
+  announcement_id bigint not null references public.announcements(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  primary key (announcement_id, user_id)
+);
+create index if not exists announcement_recipients_user_idx on public.announcement_recipients (user_id);
+alter table public.announcements enable row level security;
+alter table public.announcement_recipients enable row level security;
+revoke all on public.announcements from anon, authenticated;
+revoke all on public.announcement_recipients from anon, authenticated;
+
+create or replace function public.admin_send_announcement(p_title text, p_body text, p_audience text, p_user_ids uuid[] default null) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare t text := btrim(coalesce(p_title, '')); b text := btrim(coalesce(p_body, '')); new_id bigint; n int;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if char_length(t) not between 1 and 120 then raise exception 'Write a title (up to 120 characters).'; end if;
+  if char_length(b) not between 1 and 2000 then raise exception 'Write the message (up to 2000 characters).'; end if;
+  if p_audience not in ('all','private') then raise exception 'Choose who should get it.'; end if;
+  if p_audience = 'private' and coalesce(cardinality(p_user_ids), 0) = 0 then raise exception 'Choose at least one person.'; end if;
+  insert into public.announcements (title, body, audience, created_by) values (t, b, p_audience, auth.uid()) returning id into new_id;
+  if p_audience = 'all' then
+    insert into public.notifications (user_id, kind, title, body, link)
+    select p.id, 'announce', left(t, 200), left(b, 500), case when p.is_teacher then '/app/admin/announcements' else '/app/announcements' end
+      from public.profiles p where not p.is_admin and not coalesce(p.suspended, false);
+  else
+    insert into public.announcement_recipients (announcement_id, user_id)
+      select new_id, p.id from public.profiles p where p.id = any (p_user_ids) on conflict do nothing;
+    get diagnostics n = row_count;
+    if n = 0 then raise exception 'Choose at least one person.'; end if;
+    insert into public.notifications (user_id, kind, title, body, link)
+    select p.id, 'announce', left(t, 200), left(b, 500), case when p.is_teacher then '/app/admin/announcements' else '/app/announcements' end
+      from public.profiles p join public.announcement_recipients r on r.user_id = p.id where r.announcement_id = new_id and not p.is_admin;
+  end if;
+  return new_id;
+end $$;
+revoke execute on function public.admin_send_announcement(text, text, text, uuid[]) from public, anon;
+grant execute on function public.admin_send_announcement(text, text, text, uuid[]) to authenticated;
+
+create or replace function public.admin_announcements() returns table (id bigint, title text, body text, audience text, recipients jsonb, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select a.id, a.title, a.body, a.audience,
+      case when a.audience = 'all' then null else (select jsonb_agg(coalesce(nullif(p.full_name, ''), p.email) order by p.full_name) from public.announcement_recipients r join public.profiles p on p.id = r.user_id where r.announcement_id = a.id) end,
+      a.created_at
+    from public.announcements a order by a.created_at desc limit 500;
+end $$;
+revoke execute on function public.admin_announcements() from public, anon;
+grant execute on function public.admin_announcements() to authenticated;
+
+create or replace function public.admin_delete_announcement(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  -- take back the bell notifications this announcement sent (matched by text and send time)
+  delete from public.notifications n using public.announcements a
+   where a.id = p_id and n.kind = 'announce' and n.title = left(a.title, 200) and n.body = left(a.body, 500)
+     and n.created_at between a.created_at - interval '2 minutes' and a.created_at + interval '2 minutes';
+  delete from public.announcements where id = p_id;
+end $$;
+revoke execute on function public.admin_delete_announcement(bigint) from public, anon;
+grant execute on function public.admin_delete_announcement(bigint) to authenticated;
+
+-- everyone: the public announcements plus the ones sent privately to me
+create or replace function public.my_announcements() returns table (id bigint, title text, body text, audience text, created_at timestamptz)
+language sql security definer stable set search_path = public as $$
+  select a.id, a.title, a.body, a.audience, a.created_at
+    from public.announcements a
+   where auth.uid() is not null
+     and (a.audience = 'all' or exists (select 1 from public.announcement_recipients r where r.announcement_id = a.id and r.user_id = auth.uid()))
+   order by a.created_at desc limit 100;
+$$;
+revoke execute on function public.my_announcements() from public, anon;
+grant execute on function public.my_announcements() to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── discount codes (migrate-coupons.sql) ─────────────
+create table if not exists public.coupons (
+  id bigserial primary key,
+  code text not null check (code ~ '^[A-Z0-9_-]{3,20}$'),
+  percent int not null check (percent between 1 and 90),
+  plan text not null default 'all' check (plan in ('all','student','pro')),
+  expires_at timestamptz,
+  max_uses int check (max_uses is null or max_uses >= 1),
+  used_count int not null default 0,
+  active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create unique index if not exists coupons_code_uq on public.coupons (code);
+alter table public.coupons enable row level security;     -- no policies: only the functions below reach it
+revoke all on public.coupons from anon, authenticated;
+
+alter table public.payments add column if not exists coupon_id bigint references public.coupons(id) on delete set null;
+alter table public.payments add column if not exists discount_kobo int not null default 0;
+
+-- the price for a plan with a code. Used for the preview on the Plans page and by paystack-init for the real charge.
+drop function if exists public.coupon_quote(text, text);
+create function public.coupon_quote(p_code text, p_plan text) returns table (valid boolean, message text, coupon_id bigint, code text, percent int, list_kobo int, discount_kobo int, final_kobo int)
+language plpgsql security definer stable set search_path = public as $$
+declare c public.coupons; lp int; disc int; fin int; cd text := upper(btrim(coalesce(p_code, '')));
+begin
+  select price_kobo into lp from public.plans where id = p_plan;
+  if lp is null or lp <= 0 then return query select false, 'Unknown plan.', null::bigint, cd, 0, 0, 0, 0; return; end if;
+  select * into c from public.coupons x where x.code = cd;
+  if not found or not c.active then return query select false, 'That code is not valid.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.expires_at is not null and c.expires_at <= now() then return query select false, 'That code has expired.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.max_uses is not null and c.used_count >= c.max_uses then return query select false, 'That code has been fully used.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.plan <> 'all' and c.plan <> p_plan then return query select false, 'That code is for the ' || initcap(c.plan) || ' plan only.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  fin := greatest(10000, (round(lp * (100 - c.percent) / 100.0 / 100.0) * 100)::int);   -- whole naira, never below N100
+  disc := lp - fin;
+  return query select true, c.percent || '% off applied.', c.id, c.code, c.percent, lp, disc, fin;
+end $$;
+revoke execute on function public.coupon_quote(text, text) from public, anon;
+grant execute on function public.coupon_quote(text, text) to authenticated, service_role;
+
+-- admin: list, create, switch on or off, delete
+create or replace function public.admin_coupons() returns table (id bigint, code text, percent int, plan text, expires_at timestamptz, max_uses int, used_count int, active boolean, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select c.id, c.code, c.percent, c.plan, c.expires_at, c.max_uses, c.used_count, c.active, c.created_at from public.coupons c order by c.created_at desc limit 500;
+end $$;
+revoke execute on function public.admin_coupons() from public, anon;
+grant execute on function public.admin_coupons() to authenticated;
+
+create or replace function public.admin_save_coupon(p_code text, p_percent int, p_plan text, p_expires timestamptz, p_max_uses int) returns bigint
+language plpgsql security definer set search_path = public as $$
+declare cd text := upper(btrim(coalesce(p_code, ''))); new_id bigint;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if cd !~ '^[A-Z0-9_-]{3,20}$' then raise exception 'The code must be 3 to 20 letters or numbers (no spaces).'; end if;
+  if p_percent is null or p_percent not between 1 and 90 then raise exception 'The discount must be from 1%% to 90%%.'; end if;
+  if p_plan not in ('all','student','pro') then raise exception 'Choose a plan.'; end if;
+  if p_expires is not null and p_expires <= now() then raise exception 'The end date must be in the future.'; end if;
+  if p_max_uses is not null and p_max_uses < 1 then raise exception 'The use limit must be at least 1.'; end if;
+  if exists (select 1 from public.coupons where code = cd) then raise exception 'A code named % already exists.', cd; end if;
+  insert into public.coupons (code, percent, plan, expires_at, max_uses) values (cd, p_percent, p_plan, p_expires, p_max_uses) returning id into new_id;
+  perform public.admin_log('coupon.add', cd || ' ' || p_percent || '% ' || p_plan);
+  return new_id;
+end $$;
+revoke execute on function public.admin_save_coupon(text, int, text, timestamptz, int) from public, anon;
+grant execute on function public.admin_save_coupon(text, int, text, timestamptz, int) to authenticated;
+
+create or replace function public.admin_set_coupon_active(p_id bigint, p_active boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  update public.coupons set active = p_active where id = p_id;
+end $$;
+revoke execute on function public.admin_set_coupon_active(bigint, boolean) from public, anon;
+grant execute on function public.admin_set_coupon_active(bigint, boolean) to authenticated;
+
+create or replace function public.admin_delete_coupon(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  delete from public.coupons where id = p_id;
+end $$;
+revoke execute on function public.admin_delete_coupon(bigint) from public, anon;
+grant execute on function public.admin_delete_coupon(bigint) to authenticated;
+
+notify pgrst, 'reload schema';

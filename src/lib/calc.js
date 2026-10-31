@@ -66,6 +66,6 @@ export function keyFromEvent(e) {
   if (k === ',') return '.'
   if (k === 'Enter' || k === '=') return '='
   if (k === 'Backspace') return 'back'
-  if (k === 'c' || k === 'C' || k === 'Delete') return 'C'
+  if (k === 'Delete') return 'C'   // the letter C is an exam shortcut (option C), so the calculator clears with Delete or its own C button
   return ''
 }

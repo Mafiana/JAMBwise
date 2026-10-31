@@ -28,7 +28,7 @@ function EditTeacher({ t, onClose, reload }) {
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal form" role="dialog" aria-modal="true" aria-label={`Edit ${t.full_name}`}>
         <h3>{t.full_name}</h3>
-        <p className="sm">{t.email} · {t.reg_number}{t.suspended && <span className="tag bad">suspended</span>}</p>
+        <p className="sm">{t.email}{t.suspended && <span className="tag bad">suspended</span>}</p>
         <label htmlFor="et-n">Full name</label>
         <input id="et-n" value={f.name} maxLength={100} onChange={set('name')} />
         <label htmlFor="et-c">Subject or course</label>
@@ -76,7 +76,7 @@ export default function Teachers() {
   const teachers = useMemo(() => (data || []).filter((s) => s.is_teacher), [data])
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    return teachers.filter((s) => (instF === 'all' || (instF === 'none' ? !s.institution_id : s.institution_id === instF)) && (!needle || [s.full_name, s.email, s.reg_number].some((v) => String(v || '').toLowerCase().includes(needle))))
+    return teachers.filter((s) => (instF === 'all' || (instF === 'none' ? !s.institution_id : s.institution_id === instF)) && (!needle || [s.full_name, s.email].some((v) => String(v || '').toLowerCase().includes(needle))))
   }, [teachers, q, instF])
   const last = useMemo(() => new Map((inbox.data || []).map((m) => [m.teacher_id, m])), [inbox.data])
   if (loading) return <TabLoader />
@@ -88,7 +88,7 @@ export default function Teachers() {
   return (
     <>
       <div className="adm-filters">
-        <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search teachers" placeholder="Search name, email or number" value={q} onChange={(e) => setQ(e.target.value)} /></span>
+        <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search teachers" placeholder="Search name or email" value={q} onChange={(e) => setQ(e.target.value)} /></span>
         {!insts.builtIn && insts.list.length > 0 && (
           <select aria-label="Filter by institution" value={instF} onChange={(e) => setInstF(e.target.value)}>
             <option value="all">All institutions</option><option value="none">No institution</option>
@@ -111,7 +111,7 @@ export default function Teachers() {
 
       <div className="card tw">
         <table>
-          <thead><tr><th>Teacher</th><th>Institution</th><th>Reg number</th><th>Last message</th><th>Joined</th><th /></tr></thead>
+          <thead><tr><th>Teacher</th><th>Institution</th><th>Last message</th><th>Joined</th><th /></tr></thead>
           <tbody>
             {shown.map((t) => {
               const m = last.get(t.id)
@@ -119,7 +119,6 @@ export default function Teachers() {
                 <tr key={t.id}>
                   <td><span className="who-cell"><Avatar profile={{ full_name: t.full_name, avatar: null }} /><span><b>{t.full_name}</b>{t.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{t.email}</span></span></span></td>
                   <td>{t.institution ? <>{t.institution}<br /><span className="sm">{t.inst_title || 'Teacher'}</span></> : <span className="sm">–</span>}</td>
-                  <td>{t.reg_number}</td>
                   <td className="sm">{m ? <>{m.last_from === t.id ? 'Teacher: ' : 'You: '}{String(m.last_body).slice(0, 40)}{m.last_body.length > 40 ? '…' : ''}</> : '–'}</td>
                   <td>{fmtDate(t.created_at)}</td>
                   <td className="acts"><button className="btn ghost" onClick={() => openChat(t.id)}><Icon name="chat" size={16} /> Chat</button> <button className="btn ghost" onClick={() => setEdit(t.id)}>Edit</button></td>

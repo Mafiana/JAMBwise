@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import Icon from '../../components/Icons.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
+import RichText from '../../components/RichText.jsx'
 import { ErrorLine, Loader } from '../../components/ui.jsx'
 import { PRACTICE_SIZE, SUBJECTS, SUBJECT_KEYS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
@@ -44,7 +45,7 @@ function Question({ s }) {
     <div className="card">
       <div className="q-meta"><span>{SUBJECTS[s.subject].name}</span><span>Question {s.i + 1} of {s.qs.length}</span></div>
       <div className="progress-line"><i style={{ width: ((s.i + (s.sel != null ? 1 : 0)) / s.qs.length) * 100 + '%' }} /></div>
-      <h3>{q.body}</h3>
+      <h3><RichText text={q.body} /></h3>
       {q.options.map((o, j) => (
         <button
           key={j}

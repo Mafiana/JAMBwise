@@ -14,13 +14,19 @@ export const SUBJECTS = {
   lit: { name: 'Literature in English', level: 1 },
   irk: { name: 'Islamic Religious Knowledge', level: 1 },
   crk: { name: 'Christian Religious Knowledge', level: 1 },
+  hec: { name: 'Home Economics', level: 1 },
+  cst: { name: 'Computer Studies', level: 1 },
+  geo: { name: 'Geography', level: 1 },
 }
 export const SUBJECT_KEYS = Object.keys(SUBJECTS)
 /** English is automatic in the mock, so students choose their 3 from these. */
 export const PICKABLE = SUBJECT_KEYS.filter((k) => k !== 'eng')
 
-export const PRACTICE_SIZE = 20 // questions per practice session
-export const MOCK_PER_SUBJECT = 20 // questions per subject in a mock
+export const PRACTICE_SIZE = 30 // questions per practice session
+export const MOCK_ENGLISH = 60 // Use of English questions in a mock (CBT Mock and ExamHall)
+export const MOCK_PER_SUBJECT = 40 // questions in each of the other three subjects
+/** How many questions a mock or ExamHall gives for one subject. 60 + 3 x 40 = 180, the real UTME count. */
+export const mockCountFor = (subject) => (subject === 'eng' ? MOCK_ENGLISH : MOCK_PER_SUBJECT)
 export const SECONDS_PER_QUESTION = 40 // the real UTME pace (2 hours for 180 questions)
 
 // Prices shown here are only a fallback. The real prices come from the `plans` table in the database.
@@ -34,7 +40,7 @@ export const PLANS = [
   ] },
   { id: 'student', name: 'Student', kobo: 150000, features: [
     'Everything in Free',
-    'All 14 UTME subjects to practise',
+    'All 17 subjects to practise',
     'CBT Mock exams at the real pace, scored out of 400',
     'ExamHall: the one-time exam your administrator releases results for',
     'Mock score history and trend',

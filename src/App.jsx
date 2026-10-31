@@ -27,6 +27,13 @@ import Settings from './pages/app/Settings.jsx'
 import Help from './pages/app/Help.jsx'
 
 // Only admins ever open these, so they load on demand.
+const Syllabus = lazy(() => import('./pages/app/Syllabus.jsx'))
+const AdminSyllabus = lazy(() => import('./pages/app/admin/Syllabus.jsx'))
+const Rate = lazy(() => import('./pages/app/Rate.jsx'))
+const Announcements = lazy(() => import('./pages/app/Announcements.jsx'))
+const AdminFeedback = lazy(() => import('./pages/app/admin/Feedback.jsx'))
+const AdminAnnouncements = lazy(() => import('./pages/app/admin/Announcements.jsx'))
+const TeacherRate = lazy(() => import('./pages/app/admin/RateSuggest.jsx'))
 const Planner = lazy(() => import('./pages/app/Planner.jsx'))
 const AdminLayout = lazy(() => import('./pages/app/admin/AdminLayout.jsx'))
 const Overview = lazy(() => import('./pages/app/admin/Overview.jsx'))
@@ -36,6 +43,7 @@ const Scoresheet = lazy(() => import('./pages/app/admin/Scoresheet.jsx'))
 const Payments = lazy(() => import('./pages/app/admin/Payments.jsx'))
 const Questions = lazy(() => import('./pages/app/admin/Questions.jsx'))
 const Messages = lazy(() => import('./pages/app/admin/Messages.jsx'))
+const Coupons = lazy(() => import('./pages/app/admin/Coupons.jsx'))
 const PriceSettings = lazy(() => import('./pages/app/admin/PriceSettings.jsx'))
 const Parent = lazy(() => import('./pages/Parent.jsx'))
 const ParentAccess = lazy(() => import('./pages/app/admin/ParentAccess.jsx'))
@@ -76,6 +84,9 @@ export default function App() {
                     <Route path="calc" element={<StudentOnly><Calc /></StudentOnly>} />
                     <Route path="planner" element={<StudentOnly><Planner /></StudentOnly>} />
                     <Route path="progress" element={<StudentOnly><Progress /></StudentOnly>} />
+                    <Route path="syllabus" element={<StudentOnly><Syllabus /></StudentOnly>} />
+                    <Route path="rate" element={<StudentOnly><Rate /></StudentOnly>} />
+                    <Route path="announcements" element={<StudentOnly><Announcements /></StudentOnly>} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="billing" element={<StudentOnly><Billing /></StudentOnly>} />
                     <Route path="settings" element={<Settings />} />
@@ -93,9 +104,14 @@ export default function App() {
                       <Route path="scoresheet" element={<Scoresheet />} />
                       <Route path="payments" element={<AdminOnly><Payments /></AdminOnly>} />
                       <Route path="questions" element={<Questions />} />
+                      <Route path="syllabus" element={<AdminSyllabus />} />
+                      <Route path="feedback" element={<AdminOnly><AdminFeedback /></AdminOnly>} />
+                      <Route path="announcements" element={<AdminAnnouncements />} />
+                      <Route path="rate" element={<TeacherRate />} />
                       <Route path="messages" element={<Messages />} />
                       <Route path="mail" element={<AdminOnly><Mail /></AdminOnly>} />
                       <Route path="settings" element={<AdminOnly><PriceSettings /></AdminOnly>} />
+                      <Route path="coupons" element={<AdminOnly><Coupons /></AdminOnly>} />
                       <Route path="activity" element={<AdminOnly><Activity /></AdminOnly>} />
                       <Route path="*" element={<AdminHome />} />
                     </Route>

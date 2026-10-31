@@ -161,3 +161,78 @@ test('pageList shows every page when there are few, and ellipses when there are 
 })
 
 test('ticketNo pads the id', () => { assert.equal(ticketNo(7), 'JW-T0007'); assert.equal(ticketNo(12345), 'JW-T12345') })
+
+import { questionReport, studentReport, REPORT_REASONS } from '../src/lib/utils.js'
+test('questionReport: shows the question as the student saw it, marks the shown answer, fits the ticket limits', () => {
+  const q = { id: 12, body: 'What is 2 + 2?', options: ['3', '5', '4', '22'], answer: 2 }
+  const r = questionReport({ q, subjectName: 'Mathematics', reason: 'wrong_answer', note: 'I think it is 5' })
+  assert.equal(r.subject, 'Report: Q#12 (Mathematics)')
+  assert.match(r.body, /^Question #12 · Mathematics\nReason: The marked answer is wrong\n\nWhat is 2 \+ 2\?\nA\. 3\nB\. 5\nC\. 4  \(marked correct\)\nD\. 22\n\nStudent note: I think it is 5$/)
+  const huge = questionReport({ q: { id: 1, body: 'x'.repeat(5000), options: ['y'.repeat(900), 'b', 'c', 'd'], answer: 0 }, subjectName: 'English', reason: 'other', note: 'n'.repeat(5000) })
+  assert.ok(huge.body.length <= 2000 && huge.body.length >= 5, 'length ' + huge.body.length)
+  assert.ok(huge.subject.length <= 120)
+  assert.equal(questionReport({ q, subjectName: 'M', reason: 'nonsense' }).body.includes('Something else'), true)
+  assert.equal(REPORT_REASONS.length, 5)
+})
+test('studentReport: totals, accuracy, per-subject rows, mock scores newest first', () => {
+  const a = [
+    { subject: 'mat', correct: 12, total: 20, kind: 'practice', mock_score: null, created_at: '2026-01-01T10:00:00Z' },
+    { subject: 'mat', correct: 18, total: 20, kind: 'practice', mock_score: null, created_at: '2026-01-02T10:00:00Z' },
+    { subject: 'eng', correct: 16, total: 20, kind: 'mock', mock_score: 290, created_at: '2026-01-03T10:00:00Z' },
+    { subject: 'eng', correct: 10, total: 20, kind: 'mock', mock_score: 210, created_at: '2026-01-04T10:00:00Z' },
+  ]
+  const r = studentReport(a)
+  assert.equal(r.total, 80); assert.equal(r.correct, 56); assert.equal(r.accuracy, 70); assert.equal(r.sessions, 4)
+  assert.deepEqual(r.mocks.map((m) => m.score), [210, 290]); assert.equal(r.bestMock, 290)
+  assert.deepEqual(r.subjects.map((s) => [s.subject, s.pct, s.sessions]), [['mat', 75, 2], ['eng', 65, 2]])
+  assert.deepEqual(studentReport([]), { total: 0, correct: 0, sessions: 0, accuracy: 0, mocks: [], bestMock: null, subjects: [] })
+})
+
+import { sampleFresh } from '../src/lib/utils.js'
+test('sampleFresh avoids questions already seen, and falls back to them only when needed', () => {
+  const rows = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }))
+  const seen = new Set([1, 2, 3, 4, 5])
+  for (let k = 0; k < 30; k++) {
+    const a = sampleFresh(rows, 5, seen)
+    assert.equal(a.length, 5)
+    assert.ok(a.every((r) => !seen.has(r.id)))
+  }
+  const b = sampleFresh(rows, 8, seen)
+  assert.equal(new Set(b.map((r) => r.id)).size, 8)
+  assert.ok([6, 7, 8, 9, 10].every((id) => b.some((r) => r.id === id)))
+  assert.equal(sampleFresh(rows, 20, seen).length, 10)
+})
+
+test('pinExpired only flags PIN students whose paid time has ended', async () => {
+  const { pinExpired } = await import('../src/lib/utils.js')
+  const pin = { email: 'gxgf3yqb@pin.jambwise.ng' }
+  const now = new Date('2026-11-27T00:00:00Z')
+  assert.equal(pinExpired(pin, { plan: 'student', plan_expires: '2026-11-26T00:00:00Z' }, now), true)
+  assert.equal(pinExpired(pin, { plan: 'student', plan_expires: '2026-12-26T00:00:00Z' }, now), false)
+  assert.equal(pinExpired(pin, { plan: 'free', plan_expires: null }, now), false)
+  assert.equal(pinExpired({ email: 'a@b.com' }, { plan: 'student', plan_expires: '2026-11-26T00:00:00Z' }, now), false)
+  assert.equal(pinExpired(pin, { plan: 'student', is_teacher: true, plan_expires: '2026-11-26T00:00:00Z' }, now), false)
+  assert.equal(pinExpired(null, null, now), false)
+})
+
+test('parseRich turns <u> into formatting and leaves other tags as text', async () => {
+  const { parseRich } = await import('../src/lib/utils.js')
+  assert.deepEqual(parseRich('b<u>i</u>rd'), [{ text: 'b' }, { tag: 'u', text: 'i' }, { text: 'rd' }])
+  assert.deepEqual(parseRich('H<sub>2</sub>O'), [{ text: 'H' }, { tag: 'sub', text: '2' }, { text: 'O' }])
+  assert.deepEqual(parseRich('<script>x</script>'), [{ text: '<script>x</script>' }])
+  assert.deepEqual(parseRich('a < b'), [{ text: 'a < b' }])
+  assert.deepEqual(parseRich(null), [])
+})
+
+test('pinTimeLeft counts down only in the last 3 days of a PIN student', async () => {
+  const { pinTimeLeft } = await import('../src/lib/utils.js')
+  const pin = { email: 'gxgf3yqb@pin.jambwise.ng' }
+  const now = new Date('2026-11-10T00:00:00Z')
+  const exp = (ms) => ({ plan: 'student', plan_expires: new Date(now.getTime() + ms).toISOString() })
+  const t = pinTimeLeft(pin, exp(2 * 864e5 + 3 * 36e5 + 4 * 6e4 + 5e3), now)
+  assert.deepEqual([t.d, t.h, t.m, t.s], [2, 3, 4, 5])
+  assert.equal(pinTimeLeft(pin, exp(4 * 864e5), now), null)      // more than 3 days
+  assert.equal(pinTimeLeft(pin, exp(-1000), now), null)          // already over (the expired box handles it)
+  assert.equal(pinTimeLeft({ email: 'a@b.com' }, exp(864e5), now), null)
+  assert.equal(pinTimeLeft(pin, { plan: 'free', plan_expires: null }, now), null)
+})

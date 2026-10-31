@@ -90,7 +90,7 @@ export default function ParentAccess() {
         </select>
         {filtered && <button className="btn ghost" onClick={clear}>Clear filters</button>}
         <button className="btn" onClick={refresh} disabled={refreshing} aria-busy={refreshing}><Icon name="refresh" size={16} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Refreshing…' : 'Refresh'}</button>
-        <button className="btn ghost" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
+        <button className="btn" onClick={exportCsv} disabled={!matches.length}>Export CSV</button>
       </div>
       {refreshing && <Loader size="sm" label="Refreshing the list…" />}
       <p className="sm">Updated {at.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}. {matches.length} of {data.length} entries. Parents sign in on the home page with a student's ID and the code that student made.</p>

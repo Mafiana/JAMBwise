@@ -1,7 +1,7 @@
 // One small line icon per subject, and a colour for each, so students can spot a subject at a glance.
 export const SUBJECT_COLOR = {
   eng: '#2563EB', mat: '#7C3AED', phy: '#0891B2', chm: '#16A34A', bio: '#65A30D', gov: '#B45309', eco: '#D97706',
-  com: '#DB2777', agr: '#15803D', acc: '#0F766E', mkt: '#E11D48', lit: '#9333EA', irk: '#047857', crk: '#4F46E5',
+  com: '#DB2777', agr: '#15803D', acc: '#0F766E', mkt: '#E11D48', lit: '#9333EA', irk: '#047857', crk: '#4F46E5', hec: '#EA580C', cst: '#0284C7', geo: '#059669',
 }
 
 const SHAPES = {
@@ -19,6 +19,9 @@ const SHAPES = {
   lit: <path d="M3 5.500c3-1.200 6-1.200 9 .5 3-1.700 6-1.700 9-.5V18c-3-1.200-6-1.200-9 .5-3-1.700-6-1.700-9-.5V5.500ZM12 6v12.500" />,
   irk: <><path d="M17.500 15.500A7.500 7.500 0 1 1 9.500 5a6 6 0 0 0 8 10.500Z" /><path d="M18 4.500l.7 1.600 1.600.7-1.600.7-.7 1.600-.7-1.600-1.600-.7 1.600-.7Z" /></>,
   crk: <path d="M12 3v18M6.500 9h11" />,
+  hec: <path d="M3 11.500 12 4l9 7.500M5.500 10v10h13V10M10 20v-5h4v5" />,
+  cst: <path d="M4 5h16v11H4zM9 20h6M12 16v4" />,
+  geo: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></>,
 }
 
 export default function SubjectIcon({ k, size = 22, ...rest }) {

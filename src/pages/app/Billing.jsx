@@ -40,11 +40,29 @@ export default function Billing() {
   const ret = useReturnFromPaystack(params.get('reference') || params.get('trxref'), refreshProfile)
   const { busy, error, run } = useAction()
   const [target, setTarget] = useState('')
+  const [code, setCode] = useState('')
+  const [applied, setApplied] = useState(null)   // { code, quotes: { student: quote, pro: quote } }
+  const [codeMsg, setCodeMsg] = useState({ ok: false, text: '' })
+  const [checking, setChecking] = useState(false)
+  const apply = async () => {
+    const c = code.trim().toUpperCase()
+    if (!c) return
+    setChecking(true); setCodeMsg({ ok: false, text: '' })
+    try {
+      const [student, pro] = await Promise.all([api.couponQuote(c, 'student'), api.couponQuote(c, 'pro')])
+      const good = [['Student', student], ['Pro', pro]].filter(([, q]) => q.valid)
+      if (!good.length) { setApplied(null); setCodeMsg({ ok: false, text: student.message }) }
+      else { setApplied({ code: c, quotes: { student, pro } }); setCode(c); setCodeMsg({ ok: true, text: `${good[0][1].percent}% off applied${good.length === 1 ? ' to the ' + good[0][0] + ' plan' : ''}.` }) }
+    } catch (e) { setApplied(null); setCodeMsg({ ok: false, text: e.message }) }
+    setChecking(false)
+  }
+  const clearCode = () => { setApplied(null); setCode(''); setCodeMsg({ ok: false, text: '' }) }
+  const quoteFor = (id) => (applied?.quotes[id]?.valid ? applied.quotes[id] : null)
 
   const pay = (id) => {
     setTarget(id)
     run(async () => {
-      const { url } = await api.startCheckout(id)
+      const { url } = await api.startCheckout(id, quoteFor(id) ? applied.code : '')
       window.location.href = url
     })
   }
@@ -59,8 +77,20 @@ export default function Billing() {
       {plan !== 'free' && expires && <p className="mut">Your <b>{plan}</b> plan is active until <b>{expires}</b>. Paying again adds 30 days.</p>}
       {profile.plan !== 'free' && plan === 'free' && <p className="err">Your paid plan expired on {expires}. Renew below to get your access back.</p>}
       <ErrorLine>{error}</ErrorLine>
+      <div className="coupon-box">
+        <label htmlFor="cp">Have a discount code?</label>
+        <div className="coupon-row">
+          <input id="cp" value={code} onChange={(e) => { setCode(e.target.value.toUpperCase()); if (applied) setApplied(null); setCodeMsg({ ok: false, text: '' }) }} onKeyDown={(e) => e.key === 'Enter' && apply()} maxLength={20} placeholder="Enter your code" autoComplete="off" spellCheck={false} />
+          <button type="button" className="btn" onClick={apply} disabled={checking || !code.trim()}>{checking ? 'Checking…' : 'Apply'}</button>
+          {applied && <button type="button" className="linkish" onClick={clearCode}>Remove</button>}
+        </div>
+        {codeMsg.text && <p className={codeMsg.ok ? 'ok' : 'err'} role="status" style={{ margin: '6px 0 0' }}>{codeMsg.text}</p>}
+      </div>
       <div className="grid">
-        {plans.map((p) => (
+        {plans.map((p0) => {
+          const q = quoteFor(p0.id)
+          const p = q ? { ...p0, kobo: q.final_kobo, was: q.list_kobo } : p0
+          return (
           <PlanCard key={p.id} plan={p} current={plan === p.id} hot={p.id === 'student' && plan !== 'student'}>
             {p.id === 'free' ? (
               <button className="btn" disabled>{plan === 'free' ? 'Current plan' : 'Free forever'}</button>
@@ -70,7 +100,8 @@ export default function Billing() {
               </button>
             )}
           </PlanCard>
-        ))}
+          )
+        })}
       </div>
       <p className="sm">Payments are processed by Paystack. Each payment gives 30 days of access and does not renew automatically.</p>
     </>

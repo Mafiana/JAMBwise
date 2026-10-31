@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../../../components/Icons.jsx'
 import { ErrorLine } from '../../../components/ui.jsx'
@@ -7,7 +7,8 @@ import { buildOverview, naira } from '../../../lib/utils.js'
 import { fmtDate, useLoad, TabLoader } from './shared.jsx'
 
 const fetchAll = async () => {
-  const [stats, students, payments, messages] = await Promise.all([api.adminStats(), api.adminStudents(), api.adminPayments().catch(() => []), api.adminMessages().catch(() => [])])
+  const [stats, everyone, payments, messages] = await Promise.all([api.adminStats(), api.adminStudents(), api.adminPayments().catch(() => []), api.adminMessages().catch(() => [])])
+  const students = everyone.filter((s) => !s.is_admin && !s.is_teacher)   // admins and teachers are not students
   return { stats, students, payments, messages }
 }
 
@@ -76,6 +77,8 @@ function CalendarArt() {
 
 export default function Overview() {
   const { data, error, loading } = useLoad(fetchAll)
+  // like a bank app: amounts start hidden, the eye shows or hides them
+  const [show, setShow] = useState(false)
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const { stats, students, payments, messages } = data
@@ -87,15 +90,16 @@ export default function Overview() {
   const sum = (a) => a.reduce((n, v) => n + v, 0)
   const newStudents = sum(o.signups)
   const revenue = sum(o.revenue)
+  const money = (v) => (show ? naira(v) : '₦ ••••••')
   const planRows = [['free', 'Free', 'green'], ['student', 'Student', 'blue'], ['pro', 'Pro', 'violet']]
   return (
     <div className="ov">
-      <p className="mut ov-sub">Track your platform performance at a glance.</p>
+      <p className="mut ov-sub">Track your platform performance at a glance. <button type="button" className="eye-btn" onClick={() => setShow(!show)} aria-pressed={show} aria-label={show ? 'Hide amounts' : 'Show amounts'} title={show ? 'Hide amounts' : 'Show amounts'}><Icon name={show ? 'eye' : 'eyeoff'} size={20} /></button></p>
 
       <div className="stat-grid s3">
-        <div className="card st"><span className="ic"><Icon name="user" /></span><b>{stats.students}</b><span>students · {o.new7d} new this week</span></div>
+        <div className="card st"><span className="ic"><Icon name="user" /></span><b>{students.length}</b><span>students · {o.new7d} new this week</span></div>
         <div className="card st"><span className="ic"><Icon name="card" /></span><b>{stats.paying}</b><span>on a paid plan · {o.conversion}% of students</span></div>
-        <div className="card st"><span className="ic gold"><Icon name="trophy" /></span><b>{naira(Number(stats.revenue_kobo))}</b><span>total revenue · {naira(o.revenue30d)} last 30 days</span></div>
+        <div className="card st"><span className="ic gold"><Icon name="trophy" /></span><b>{money(Number(stats.revenue_kobo))}</b><span>total revenue · {money(o.revenue30d)} last 30 days</span></div>
         <div className="card st"><span className="ic"><Icon name="flame" /></span><b>{o.active7d}</b><span>active in the last 7 days</span></div>
         <div className="card st"><span className="ic"><Icon name="mock" /></span><b>{stats.mocks}</b><span>mocks taken</span></div>
         <Link to="/app/admin/messages" className="card st"><span className="ic"><Icon name="help" /></span><b>{unread}</b><span>unread messages</span></Link>
@@ -114,10 +118,10 @@ export default function Overview() {
         <section className="card ov-card">
           <header className="ov-head">
             <span className="ov-ic green"><Icon name="wallet" size={20} /></span>
-            <div className="ov-t"><h3>Revenue, last 14 days</h3><div className="ov-big"><b>{naira(revenue)}</b><Chip pct={growth(o.revenue)} /></div></div>
+            <div className="ov-t"><h3>Revenue, last 14 days</h3><div className="ov-big"><b>{money(revenue)}</b><Chip pct={growth(o.revenue)} /></div></div>
             <Link to="/app/admin/payments" className="ov-btn green">View Details <Icon name="arrow" size={16} /></Link>
           </header>
-          <Chart values={o.revenue} labels={labels} kind="line" tone="green" fmt={naira} yFmt={(v) => short(v / 100)} label="Revenue per day" />
+          <Chart values={o.revenue} labels={labels} kind="line" tone="green" fmt={money} yFmt={(v) => (show ? short(v / 100) : '•••')} label="Revenue per day" />
         </section>
 
         <section className="card ov-card ov-plans">

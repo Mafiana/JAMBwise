@@ -9,7 +9,7 @@ import { breakdown } from '../../lib/scoresheet.js'
 import { firstName, streak } from '../../lib/utils.js'
 import { useMyExam, useProgress } from '../../hooks.js'
 
-const SHORT = { eng: 'ENG', mat: 'MAT', phy: 'PHY', chm: 'CHM', bio: 'BIO', gov: 'GOV', eco: 'ECO', com: 'COM', agr: 'AGR', acc: 'ACC', mkt: 'MKT', lit: 'LIT', irk: 'IRK', crk: 'CRK' }
+const SHORT = { eng: 'ENG', mat: 'MAT', phy: 'PHY', chm: 'CHM', bio: 'BIO', gov: 'GOV', eco: 'ECO', com: 'COM', agr: 'AGR', acc: 'ACC', mkt: 'MKT', lit: 'LIT', irk: 'IRK', crk: 'CRK', hec: 'HEC', cst: 'CST', geo: 'GEO' }
 const tone = (pct) => (pct >= 75 ? 'hi' : pct >= 55 ? 'mid' : 'lo')
 
 /** A ring that fills to the student's overall accuracy. */

@@ -14,6 +14,18 @@ export function shuffle(arr, rnd = Math.random) {
 
 export const sample = (arr, n, rnd = Math.random) => shuffle(arr, rnd).slice(0, n)
 
+/**
+ * Picks `n` random questions, preferring ones this student has not been given yet (`seen` is a Set of ids).
+ * When fewer than `n` unseen questions are left, the rest come from the seen ones, so a new exam never repeats
+ * the previous one while the bank still has fresh questions. Returns the picked rows, in random order.
+ */
+export function sampleFresh(rows, n, seen = new Set(), rnd = Math.random) {
+  const fresh = rows.filter((r) => !seen.has(r.id))
+  if (fresh.length >= n) return shuffle(fresh, rnd).slice(0, n)
+  const used = rows.filter((r) => seen.has(r.id))
+  return shuffle([...shuffle(fresh, rnd), ...shuffle(used, rnd)].slice(0, n), rnd)
+}
+
 /** Turns a database row into a question with shuffled options and the new index of the right answer. */
 export function prepareQuestion(row, rnd = Math.random) {
   const opts = shuffle(
@@ -56,6 +68,49 @@ export function effectivePlan(profile, now = new Date()) {
   if (!profile) return 'free'
   if (profile.plan !== 'free' && profile.plan_expires && new Date(profile.plan_expires) <= now) return 'free'
   return profile.plan
+}
+
+/** True when this account was opened with an access PIN (student) and its paid time has run out. */
+export function pinExpired(user, profile, now = new Date()) {
+  return Boolean(
+    user && profile && String(user.email || '').toLowerCase().endsWith('@pin.jambwise.ng') && !profile.is_admin && !profile.is_teacher &&
+    profile.plan !== 'free' && profile.plan_expires && new Date(profile.plan_expires) <= now,
+  )
+}
+
+/**
+ * Splits text such as "b<u>i</u>rd" into [{ text: 'b' }, { tag: 'u', text: 'i' }, { text: 'rd' }].
+ * Only u, b, i, sub and sup are understood; they cannot be nested, and any other "<...>" stays as ordinary text.
+ */
+export function parseRich(input) {
+  const s = String(input ?? '')
+  const out = []
+  const re = /<(u|b|i|sub|sup)>([^<]*)<\/\1>/gi
+  let last = 0
+  let m
+  while ((m = re.exec(s))) {
+    if (m.index > last) out.push({ text: s.slice(last, m.index) })
+    out.push({ tag: m[1].toLowerCase(), text: m[2] })
+    last = m.index + m[0].length
+  }
+  if (last < s.length) out.push({ text: s.slice(last) })
+  return out
+}
+
+export const PIN_WARN_DAYS = 3
+
+/**
+ * For a PIN student whose paid time ends within PIN_WARN_DAYS: the time left, split into days, hours, minutes and seconds,
+ * and the share (0-1) of the warning window still remaining. Otherwise null (not a PIN student, plenty of time left, or already over).
+ */
+export function pinTimeLeft(user, profile, now = new Date()) {
+  const isPin = String(user?.email || '').toLowerCase().endsWith('@pin.jambwise.ng')
+  if (!isPin || !profile || profile.is_admin || profile.is_teacher || profile.plan === 'free' || !profile.plan_expires) return null
+  const ms = new Date(profile.plan_expires).getTime() - now.getTime()
+  const window = PIN_WARN_DAYS * 864e5
+  if (!(ms > 0) || ms > window) return null
+  const t = Math.floor(ms / 1000)
+  return { ms, d: Math.floor(t / 86400), h: Math.floor((t % 86400) / 3600), m: Math.floor((t % 3600) / 60), s: t % 60, left: ms / window }
 }
 
 export const planLevel = (profile, now) => PLAN_LEVEL[effectivePlan(profile, now)] ?? 0
@@ -241,9 +296,12 @@ if (typeof window !== 'undefined') {
   const unlock = () => { try { chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)(); chimeCtx.resume() } catch { /* no sound available */ } }
   ;['pointerdown', 'keydown', 'touchstart'].forEach((e) => window.addEventListener(e, unlock, { once: true, passive: true }))
 }
+let lastChime = 0
 export function playChime() {
   try {
     if (!chimeCtx || chimeCtx.state !== 'running') return
+    if (Date.now() - lastChime < 4000) return   // several things can arrive together: one sound is enough
+    lastChime = Date.now()
     const t0 = chimeCtx.currentTime
     ;[[880, 0], [1175, 0.16]].forEach(([f, d]) => {
       const o = chimeCtx.createOscillator(); const g = chimeCtx.createGain()

@@ -236,7 +236,33 @@ export function clearLocalStudentData() {
   } catch { /* storage blocked */ }
 }
 
-export const startCheckout = (plan) => callFn('paystack-init', { plan, origin: window.location.origin })
+export const startCheckout = (plan, coupon = '') => callFn('paystack-init', { plan, origin: window.location.origin, ...(coupon ? { coupon } : {}) })
+
+// ── discount codes ──
+const couponReady = (error) => !/PGRST20[25]|42883|schema cache|does not exist|Could not find the function/i.test(String(error?.code || '') + ' ' + String(error?.message || ''))
+/** The price of `plan` with a code: { valid, message, percent, list_kobo, discount_kobo, final_kobo }. */
+export async function couponQuote(code, plan) {
+  const { data, error } = await supabase.rpc('coupon_quote', { p_code: code, p_plan: plan })
+  if (error) throw new Error(couponReady(error) ? 'Could not check that code. Please try again.' : 'Discount codes are not switched on yet.')
+  return Array.isArray(data) ? data[0] : data
+}
+export async function adminCoupons() {
+  const { data, error } = await supabase.rpc('admin_coupons')
+  if (error) fail(error, couponReady(error) ? 'Could not load the codes.' : 'Discount codes are not switched on yet. Run supabase/migrate-coupons.sql in the Supabase SQL Editor, then reload this page.')
+  return data || []
+}
+export async function adminSaveCoupon({ code, percent, plan, expires = null, maxUses = null }) {
+  const { error } = await supabase.rpc('admin_save_coupon', { p_code: code, p_percent: percent, p_plan: plan, p_expires: expires ? new Date(expires).toISOString() : null, p_max_uses: maxUses })
+  if (error) fail(error, couponReady(error) ? 'Could not save the code.' : 'Discount codes are not switched on yet. Run supabase/migrate-coupons.sql in the Supabase SQL Editor, then try again.')
+}
+export async function adminSetCouponActive(id, active) {
+  const { error } = await supabase.rpc('admin_set_coupon_active', { p_id: id, p_active: active })
+  if (error) fail(error, 'Could not update the code.')
+}
+export async function adminDeleteCoupon(id) {
+  const { error } = await supabase.rpc('admin_delete_coupon', { p_id: id })
+  if (error) fail(error, 'Could not delete the code.')
+}
 
 export async function getPayment(reference) {
   const { data, error } = await supabase.from('payments').select('status, plan').eq('reference', reference).maybeSingle()
@@ -341,6 +367,40 @@ export async function adminScoresheet() {
   return out
 }
 
+/** How many CBT Mock / ExamHall results have come in since `sinceMs` (staff only; a teacher sees their own students). */
+export async function adminNewExamCount(sinceMs) {
+  const { data, error } = await supabase.from('attempts').select('id, created_at').in('kind', ['mock', 'hall']).order('created_at', { ascending: false }).limit(200)
+  if (error) return 0
+  return (data || []).filter((r) => new Date(r.created_at).getTime() > sinceMs).length
+}
+
+// ── syllabus (one PDF per subject) ──
+const syllabusReady = (error) => !/PGRST20[25]|42883|schema cache|does not exist|Could not find the function/i.test(String(error.code || '') + ' ' + String(error.message || ''))
+/** The syllabus list (no file data). Throws a friendly message if the database has not been set up for it yet. */
+export async function getSyllabi() {
+  const { data, error } = await supabase.rpc('list_syllabi')
+  if (error) {
+    if (isNetworkError(error)) throw new Error(friendly(error) || 'No internet connection.')
+    throw new Error(syllabusReady(error) ? 'Could not load the syllabus list.' : 'The syllabus is not available yet. Please check back soon.')
+  }
+  return data || []
+}
+/** One syllabus PDF as a data: URL. */
+export async function getSyllabusFile(id) {
+  const { data, error } = await supabase.rpc('get_syllabus', { p_id: id })
+  if (error || !data) fail(error || { message: 'missing' }, 'Could not open this syllabus.')
+  return data
+}
+export async function adminAddSyllabus({ subject, fileName, size, data }) {
+  const { data: id, error } = await supabase.rpc('admin_add_syllabus', { p_subject: subject, p_file_name: fileName, p_size: size, p_data: data })
+  if (error) fail(error, syllabusReady(error) ? 'Could not save the syllabus.' : 'Syllabus is not switched on yet. Run supabase/migrate-syllabus.sql in the Supabase SQL Editor, then try again.')
+  return id
+}
+export async function adminDeleteSyllabus(id) {
+  const { error } = await supabase.rpc('admin_delete_syllabus', { p_id: id })
+  if (error) fail(error, 'Could not delete the syllabus.')
+}
+
 /** Saves the ExamHall (or CBT Mock) sitting window. Pass null for "no limit". `opens`/`closes` are Date or ISO strings. */
 export async function adminSetExamWindow(kind, opens, closes, maxViolations) {
   const { error } = await supabase.rpc('admin_set_exam_window', {
@@ -412,6 +472,76 @@ export async function adminSaveQuestion(q) {
   }
 }
 
+// ── Rate & suggest, and announcements ──
+const featureReady = (error) => !/PGRST20[25]|42883|schema cache|does not exist|Could not find the function/i.test(String(error?.code || '') + ' ' + String(error?.message || ''))
+const FEATURE_OFF = 'This is not switched on yet. Run supabase/migrate-feedback-announcements.sql in the Supabase SQL Editor, then try again.'
+/** Student or teacher: a star rating (1 to 5, or null), a kind ('feedback' | 'feature' | 'bug') and a message. */
+export async function submitFeedback({ rating = null, kind = 'feedback', message = '' }) {
+  const { error } = await supabase.rpc('submit_feedback', { p_rating: rating, p_kind: kind, p_message: message })
+  if (error) fail(error, featureReady(error) ? 'Could not send this. Please try again.' : FEATURE_OFF)
+}
+export async function adminFeedback() {
+  const { data, error } = await supabase.rpc('admin_feedback')
+  if (error) fail(error, featureReady(error) ? 'Could not load feedback.' : FEATURE_OFF)
+  return data || []
+}
+export async function adminSetFeedbackStatus(id, status) {
+  const { error } = await supabase.rpc('admin_set_feedback_status', { p_id: id, p_status: status })
+  if (error) fail(error, 'Could not update this.')
+}
+export async function adminDeleteFeedback(id) {
+  const { error } = await supabase.rpc('admin_delete_feedback', { p_id: id })
+  if (error) fail(error, 'Could not delete this.')
+}
+/** `audience`: 'all' (everyone sees it) or 'private' (only the people in `userIds`). */
+export async function adminSendAnnouncement({ title, body, audience, userIds = [] }) {
+  const { data, error } = await supabase.rpc('admin_send_announcement', { p_title: title, p_body: body, p_audience: audience, p_user_ids: audience === 'private' ? userIds : null })
+  if (error) fail(error, featureReady(error) ? 'Could not send the announcement.' : FEATURE_OFF)
+  return data
+}
+export async function adminAnnouncements() {
+  const { data, error } = await supabase.rpc('admin_announcements')
+  if (error) fail(error, featureReady(error) ? 'Could not load announcements.' : FEATURE_OFF)
+  return data || []
+}
+export async function adminDeleteAnnouncement(id) {
+  const { error } = await supabase.rpc('admin_delete_announcement', { p_id: id })
+  if (error) fail(error, 'Could not delete the announcement.')
+}
+/** The announcements for the signed-in person (public ones, and ones sent privately to them). [] when the database does not have them yet. */
+export async function myAnnouncements() {
+  const { data, error } = await supabase.rpc('my_announcements')
+  if (error) return []
+  return data || []
+}
+
+// ── teacher questions wait for admin review ──
+const reviewReady = (error) => !/PGRST20[25]|42883|schema cache|does not exist|Could not find the function/i.test(String(error?.code || '') + ' ' + String(error?.message || ''))
+const REVIEW_OFF = 'Question review is not switched on yet. Run supabase/migrate-question-review.sql in the Supabase SQL Editor, then try again.'
+/** Teacher: sends a new question to the admins for review. */
+export async function submitQuestion(q) {
+  const { data, error } = await supabase.rpc('submit_question', { p_subject: q.subject, p_body: q.body, p_options: q.options, p_answer: q.answer, p_explanation: q.explanation || null })
+  if (error) fail(error, reviewReady(error) ? 'Could not send the question for review.' : REVIEW_OFF)
+  return data
+}
+/** Teacher: their own submitted questions and what happened to each. Returns [] on a database without review. */
+export async function mySubmittedQuestions() {
+  const { data, error } = await supabase.rpc('my_question_submissions')
+  if (error) return []
+  return data || []
+}
+/** Admin: questions waiting for Accept or Decline. Returns [] on a database without review. */
+export async function adminPendingQuestions() {
+  const { data, error } = await supabase.rpc('admin_pending_questions')
+  if (error) return []
+  return data || []
+}
+/** Admin: accept (puts the question live) or decline (with an optional reason). The teacher is told either way. */
+export async function adminReviewQuestion(id, approve, reason = '') {
+  const { error } = await supabase.rpc('admin_review_question', { p_id: id, p_approve: approve, p_reason: reason || null })
+  if (error) fail(error, 'Could not save your decision.')
+}
+
 /** Saves parsed rows (see lib/importQuestions.js) 500 at a time. Returns { inserted, duplicates, invalid }. */
 export async function adminImportQuestions(rows, onProgress) {
   const total = { inserted: 0, duplicates: 0, invalid: 0 }
@@ -429,6 +559,12 @@ export async function adminImportQuestions(rows, onProgress) {
 export async function adminDeleteQuestion(id) {
   const { error } = await supabase.from('questions').delete().eq('id', id)
   if (error) fail(error, 'Could not delete the question.')
+}
+
+/** Removes every question of one subject (admins only; the questions table allows deletes for admins). */
+export async function adminDeleteSubjectQuestions(subject) {
+  const { error } = await supabase.from('questions').delete().eq('subject', subject)
+  if (error) fail(error, 'Could not delete the questions.')
 }
 
 export async function adminSavePlan(id, { name, price_kobo }) {

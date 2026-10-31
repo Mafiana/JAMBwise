@@ -3,12 +3,35 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as api from '../lib/api.js'
 import { useAuth } from './AuthContext.jsx'
-import { MOCK_PER_SUBJECT, PRACTICE_SIZE, SECONDS_PER_QUESTION } from '../lib/constants.js'
-import { prepareQuestion, sample, scoreMock } from '../lib/utils.js'
+import { mockCountFor, PRACTICE_SIZE, SECONDS_PER_QUESTION } from '../lib/constants.js'
+import { prepareQuestion, sampleFresh, scoreMock } from '../lib/utils.js'
 import { canFullscreen, examEndsAt, fmtWhen, inFullscreen, leaveFullscreen, mergeEvent, shouldAutoSubmit, windowState } from '../lib/integrity.js'
 import { clearExam, loadExam, saveExam } from '../lib/examStore.js'
 
 const Ctx = createContext(null)
+
+// Questions this student was already given, kept on this device per subject, so the next exam or practice round
+// is reshuffled from questions they have not seen. Only the newest ones are remembered (older ones can come back).
+const seenKey = (uid, subject) => `jw_seen:${uid}:${subject}`
+function readSeen(uid, subject) {
+  try { return new Set(JSON.parse(localStorage.getItem(seenKey(uid, subject)) || '[]')) } catch { return new Set() }
+}
+function writeSeen(uid, subject, ids, keep) {
+  try { localStorage.setItem(seenKey(uid, subject), JSON.stringify(ids.slice(-keep))) } catch { /* storage full or blocked: the picks are still random */ }
+}
+/** Random picks that avoid what the student has seen; remembers the new picks. */
+function pickFor(uid, subject, rows, n) {
+  const seen = uid ? readSeen(uid, subject) : new Set()
+  const picked = sampleFresh(rows, n, seen)
+  if (uid) {
+    const live = new Set(rows.map((r) => r.id))
+    const old = [...seen].filter((id) => live.has(id) && !picked.some((p) => p.id === id))   // drop ids of deleted questions
+    // once every question has been seen, start over with only this round remembered
+    const all = seen.size + picked.filter((p) => !seen.has(p.id)).length >= rows.length
+    writeSeen(uid, subject, all ? picked.map((p) => p.id) : [...old, ...picked.map((p) => p.id)], Math.max(rows.length, 1))
+  }
+  return picked
+}
 
 export function ExamProvider({ children }) {
   const { user } = useAuth()
@@ -46,9 +69,9 @@ export function ExamProvider({ children }) {
   const startPractice = useCallback(async (subject) => {
     const rows = await api.getQuestions(subject)
     if (!rows.length) throw new Error('No questions are available for this subject on your plan.')
-    const qs = sample(rows, PRACTICE_SIZE).map((r) => prepareQuestion(r))
+    const qs = pickFor(uid, subject, rows, PRACTICE_SIZE).map((r) => prepareQuestion(r))
     setPractice({ subject, qs, i: 0, score: 0, sel: null, done: false, saved: null, marks: [] })
-  }, [])
+  }, [uid])
 
   const pick = useCallback((j) => {
     setPractice((p) => {
@@ -93,7 +116,7 @@ export function ExamProvider({ children }) {
     for (const s of subs) {
       const rows = await api.getQuestions(s)
       if (rows.length < 5) throw new Error('Not enough questions yet for ' + s.toUpperCase() + '. Make sure your plan is active.')
-      sample(rows, MOCK_PER_SUBJECT).forEach((r) => qs.push(prepareQuestion(r)))
+      pickFor(uid, s, rows, mockCountFor(s)).forEach((r) => qs.push(prepareQuestion(r)))
     }
     const endsAt = examEndsAt(Date.now(), qs.length * SECONDS_PER_QUESTION * 1000, win)   // never later than the closing time
     if (endsAt - Date.now() < 60 * 1000) throw new Error('ExamHall closes in less than a minute, so it cannot be started now.')

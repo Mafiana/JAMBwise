@@ -1,0 +1,431 @@
+[
+ {
+  "q": "CPU stands for",
+  "o": [
+   "Central Processing Unit",
+   "Central Program Unit",
+   "Computer Processing Utility",
+   "Control Power Unit"
+  ],
+  "a": 0,
+  "e": "The CPU carries out the instructions of a program."
+ },
+ {
+  "q": "Which of these is an input device?",
+  "o": [
+   "Monitor",
+   "Keyboard",
+   "Printer",
+   "Speaker"
+  ],
+  "a": 1,
+  "e": "A keyboard sends data into the computer."
+ },
+ {
+  "q": "Which of these is an output device?",
+  "o": [
+   "Keyboard",
+   "Mouse",
+   "Monitor",
+   "Scanner"
+  ],
+  "a": 2,
+  "e": "A monitor shows the results of processing."
+ },
+ {
+  "q": "RAM stands for",
+  "o": [
+   "Read Access Memory",
+   "Rapid Action Memory",
+   "Run Applications Memory",
+   "Random Access Memory"
+  ],
+  "a": 3,
+  "e": "RAM holds the programs and data being used right now."
+ },
+ {
+  "q": "Which memory loses its contents when the power is switched off?",
+  "o": [
+   "RAM",
+   "ROM",
+   "Hard disk",
+   "Flash drive"
+  ],
+  "a": 0,
+  "e": "RAM is volatile memory."
+ },
+ {
+  "q": "ROM stands for",
+  "o": [
+   "Random Output Memory",
+   "Read Only Memory",
+   "Read Once Memory",
+   "Run Operating Memory"
+  ],
+  "a": 1,
+  "e": "ROM keeps the start-up instructions even when the power is off."
+ },
+ {
+  "q": "One byte is made up of",
+  "o": [
+   "4 bits",
+   "16 bits",
+   "8 bits",
+   "10 bits"
+  ],
+  "a": 2,
+  "e": "A bit is a single 1 or 0; eight of them make a byte."
+ },
+ {
+  "q": "The base of the binary number system is",
+  "o": [
+   "8",
+   "10",
+   "16",
+   "2"
+  ],
+  "a": 3,
+  "e": "Binary uses only the digits 0 and 1."
+ },
+ {
+  "q": "The decimal number 5 is written in binary as",
+  "o": [
+   "101",
+   "110",
+   "111",
+   "100"
+  ],
+  "a": 0,
+  "e": "4 + 0 + 1 = 5, so 101."
+ },
+ {
+  "q": "The binary number 1010 is equal to which decimal number?",
+  "o": [
+   "8",
+   "10",
+   "12",
+   "5"
+  ],
+  "a": 1,
+  "e": "8 + 0 + 2 + 0 = 10."
+ },
+ {
+  "q": "Which of these is an operating system?",
+  "o": [
+   "Microsoft Word",
+   "Google Chrome",
+   "Windows",
+   "Adobe Reader"
+  ],
+  "a": 2,
+  "e": "An operating system manages the hardware and runs other programs."
+ },
+ {
+  "q": "Which of these is a word-processing package?",
+  "o": [
+   "Microsoft Excel",
+   "Windows",
+   "Google Chrome",
+   "Microsoft Word"
+  ],
+  "a": 3,
+  "e": "Word is used to type and format documents."
+ },
+ {
+  "q": "Which of these is a spreadsheet package?",
+  "o": [
+   "Microsoft Excel",
+   "Microsoft Word",
+   "Paint",
+   "Notepad"
+  ],
+  "a": 0,
+  "e": "Excel works with rows, columns and formulas."
+ },
+ {
+  "q": "In a spreadsheet, the place where a row and a column meet is called a",
+  "o": [
+   "field",
+   "cell",
+   "record",
+   "frame"
+  ],
+  "a": 1,
+  "e": "Each cell has an address such as B3."
+ },
+ {
+  "q": "URL stands for",
+  "o": [
+   "Universal Resource Link",
+   "Uniform Regional Locator",
+   "Uniform Resource Locator",
+   "United Resource Location"
+  ],
+  "a": 2,
+  "e": "A URL is the address of a web page."
+ },
+ {
+  "q": "WWW stands for",
+  "o": [
+   "World Web Wire",
+   "Wide World Web",
+   "Web World Window",
+   "World Wide Web"
+  ],
+  "a": 3,
+  "e": "It is the collection of linked pages on the Internet."
+ },
+ {
+  "q": "A computer virus is",
+  "o": [
+   "a harmful program that can copy itself and damage files",
+   "a part of the keyboard",
+   "a type of printer",
+   "a kind of memory"
+  ],
+  "a": 0,
+  "e": "Viruses spread from file to file and can corrupt data."
+ },
+ {
+  "q": "Which of these is a web browser?",
+  "o": [
+   "Microsoft Excel",
+   "Mozilla Firefox",
+   "Windows",
+   "Notepad"
+  ],
+  "a": 1,
+  "e": "A browser is used to view pages on the Internet."
+ },
+ {
+  "q": "LAN stands for",
+  "o": [
+   "Large Area Network",
+   "Long Access Network",
+   "Local Area Network",
+   "Linked Area Node"
+  ],
+  "a": 2,
+  "e": "A LAN joins computers in a small place such as a school or an office."
+ },
+ {
+  "q": "The device that lets a computer connect to the Internet through a telephone or cable line is a",
+  "o": [
+   "monitor",
+   "scanner",
+   "joystick",
+   "modem"
+  ],
+  "a": 3,
+  "e": "A modem changes signals between digital and analogue forms."
+ },
+ {
+  "q": "The part of the computer called its brain is the",
+  "o": [
+   "CPU",
+   "monitor",
+   "keyboard",
+   "printer"
+  ],
+  "a": 0,
+  "e": "The CPU processes data and controls the other parts."
+ },
+ {
+  "q": "Which of these is a high-level programming language?",
+  "o": [
+   "Machine code",
+   "Python",
+   "Binary code",
+   "Assembly language"
+  ],
+  "a": 1,
+  "e": "High-level languages are close to human language."
+ },
+ {
+  "q": "The only language a computer understands directly is",
+  "o": [
+   "English",
+   "BASIC",
+   "machine language",
+   "Pascal"
+  ],
+  "a": 2,
+  "e": "Machine language is made of 0s and 1s."
+ },
+ {
+  "q": "A program that translates the whole source code into machine code at once is a",
+  "o": [
+   "debugger",
+   "editor",
+   "loader",
+   "compiler"
+  ],
+  "a": 3,
+  "e": "An interpreter, by contrast, translates one line at a time."
+ },
+ {
+  "q": "A flowchart is",
+  "o": [
+   "a diagram that shows the steps of a program or process",
+   "a type of chart in Excel",
+   "a kind of printer",
+   "a storage device"
+  ],
+  "a": 0,
+  "e": "It uses shapes and arrows to show the flow of steps."
+ },
+ {
+  "q": "An algorithm is",
+  "o": [
+   "a computer virus",
+   "a step-by-step set of instructions for solving a problem",
+   "a type of hardware",
+   "a storage unit"
+  ],
+  "a": 1,
+  "e": "A good algorithm is clear and finite."
+ },
+ {
+  "q": "In a flowchart, a diamond shape stands for",
+  "o": [
+   "the start",
+   "an input",
+   "a decision",
+   "an output"
+  ],
+  "a": 2,
+  "e": "A decision has a yes or no answer that decides which way to go."
+ },
+ {
+  "q": "One kilobyte (KB) is equal to",
+  "o": [
+   "1,000 bits",
+   "100 bytes",
+   "8 bytes",
+   "1,024 bytes"
+  ],
+  "a": 3,
+  "e": "Computer memory is counted in powers of 2."
+ },
+ {
+  "q": "A hard disk is a",
+  "o": [
+   "secondary storage device",
+   "input device",
+   "output device",
+   "type of processor"
+  ],
+  "a": 0,
+  "e": "It keeps data permanently, even when the power is off."
+ },
+ {
+  "q": "A CD-ROM is an example of",
+  "o": [
+   "a magnetic tape",
+   "an optical storage medium",
+   "an input device",
+   "a printer"
+  ],
+  "a": 1,
+  "e": "Data is read from it with a laser."
+ },
+ {
+  "q": "First generation computers used",
+  "o": [
+   "transistors",
+   "integrated circuits",
+   "vacuum tubes",
+   "microprocessors"
+  ],
+  "a": 2,
+  "e": "Vacuum tubes made those computers very large and hot."
+ },
+ {
+  "q": "Second generation computers used",
+  "o": [
+   "vacuum tubes",
+   "integrated circuits",
+   "microprocessors",
+   "transistors"
+  ],
+  "a": 3,
+  "e": "Transistors were smaller and more reliable than vacuum tubes."
+ },
+ {
+  "q": "Third generation computers used",
+  "o": [
+   "integrated circuits",
+   "vacuum tubes",
+   "transistors only",
+   "relays"
+  ],
+  "a": 0,
+  "e": "Many transistors were put on a single chip."
+ },
+ {
+  "q": "Who is called the father of the computer?",
+  "o": [
+   "Bill Gates",
+   "Charles Babbage",
+   "Steve Jobs",
+   "Isaac Newton"
+  ],
+  "a": 1,
+  "e": "He designed the Analytical Engine in the 1800s."
+ },
+ {
+  "q": "E-mail stands for",
+  "o": [
+   "express mail",
+   "emergency mail",
+   "electronic mail",
+   "external mail"
+  ],
+  "a": 2,
+  "e": "Messages are sent over a network instead of on paper."
+ },
+ {
+  "q": "Pressing Ctrl and Z together usually",
+  "o": [
+   "copies the text",
+   "saves the file",
+   "prints the page",
+   "undoes the last action"
+  ],
+  "a": 3,
+  "e": "Ctrl + Z is the undo shortcut."
+ },
+ {
+  "q": "Which of these is a type of printer?",
+  "o": [
+   "Inkjet",
+   "Scanner",
+   "Joystick",
+   "Mouse"
+  ],
+  "a": 0,
+  "e": "An inkjet printer sprays tiny drops of ink onto paper."
+ },
+ {
+  "q": "Software that controls and manages the computer hardware is called",
+  "o": [
+   "application software",
+   "system software",
+   "a utility card",
+   "a driver disk only"
+  ],
+  "a": 1,
+  "e": "The operating system is the main system software."
+ },
+ {
+  "q": "Which of these is NOT hardware?",
+  "o": [
+   "A mouse",
+   "A monitor",
+   "A program",
+   "A keyboard"
+  ],
+  "a": 2,
+  "e": "Hardware is the physical part; programs are software."
+ }
+]

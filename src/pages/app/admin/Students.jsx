@@ -14,8 +14,8 @@ import { useInstitutions } from './InstitutionAssign.jsx'
 export default function Students() {
   const { user, isAdmin } = useAuth()
   const { data: all, error, loading, reload } = useLoad(api.adminStudents)
-  // a teacher sees students only: never an admin or another teacher (the database already hides them; this keeps it true on an older database too)
-  const data = useMemo(() => (all && !isAdmin ? all.filter((s) => !s.is_admin && !s.is_teacher) : all), [all, isAdmin])
+  // this page is for students only: admins and teachers have their own pages (Teachers), so they never appear here, whoever is looking
+  const data = useMemo(() => (all ? all.filter((s) => !s.is_admin && !s.is_teacher) : all), [all])
   const [q, setQ] = useState('')
   const [planF, setPlanF] = useState('all')
   const [instF, setInstF] = useState('all')
@@ -53,7 +53,7 @@ export default function Students() {
             {insts.list.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
           </select>
         )}
-        <button className="btn ghost" onClick={exportCsv}>Export CSV</button>
+        <button className="btn" onClick={exportCsv}>Export CSV</button>
         {isAdmin && <button className="btn" onClick={() => setAdding(true)}><Icon name="plus" size={16} /> Add student</button>}
       </div>
       <p className="sm">{shown.length} of {data.length} students</p>

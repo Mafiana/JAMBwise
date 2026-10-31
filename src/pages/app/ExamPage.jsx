@@ -1,5 +1,6 @@
 // The timed exam screen shared by CBT Mock and ExamHall. They are the same exam (same questions, calculator, timer, one attempt
 // each); the only difference is that a student may see their CBT Mock result, while ExamHall results are visible to admins and to the teachers in charge of the student.
+import RichText from '../../components/RichText.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -10,7 +11,7 @@ import Icon from '../../components/Icons.jsx'
 import ExamCalculator from '../../components/ExamCalculator.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
 import Modal from '../../components/Modal.jsx'
-import { MOCK_PER_SUBJECT, PICKABLE, SECONDS_PER_QUESTION, SUBJECTS } from '../../lib/constants.js'
+import { MOCK_ENGLISH, MOCK_PER_SUBJECT, PICKABLE, SECONDS_PER_QUESTION, SUBJECTS } from '../../lib/constants.js'
 import * as api from '../../lib/api.js'
 import { fmtTime } from '../../lib/utils.js'
 import { canFullscreen, enterFullscreen, fmtCountdown, fmtWhen, inFullscreen, leaveFullscreen, windowState } from '../../lib/integrity.js'
@@ -75,16 +76,30 @@ function HallRules({ win, state, now }) {
 
 /** The box shown before ExamHall opens: what to expect, the rules, and a Proceed button. */
 function HallInstructions({ win, chosen, busy, onProceed, onCancel, hall = true }) {
-  const questions = (chosen.length + 1) * MOCK_PER_SUBJECT   // English plus the three chosen subjects
+  const questions = MOCK_ENGLISH + chosen.length * MOCK_PER_SUBJECT   // English plus the three chosen subjects
   const minutes = Math.round((questions * SECONDS_PER_QUESTION) / 60)
   return (
     <Modal title={hall ? 'ExamHall instructions' : 'CBT Mock instructions'} onClose={onCancel} wide>
       <p className="sm" style={{ marginTop: 0 }}>Please read this carefully before you begin.</p>
       <b>Instructions</b>
       <ul className="sm hall-ins">
-        <li>You will answer English and your 3 chosen subjects: about <b>{questions} questions</b> in <b>{minutes} minutes</b>, at the real UTME pace of {SECONDS_PER_QUESTION} seconds a question.</li>
+        <li>You will answer English and your 3 chosen subjects: <b>{questions} questions</b> in <b>{minutes} minutes</b>: {MOCK_ENGLISH} in Use of English and {MOCK_PER_SUBJECT} in each of the other subjects, at the real UTME pace of {SECONDS_PER_QUESTION} seconds a question.</li>
         <li>Tap an option to answer. You move to the next question automatically, and you can use Previous, the question numbers or the subject tabs to go back and change an answer.</li>
         <li>The calculator opens on a computer; you may use it any time.</li>
+        {isDesktop && (
+          <li>
+            Keyboard keys on a computer, so you can work without the mouse:
+            <ul className="keys">
+              <li><kbd>A</kbd> choose option A</li>
+              <li><kbd>B</kbd> choose option B</li>
+              <li><kbd>C</kbd> choose option C</li>
+              <li><kbd>D</kbd> choose option D</li>
+              <li><kbd>N</kbd> go to the next question</li>
+              <li><kbd>P</kbd> go to the previous question</li>
+              <li><kbd>S</kbd> submit the exam (you are asked to confirm first)</li>
+            </ul>
+          </li>
+        )}
         <li>Submit when you are done. If the time runs out, your exam is submitted for you.</li>
         {hall
           ? <li>You can sit ExamHall <b>once only</b>. Your score is shown to your teacher and the administrator, not to you until it is released.</li>
@@ -202,14 +217,36 @@ function Running({ m }) {
     clearTimeout(adv.current)
     if (!last) { const to = m.i + 1; adv.current = setTimeout(() => gotoMock(to), 350) }
   }
-  const submit = async () => {
-    if (unanswered === 0 || await confirm({
+  const submit = async (ask = false) => {   // `ask`: pressed S on the keyboard, so always check first
+    if ((unanswered === 0 && ask !== true) || await confirm({
       title: 'Submit your exam?',
       message: `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Once you submit you cannot change your answers or write this exam again.`,
       confirmLabel: 'Submit anyway', cancelLabel: 'Keep working', danger: false,
     })) submitMock()
   }
   const back = () => { enterFullscreen(); ackWarn() }
+  // Computer keyboard: A B C D choose an option, N next, P previous, S submit. Off on phones and tablets.
+  const keys = useRef(null)
+  keys.current = { choose, submit, gotoMock, m, last, cur }
+  useEffect(() => {
+    if (!isDesktop) return undefined
+    const onKey = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
+      const t = e.target
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return   // typing a note, say
+      if (document.querySelector('[aria-modal="true"]')) return              // a pop-up box is open (warning, confirm, report); the floating calculator does not count
+      const k = e.key.toLowerCase()
+      const { choose: pick, submit: send, gotoMock: go, m: ex, last: end, cur: q } = keys.current
+      if (ex.warn) return
+      const j = 'abcd'.indexOf(k)
+      if (k.length === 1 && j >= 0) { if (j < q.options.length) { e.preventDefault(); pick(j) } }
+      else if (k === 'n') { if (!end) { e.preventDefault(); go(ex.i + 1) } }
+      else if (k === 'p') { if (ex.i > 0) { e.preventDefault(); go(ex.i - 1) } }
+      else if (k === 's') { e.preventDefault(); send(true) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   return (
     <div className={'exam' + (calcOpen ? ' calc-on' : '')}>
       {m.warn && (
@@ -256,7 +293,7 @@ function Running({ m }) {
       </div>
       <div className="card">
         <div className="mut">Question {m.i - first + 1} of {inSubject}</div>
-        <h3>{cur.body}</h3>
+        <h3><RichText text={cur.body} /></h3>
         {cur.options.map((o, j) => (
           <button key={j} className={'opt ' + (m.a[m.i] === j ? 'sel' : '')} onClick={() => choose(j)} aria-pressed={m.a[m.i] === j}>
             <span className="k">{'ABCD'[j]}</span><span>{o}</span>
@@ -266,6 +303,7 @@ function Running({ m }) {
           <button className="btn ghost" onClick={() => gotoMock(m.i - 1)} disabled={m.i === 0}>Previous</button>
           {last ? <button className="btn" onClick={submit}>Submit exam</button> : <button className="btn" onClick={() => gotoMock(m.i + 1)}>Next</button>}
         </div>
+        {isDesktop && <p className="sm key-hint">Keyboard: <b>A B C D</b> choose · <b>N</b> next · <b>P</b> previous · <b>S</b> submit</p>}
         <div className="report-row"><ReportQuestion key={cur.id ?? m.i} q={cur} /></div>
       </div>
       <div className="pal">

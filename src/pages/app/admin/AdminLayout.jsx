@@ -1,11 +1,23 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
+import Icon from '../../../components/Icons.jsx'
 import AdminLoader from '../../../components/AdminLoader.jsx'
 import InstLogo from '../../../components/InstLogo.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 
 /** The first word of the person's name (or the start of their email) for the greeting. */
 const firstName = (p) => (p?.full_name || '').trim().split(/\s+/)[0] || (p?.email || '').split('@')[0] || 'there'
+
+/** "Today's Date: Tuesday, October 27, 2026", kept current (it changes by itself at midnight). */
+function TodayDate() {
+  const fmt = () => new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const [text, setText] = useState(fmt)
+  useEffect(() => {
+    const t = setInterval(() => setText(fmt()), 60000)
+    return () => clearInterval(t)
+  }, [])
+  return <p className="today-date"><Icon name="planner" size={20} /><span>Today's Date: {text}</span></p>
+}
 
 let introShown = false   // the branded loader plays once each time the app is opened, not on every tab click
 
@@ -21,7 +33,10 @@ export default function AdminLayout() {
   if (intro) return <AdminLoader />
   return (
     <>
-      <p className="gd-hello">Good day, {firstName(profile)} <span aria-hidden="true">👋</span></p>
+      <div className="gd-bar">
+        <p className="gd-hello">Good day, {firstName(profile)} <span aria-hidden="true">👋</span></p>
+        <TodayDate />
+      </div>
       <h1>{isAdmin ? 'Admin' : institution ? institution.name : 'Teacher panel'}</h1>
       {!isAdmin && institution && (
         <p className="inst-banner" role="status">
