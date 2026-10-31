@@ -7,6 +7,7 @@ import DemoBanner from './components/DemoBanner.jsx'
 import { AdminOnly, RequireAuth, StudentOnly } from './components/Guard.jsx'
 import AppLayout from './components/AppLayout.jsx'
 import { Spinner } from './components/ui.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AdminLoader from './components/AdminLoader.jsx'
 import { ConfirmProvider } from './components/Confirm.jsx'
 import { DoneProvider } from './components/Done.jsx'
@@ -66,7 +67,7 @@ export default function App() {
         <ConfirmProvider><DoneProvider>
           {demoMode && <DemoBanner />}
           <BrowserRouter>
-            <Suspense fallback={<Spinner />}>
+            <ErrorBoundary><Suspense fallback={<Spinner />}>
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth/:mode" element={<Auth />} />
@@ -126,7 +127,7 @@ export default function App() {
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-            </Suspense>
+            </Suspense></ErrorBoundary>
           </BrowserRouter>
         </DoneProvider></ConfirmProvider>
       </AuthProvider>

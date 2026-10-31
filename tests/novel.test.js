@@ -18,3 +18,15 @@ test('novelQuestionsFromText reads a questions file without a subject column', a
   assert.equal(c.rows[0].answer, 2)
   assert.ok(novelQuestionsFromText('not json {', 'x.json').error)
 })
+
+test('keypoints text turns into headings, lists, paragraphs and bold words', async () => {
+  const { parseKeypoints, boldParts, keypointsFromFile } = await import('../src/lib/novel.js')
+  const b = parseKeypoints('# Chapter 1\n\nBepo breaks down\nat the assembly.\n\n## Themes\n- Japa\n* **Honesty** matters\n\nLast line')
+  assert.deepEqual(b.map((x) => x.type), ['h1', 'p', 'h2', 'li', 'li', 'p'])
+  assert.equal(b[1].text, 'Bepo breaks down at the assembly.')
+  assert.deepEqual(boldParts('a **b** c'), [{ text: 'a ' }, { bold: true, text: 'b' }, { text: ' c' }])
+  const ok = await keypointsFromFile(new File(['﻿# Hi\r\nText here'], 'k.txt'))
+  assert.equal(ok.text, '# Hi\nText here')
+  assert.ok((await keypointsFromFile(new File(['x'], 'k.docx'))).error)
+  assert.ok((await keypointsFromFile(new File(['   '], 'k.txt'))).error)
+})

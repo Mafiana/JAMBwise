@@ -1112,6 +1112,7 @@ end $$;
 -- ===== Novel: students read, only admins write =====
 select pg_temp.as_user((select id from t_ids where name='admin'));
 set local role authenticated;
+select public.admin_save_novel_keypoints(E'# Chapter 1\n- Bepo resigns');
 select public.admin_save_novel('Test Novel', 'data:image/jpeg;base64,AAAA', 'n.pdf', 1234, 'data:application/pdf;base64,JVBERi0=');
 do $$ declare r jsonb; begin
   r := public.admin_import_novel_questions('[{"body":"Q1?","options":["a","b","c","d"],"answer":1,"explanation":"e"},{"body":"Q1?","options":["a","b","c","d"],"answer":1},{"body":"Bad","options":["a","b"],"answer":0}]'::jsonb);
@@ -1126,9 +1127,12 @@ select pg_temp.as_user((select id from t_ids where name='free'));
 set local role authenticated;
 do $$ begin
   assert (select title from public.get_novel()) = 'Renamed', 'a student can read the novel info';
+  assert (select has_keypoints from public.get_novel()), 'the novel reports that keypoints exist';
+  assert public.get_novel_keypoints() like '# Chapter 1%', 'a student can read the keypoints';
   assert public.get_novel_file() like 'data:application/pdf%', 'a student can read the novel file';
   assert (select count(*) from public.get_novel_questions()) = 1, 'a student can read the questions';
 end $$;
+select pg_temp.expect_fail($$select public.admin_save_novel_keypoints('hacked')$$, 'student cannot save keypoints');
 select pg_temp.expect_fail($$select public.admin_save_novel('Hacked', null, null, null, null)$$, 'student cannot save the novel');
 select pg_temp.expect_fail($$select public.admin_import_novel_questions('[]'::jsonb)$$, 'student cannot import novel questions');
 select pg_temp.expect_fail($$select public.admin_clear_novel_questions()$$, 'student cannot clear novel questions');

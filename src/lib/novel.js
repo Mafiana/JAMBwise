@@ -43,3 +43,46 @@ export function novelQuestionsFromText(text, filename) {
   }
   return { rows, skipped }
 }
+
+export const MAX_KEYPOINT_CHARS = 200000
+
+/** Reads a keypoints file (plain text: .txt or .md). Returns { text } or { error }. */
+export async function keypointsFromFile(file) {
+  if (!file) return { error: 'Please choose a file.' }
+  if (/\.(docx?|pdf|rtf|odt)$/i.test(file.name)) return { error: 'Please save the keypoints as a plain text file (.txt) first. In Word: File, Save As, "Plain Text".' }
+  if (file.size > 1024 * 1024) return { error: 'That file is too big for keypoints (up to 1 MB of text).' }
+  const text = (await file.text()).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').trim()
+  if (text.length < 5) return { error: 'That file is empty.' }
+  if (text.length > MAX_KEYPOINT_CHARS) return { error: 'The keypoints are too long (up to 200,000 characters).' }
+  if (text.includes('\u0000')) return { error: 'That does not look like a text file.' }
+  return { text }
+}
+
+/**
+ * Turns keypoints text into blocks for display:
+ * "# Heading" / "## Sub heading", "- item" or "* item" lists, and paragraphs (a blank line ends one).
+ * Returns [{ type: 'h1' | 'h2' | 'li' | 'p', text }].
+ */
+export function parseKeypoints(text) {
+  const out = []
+  let para = []
+  const flush = () => { if (para.length) { out.push({ type: 'p', text: para.join(' ') }); para = [] } }
+  for (const raw of String(text || '').split('\n')) {
+    const line = raw.trim()
+    if (!line) { flush(); continue }
+    let m
+    if ((m = line.match(/^##+\s+(.*)$/))) { flush(); out.push({ type: 'h2', text: m[1] }) }
+    else if ((m = line.match(/^#\s+(.*)$/))) { flush(); out.push({ type: 'h1', text: m[1] }) }
+    else if ((m = line.match(/^(?:[-*\u2022])\s+(.*)$/))) { flush(); out.push({ type: 'li', text: m[1] }) }
+    else para.push(line)
+  }
+  flush()
+  return out
+}
+
+/** Splits "a **bold** b" into [{ text: 'a ' }, { bold: true, text: 'bold' }, { text: ' b' }]. */
+export function boldParts(s) {
+  const parts = []
+  String(s).split(/\*\*(.+?)\*\*/g).forEach((t, i) => { if (t) parts.push(i % 2 ? { bold: true, text: t } : { text: t }) })
+  return parts
+}

@@ -508,11 +508,23 @@ const rpcs = {
   get_novel() {
     if (!me()) throw new Error('JWT expired')
     const n = db.novel || {}
-    return [{ title: n.title || 'Novel', cover: n.cover || null, file_name: n.file_name || null, size_bytes: n.size_bytes || 0, has_file: Boolean(n.data), questions: (db.novelQuestions || []).length, updated_at: n.updated_at || null }]
+    return [{ title: n.title || 'Novel', cover: n.cover || null, file_name: n.file_name || null, size_bytes: n.size_bytes || 0, has_file: Boolean(n.data), questions: (db.novelQuestions || []).length, updated_at: n.updated_at || null, has_keypoints: Boolean(n.keypoints) }]
   },
   get_novel_file() {
     if (!me()) throw new Error('JWT expired')
     return (db.novel || {}).data || null
+  },
+  get_novel_keypoints() {
+    if (!me()) throw new Error('JWT expired')
+    return (db.novel || {}).keypoints || null
+  },
+  admin_save_novel_keypoints(a) {
+    adminOnly()
+    const t = String(a.p_text || '').trim()
+    if (t.length > 200000) throw new Error('The keypoints are too long (up to 200,000 characters).')
+    db.novel = { ...(db.novel || {}), keypoints: t || null, updated_at: new Date().toISOString() }
+    log('novel.keypoints', t ? t.length + ' characters' : 'removed')
+    return null
   },
   get_novel_questions() {
     if (!me()) throw new Error('JWT expired')
@@ -527,7 +539,7 @@ const rpcs = {
     if (a.p_data != null && a.p_data.length > 11200000) throw new Error('That PDF is too big. Choose one under 8 MB.')
     const n = db.novel || {}
     db.novel = {
-      title, cover: a.p_cover ?? n.cover ?? null,
+      ...n, title, cover: a.p_cover ?? n.cover ?? null,
       file_name: a.p_data != null ? String(a.p_file_name || '').slice(0, 200) : n.file_name ?? null,
       size_bytes: a.p_data != null ? a.p_size || 0 : n.size_bytes || 0,
       data: a.p_data ?? n.data ?? null, updated_at: new Date().toISOString(),

@@ -12,6 +12,7 @@ create table if not exists public.novel (
   updated_at timestamptz not null default now()
 );
 insert into public.novel (id) values (1) on conflict do nothing;
+alter table public.novel add column if not exists keypoints text check (keypoints is null or char_length(keypoints) <= 200000);   -- the keypoints (plain text)
 alter table public.novel enable row level security;                  -- no policies: only reachable through the functions below
 revoke all on public.novel from anon, authenticated;
 
@@ -27,9 +28,9 @@ alter table public.novel_questions enable row level security;
 revoke all on public.novel_questions from anon, authenticated;
 
 -- the novel without the heavy PDF
-create or replace function public.get_novel() returns table (title text, cover text, file_name text, size_bytes integer, has_file boolean, questions bigint, updated_at timestamptz)
+create or replace function public.get_novel() returns table (title text, cover text, file_name text, size_bytes integer, has_file boolean, questions bigint, updated_at timestamptz, has_keypoints boolean)
 language sql security definer stable set search_path = public as $$
-  select n.title, n.cover, n.file_name, n.size_bytes, n.data is not null, (select count(*) from public.novel_questions), n.updated_at
+  select n.title, n.cover, n.file_name, n.size_bytes, n.data is not null, (select count(*) from public.novel_questions), n.updated_at, n.keypoints is not null
     from public.novel n where n.id = 1 and auth.uid() is not null;
 $$;
 revoke execute on function public.get_novel() from public, anon;
@@ -71,6 +72,27 @@ begin
 end $$;
 revoke execute on function public.admin_save_novel(text, text, text, integer, text) from public, anon;
 grant execute on function public.admin_save_novel(text, text, text, integer, text) to authenticated;
+
+-- the keypoints text (a summary students can read before the questions), kept as plain text
+create or replace function public.get_novel_keypoints() returns text
+language sql security definer stable set search_path = public as $$
+  select n.keypoints from public.novel n where n.id = 1 and auth.uid() is not null;
+$$;
+revoke execute on function public.get_novel_keypoints() from public, anon;
+grant execute on function public.get_novel_keypoints() to authenticated;
+
+-- admin: save the keypoints text (an empty text removes them)
+create or replace function public.admin_save_novel_keypoints(p_text text) returns void
+language plpgsql security definer set search_path = public as $$
+declare t text := btrim(coalesce(p_text, ''));
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if char_length(t) > 200000 then raise exception 'The keypoints are too long (up to 200,000 characters).'; end if;
+  update public.novel set keypoints = nullif(t, ''), updated_at = now() where id = 1;
+  perform public.admin_log('novel.keypoints', case when t = '' then 'removed' else char_length(t) || ' characters' end);
+end $$;
+revoke execute on function public.admin_save_novel_keypoints(text) from public, anon;
+grant execute on function public.admin_save_novel_keypoints(text) to authenticated;
 
 -- admin: add questions (rows already checked in the browser; checked again here). Duplicates are skipped.
 create or replace function public.admin_import_novel_questions(p_rows jsonb) returns jsonb

@@ -414,13 +414,25 @@ export async function getNovel() {
     throw new Error(syllabusReady(error) ? 'Could not load the novel.' : 'The novel is not available yet. Please check back soon.')
   }
   const row = Array.isArray(data) ? data[0] : data
-  return row ? { ...row, questions: Number(row.questions) || 0 } : { title: 'Novel', cover: null, file_name: null, size_bytes: 0, has_file: false, questions: 0 }
+  return row ? { ...row, questions: Number(row.questions) || 0, has_keypoints: Boolean(row.has_keypoints) } : { title: 'Novel', cover: null, file_name: null, size_bytes: 0, has_file: false, questions: 0, has_keypoints: false }
 }
 /** The novel PDF as a data: URL (only for the reader on screen; it is never offered as a download). */
 export async function getNovelFile() {
   const { data, error } = await supabase.rpc('get_novel_file')
   if (error || !data) fail(error || { message: 'missing' }, 'Could not open the novel.')
   return data
+}
+const kpFail = (error, text) => fail(error, syllabusReady(error) ? text : 'Keypoints are not switched on in the database yet. Run supabase/migrate-novel-keypoints.sql in the Supabase SQL Editor, then try again.')
+/** The keypoints text, for the Read Keypoint box. */
+export async function getNovelKeypoints() {
+  const { data, error } = await supabase.rpc('get_novel_keypoints')
+  if (error || !data) kpFail(error || { message: 'empty' }, 'The keypoints could not be opened. Please try again.')
+  return data
+}
+/** Saves the keypoints text (an empty text removes them). */
+export async function adminSaveNovelKeypoints(text) {
+  const { error } = await supabase.rpc('admin_save_novel_keypoints', { p_text: text })
+  if (error) kpFail(error, 'The keypoints could not be saved: ' + (error.message || 'unknown error'))
 }
 export async function getNovelQuestions() {
   const { data, error } = await supabase.rpc('get_novel_questions')

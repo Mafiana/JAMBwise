@@ -1,5 +1,7 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { ErrorLine, Loader } from '../../components/ui.jsx'
+import Modal from '../../components/Modal.jsx'
+import KeypointText from '../../components/KeypointText.jsx'
 import Icon from '../../components/Icons.jsx'
 import * as api from '../../lib/api.js'
 import { useLoad } from './admin/shared.jsx'
@@ -8,15 +10,28 @@ const NovelQuiz = lazy(() => import('../../components/NovelQuiz.jsx'))
 
 /** Novel page for students and teachers: the cover, then Answer Questions. */
 export default function Novel() {
-  const { data, error, loading } = useLoad(api.getNovel)
+  const { data, error, loading, reload } = useLoad(api.getNovel)
   const [mode, setMode] = useState('')       // '' | 'quiz'
   const [rows, setRows] = useState(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [kp, setKp] = useState(null)       // null = closed, { text } or { error } = open
+  const [kpBusy, setKpBusy] = useState(false)
 
+  // an admin may have just saved a new keypoint or questions: refresh whenever the student comes back to this tab
+  useEffect(() => {
+    const again = () => { if (!document.hidden) reload() }
+    document.addEventListener('visibilitychange', again)
+    window.addEventListener('focus', again)
+    return () => { document.removeEventListener('visibilitychange', again); window.removeEventListener('focus', again) }
+  }, [reload])
   const quiz = async () => {
     setErr(''); setBusy(true)
     try { setRows(await api.getNovelQuestions()); setMode('quiz') } catch (e) { setErr(e.message) } finally { setBusy(false) }
+  }
+  const keypoints = async () => {
+    setErr(''); setKpBusy(true)
+    try { setKp({ text: await api.getNovelKeypoints() }) } catch (e) { setErr(e.message) } finally { setKpBusy(false) }
   }
   if (loading) return <Loader label="Loading the novel…" />
   if (!data) return <ErrorLine>{error}</ErrorLine>
@@ -30,11 +45,19 @@ export default function Novel() {
         <div className="nv-cover">{data.cover ? <img src={data.cover} alt={`Cover of ${title}`} draggable="false" /> : <span><Icon name="book" size={56} /></span>}</div>
         <h2>{title}</h2>
         <div className="nv-btns">
+          <button className="btn" disabled={kpBusy || !data.has_keypoints} onClick={keypoints}><Icon name="book" size={18} /> {kpBusy ? 'Opening…' : 'Read Keypoint'}</button>
           <button className="btn" disabled={busy || !data.questions} onClick={quiz}><Icon name="practice" size={18} /> {busy ? 'Opening…' : 'Answer Questions'}</button>
         </div>
+        {!data.has_keypoints && <p className="sm">The keypoints are coming soon.</p>}
         {!data.questions && <p className="sm">Questions on the novel are coming soon.</p>}
         <ErrorLine>{err}</ErrorLine>
       </div>
+      {kp && (
+        <Modal title={`${title}: Keypoint`} wide onClose={() => setKp(null)}>
+          <KeypointText text={kp.text} />
+          <div className="modal-actions"><button className="btn" onClick={() => setKp(null)}>Close</button></div>
+        </Modal>
+      )}
     </>
   )
 }

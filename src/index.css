@@ -1205,3 +1205,8 @@ kbd{display:inline-block;min-width:22px;padding:1px 7px;margin-right:6px;border:
 
 /* phones: the top bars show only the J icon, not the JAMBwise wordmark (desktop keeps both) */
 @media(max-width:760px){.nav .logo span,.mbar .logo span{display:none}}
+
+/* Novel keypoints: shown exactly as typed in the .txt file */
+.kp-text{max-height:62vh;overflow:auto;padding-right:4px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4}
+
+.nv-saved{display:block;margin-bottom:14px}.nv-saved ul{margin:.4em 0 .8em;padding-left:1.2em}
