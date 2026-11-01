@@ -1611,15 +1611,7 @@ end $$;
 revoke execute on function public.submit_feedback(int, text, text) from public, anon;
 grant execute on function public.submit_feedback(int, text, text) to authenticated;
 
-create or replace function public.admin_feedback() returns table (id bigint, user_id uuid, name text, email text, role text, rating int, kind text, message text, status text, created_at timestamptz)
-language plpgsql security definer stable set search_path = public as $$
-begin
-  if not public.is_admin() then raise exception 'not allowed'; end if;
-  return query select f.id, f.user_id, p.full_name, p.email, case when p.is_teacher then 'teacher' else 'student' end, f.rating, f.kind, f.message, f.status, f.created_at
-    from public.feedback f left join public.profiles p on p.id = f.user_id order by f.created_at desc limit 2000;
-end $$;
-revoke execute on function public.admin_feedback() from public, anon;
-grant execute on function public.admin_feedback() to authenticated;
+-- (admin_feedback is defined below, in the testimonials section)
 
 create or replace function public.admin_set_feedback_status(p_id bigint, p_status text) returns void
 language plpgsql security definer set search_path = public as $$
@@ -1951,5 +1943,119 @@ begin
 end $$;
 revoke execute on function public.admin_clear_novel_questions() from public, anon;
 grant execute on function public.admin_clear_novel_questions() to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── pictures inside questions ─────────────
+-- Pictures inside questions (a circuit, a map, a diagram). Safe to run more than once.
+-- The picture is kept in its own table so the question lists stay small and fast;
+-- a student's phone only downloads a picture when that question is on screen.
+
+alter table public.questions add column if not exists has_image boolean not null default false;
+
+create table if not exists public.question_images (
+  question_id bigint primary key references public.questions (id) on delete cascade,
+  data text not null check (data like 'data:image/%;base64,%' and char_length(data) <= 300000),
+  updated_at timestamptz not null default now()
+);
+alter table public.question_images enable row level security;     -- no policies: only reachable through the functions below
+revoke all on public.question_images from anon, authenticated;
+
+-- a student gets the picture only for a question their plan lets them see
+create or replace function public.get_question_image(p_id bigint) returns text
+language sql security definer stable set search_path = public as $$
+  select i.data
+    from public.question_images i
+    join public.questions q on q.id = i.question_id
+   where i.question_id = p_id
+     and auth.uid() is not null
+     and (public.has_access(q.subject) or public.is_staff());
+$$;
+revoke execute on function public.get_question_image(bigint) from public, anon;
+grant execute on function public.get_question_image(bigint) to authenticated;
+
+-- admin: add or replace a question's picture. A null or empty picture removes it.
+create or replace function public.admin_set_question_image(p_id bigint, p_data text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if not exists (select 1 from public.questions where id = p_id) then raise exception 'That question no longer exists.'; end if;
+  if p_data is null or btrim(p_data) = '' then
+    delete from public.question_images where question_id = p_id;
+    update public.questions set has_image = false where id = p_id and has_image;
+    perform public.admin_log('question.image', 'removed from #' || p_id);
+    return;
+  end if;
+  if p_data not like 'data:image/%;base64,%' or char_length(p_data) > 300000 then
+    raise exception 'The picture is not valid or is too big.';
+  end if;
+  insert into public.question_images (question_id, data) values (p_id, p_data)
+  on conflict (question_id) do update set data = excluded.data, updated_at = now();
+  update public.questions set has_image = true where id = p_id and not has_image;
+  perform public.admin_log('question.image', 'set on #' || p_id);
+end $$;
+revoke execute on function public.admin_set_question_image(bigint, text) from public, anon;
+grant execute on function public.admin_set_question_image(bigint, text) to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── testimonials on the home page ─────────────
+-- "Trusted by students" on the home page: real feedback that the Admin chooses to show.
+-- Nothing appears on the website until you press "Show on website" on a piece of feedback. Safe to run more than once.
+
+alter table public.feedback add column if not exists featured boolean not null default false;
+
+-- Admin > Feedback now also reports which items are on the website
+drop function if exists public.admin_feedback();
+create function public.admin_feedback() returns table (id bigint, user_id uuid, name text, email text, role text, rating int, kind text, message text, status text, created_at timestamptz, featured boolean)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select f.id, f.user_id, p.full_name, p.email, case when p.is_teacher then 'teacher' else 'student' end, f.rating, f.kind, f.message, f.status, f.created_at, f.featured
+    from public.feedback f left join public.profiles p on p.id = f.user_id order by f.created_at desc limit 2000;
+end $$;
+revoke execute on function public.admin_feedback() from public, anon;
+grant execute on function public.admin_feedback() to authenticated;
+
+-- admin: show or hide one piece of feedback on the home page (plain feedback with a message, at most 6 at a time)
+create or replace function public.admin_set_feedback_featured(p_id bigint, p_featured boolean) returns void
+language plpgsql security definer set search_path = public as $$
+declare f public.feedback;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  select * into f from public.feedback where id = p_id;
+  if not found then raise exception 'That feedback no longer exists.'; end if;
+  if p_featured then
+    if f.kind <> 'feedback' or char_length(btrim(coalesce(f.message, ''))) < 20 then
+      raise exception 'Only feedback with a message of at least 20 characters can be shown on the website.';
+    end if;
+    if (select count(*) from public.feedback where featured and id <> p_id) >= 6 then
+      raise exception 'Six are already on the website. Hide one first.';
+    end if;
+  end if;
+  update public.feedback set featured = coalesce(p_featured, false) where id = p_id;
+  perform public.admin_log('feedback.featured', case when p_featured then 'shown' else 'hidden' end || ' #' || p_id);
+end $$;
+revoke execute on function public.admin_set_feedback_featured(bigint, boolean) from public, anon;
+grant execute on function public.admin_set_feedback_featured(bigint, boolean) to authenticated;
+
+-- public: the chosen feedback, with only the first name and the first letter of the surname
+create or replace function public.public_testimonials() returns table (id bigint, name text, role text, rating int, message text)
+language sql security definer stable set search_path = public as $$
+  select f.id,
+         split_part(btrim(coalesce(p.full_name, 'Student')), ' ', 1)
+           || case when position(' ' in btrim(coalesce(p.full_name, ''))) > 0
+                   then ' ' || upper(left(split_part(btrim(p.full_name), ' ', 2), 1)) || '.' else '' end,
+         case when p.is_teacher then 'Teacher' else 'JAMBwise student' end,
+         f.rating,
+         btrim(f.message)
+    from public.feedback f
+    left join public.profiles p on p.id = f.user_id
+   where f.featured and f.kind = 'feedback' and char_length(btrim(coalesce(f.message, ''))) >= 20
+   order by f.created_at desc
+   limit 6;
+$$;
+revoke execute on function public.public_testimonials() from public;
+grant execute on function public.public_testimonials() to anon, authenticated;
 
 notify pgrst, 'reload schema';

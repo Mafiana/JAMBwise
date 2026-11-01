@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { ThemeToggle, Logo, PlanCard, ErrorLine } from '../components/ui.jsx'
 import Icon from '../components/Icons.jsx'
 import HeroMockup from '../components/HeroMockup.jsx'
+import Testimonials from '../components/Testimonials.jsx'
 import FaqList from '../components/FaqList.jsx'
 import ContactBlock from '../components/ContactBlock.jsx'
 import ParentForm from '../components/ParentForm.jsx'
@@ -159,6 +160,8 @@ export default function Landing() {
           ))}
         </div>
       </section>
+
+      <Testimonials signedIn={Boolean(session)} />
 
       <section className="wrap band" id="pricing" style={{ paddingTop: 16 }}>
         <div className="band-head">

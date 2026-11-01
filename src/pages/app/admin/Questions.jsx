@@ -10,10 +10,46 @@ import { Empty, Pagination, useLoad, TabLoader } from './shared.jsx'
 import ImportQuestions from './ImportQuestions.jsx'
 import Icon from '../../../components/Icons.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { fileToQuestionImage } from '../../../lib/questionImage.js'
 
 const blank = (subject) => ({ subject, body: '', options: ['', '', '', ''], answer: 0, explanation: '' })
 
-function Editor({ q, onDone, review = false }) {
+/** Admin: add, replace or remove the picture of a saved question. It saves straight away. */
+function PictureBox({ q, onChanged }) {
+  const { busy, error, setError, run } = useAction()
+  const [src, setSrc] = useState(null)
+  const [has, setHas] = useState(Boolean(q.has_image))
+  const input = useRef(null)
+  useEffect(() => {
+    let live = true
+    if (q.has_image) api.getQuestionImage(q.id).then((d) => { if (live) setSrc(d) }).catch(() => {})
+    return () => { live = false }
+  }, [q.id, q.has_image])
+  const choose = (file) => {
+    if (!file) return
+    run(async () => {
+      const url = await fileToQuestionImage(file)
+      await api.adminSetQuestionImage(q.id, url)
+      setSrc(url); setHas(true); await onChanged()
+    }, 'Picture saved')
+  }
+  const remove = () => run(async () => { await api.adminSetQuestionImage(q.id, null); setSrc(null); setHas(false); await onChanged() }, 'Picture removed')
+  return (
+    <div className="q-pic" aria-label="Question picture">
+      <label>Picture (optional)</label>
+      {has && src && <img className="q-img" src={src} alt="Picture for this question" />}
+      <div className="row" style={{ justifyContent: 'flex-start' }}>
+        <button type="button" className="btn ghost" disabled={busy} onClick={() => input.current?.click()}><Icon name="camera" size={16} /> {busy ? 'Saving…' : has ? 'Replace picture' : 'Add picture'}</button>
+        {has && <button type="button" className="btn danger" disabled={busy} onClick={remove}>Remove picture</button>}
+        <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { choose(e.target.files?.[0]); e.target.value = '' }} />
+      </div>
+      <ErrorLine>{error}</ErrorLine>
+      <p className="sm">Shown above the options in Practice, CBT Mock and ExamHall. It is shrunk automatically.</p>
+    </div>
+  )
+}
+
+function Editor({ q, onDone, review = false, onPicture, canPicture = false }) {
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({ ...q, options: [...q.options], explanation: q.explanation || '' })
   const setOpt = (i, v) => setF({ ...f, options: f.options.map((o, j) => (j === i ? v : o)) })
@@ -38,6 +74,9 @@ function Editor({ q, onDone, review = false }) {
         </div>
       ))}
       <p className="sm">Tick the circle next to the correct option.</p>
+      {canPicture && (q.id
+        ? <PictureBox q={q} onChanged={onPicture} />
+        : <p className="sm">To add a picture, save the question first, then press Edit on it.</p>)}
       <label htmlFor="qe">Explanation (shown when a student gets it wrong)</label>
       <textarea id="qe" rows={2} value={f.explanation} onChange={(e) => setF({ ...f, explanation: e.target.value })} />
       <ErrorLine>{error}</ErrorLine>
@@ -178,7 +217,7 @@ export default function Questions() {
       )}
       {!isAdmin && side && <MySubmissions rows={side} />}
       {importing && isAdmin && <ImportQuestions onCancel={() => setImporting(false)} onDone={() => { setImporting(false); reload() }} />}
-      {editing && <Editor key={editing.id || 'new'} q={editing} review={!isAdmin && !editing.id} onDone={(saved) => { setEditing(null); if (saved === 'review') { setSent(true); reloadSide() } else if (saved) reload() }} />}
+      {editing && <Editor key={editing.id || 'new'} q={editing} review={!isAdmin && !editing.id} canPicture={isAdmin} onPicture={reload} onDone={(saved) => { setEditing(null); if (saved === 'review') { setSent(true); reloadSide() } else if (saved) reload() }} />}
       {sent && (
         <Modal title="Question under review" onClose={() => setSent(false)}>
           <div className="c" role="status">
@@ -201,7 +240,7 @@ export default function Questions() {
                 {shown.map((x) => (
                   <tr key={x.id}>
                     <td>{x.id}</td>
-                    <td style={{ minWidth: 220 }}>{x.body}</td>
+                    <td style={{ minWidth: 220 }}>{x.body}{x.has_image && <span className="tag" style={{ marginLeft: 8 }}><Icon name="camera" size={12} /> Picture</span>}</td>
                     <td>{'ABCD'[x.answer]}. {x.options[x.answer]}</td>
                     <td>
                       <button className="btn ghost" onClick={() => { setEditing(x); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Edit</button>{' '}

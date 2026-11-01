@@ -1140,6 +1140,97 @@ select pg_temp.expect_fail($$select * from public.novel$$, 'student cannot read 
 select pg_temp.expect_fail($$select * from public.novel_questions$$, 'student cannot read novel_questions directly');
 reset role;
 
+-- ===== pictures inside questions =====
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ declare e bigint; g bigint; begin
+  select id into e from public.questions where subject = 'eng' limit 1;
+  select id into g from public.questions where subject = 'gov' limit 1;
+  perform set_config('t.qimg_eng', e::text, true);
+  perform set_config('t.qimg_gov', g::text, true);
+  perform public.admin_set_question_image(e, 'data:image/jpeg;base64,AAAA');
+  perform public.admin_set_question_image(g, 'data:image/jpeg;base64,BBBB');
+  assert (select has_image from public.questions where id = e), 'has_image is set when a picture is added';
+  perform public.admin_set_question_image(e, 'data:image/jpeg;base64,CCCC');   -- replace
+  assert public.get_question_image(e) = 'data:image/jpeg;base64,CCCC', 'a picture can be replaced';
+end $$;
+select pg_temp.expect_fail($$select public.admin_set_question_image(current_setting('t.qimg_eng')::bigint, 'not-a-picture')$$, 'a non-image is refused');
+select pg_temp.expect_fail($$select public.admin_set_question_image(current_setting('t.qimg_eng')::bigint, 'data:image/jpeg;base64,' || repeat('A', 300100))$$, 'an oversized picture is refused');
+select pg_temp.expect_fail($$select public.admin_set_question_image(-5, 'data:image/jpeg;base64,AAAA')$$, 'a missing question is refused');
+reset role;
+-- a free student sees the picture of a free subject, not of a paid one (earlier tests upgraded this student, so put them back on the free plan)
+update public.profiles set plan = 'free', plan_expires = null where email = 'free@x.com';
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+do $$ begin
+  assert public.get_question_image(current_setting('t.qimg_eng')::bigint) like 'data:image/%', 'a student can read a free-subject picture';
+  assert public.get_question_image(current_setting('t.qimg_gov')::bigint) is null, 'a free student cannot read a paid-subject picture';
+end $$;
+select pg_temp.expect_fail($$select public.admin_set_question_image(current_setting('t.qimg_eng')::bigint, null)$$, 'a student cannot remove a picture');
+select pg_temp.expect_fail($$select public.admin_set_question_image(current_setting('t.qimg_eng')::bigint, 'data:image/jpeg;base64,ZZZZ')$$, 'a student cannot add a picture');
+select pg_temp.expect_fail($$select * from public.question_images$$, 'a student cannot read question_images directly');
+select pg_temp.expect_fail($$insert into public.question_images (question_id, data) values (1, 'data:image/jpeg;base64,AAAA')$$, 'a student cannot insert into question_images');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+do $$ begin assert public.get_question_image(current_setting('t.qimg_gov')::bigint) like 'data:image/%', 'a paid student can read a paid-subject picture'; end $$;
+reset role;
+select pg_temp.as_user(null);
+set local role anon;
+select pg_temp.expect_fail($$select public.get_question_image(1)$$, 'anonymous cannot read pictures');
+reset role;
+-- removing, and deleting the question, clears the picture
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ begin
+  perform public.admin_set_question_image(current_setting('t.qimg_eng')::bigint, null);
+  assert not (select has_image from public.questions where id = current_setting('t.qimg_eng')::bigint), 'has_image is cleared when the picture is removed';
+  assert public.get_question_image(current_setting('t.qimg_eng')::bigint) is null, 'the picture is gone after removal';
+  delete from public.questions where id = current_setting('t.qimg_gov')::bigint;
+end $$;
+reset role;
+do $$ begin assert (select count(*) from public.question_images) = 0, 'deleting a question deletes its picture'; end $$;
+
+-- ===== testimonials: only what the Admin chooses reaches the public =====
+update public.profiles set full_name = 'Ada Okafor Obi' where email = 'paid@x.com';
+insert into public.feedback (user_id, rating, kind, message) values
+  ((select id from t_ids where name='paid'), 5, 'feedback', 'JAMBwise made my practice feel like the real CBT exam.'),
+  ((select id from t_ids where name='paid'), 4, 'bug', 'The page jumps when I press next on my phone.');
+do $$ begin
+  assert (select count(*) from public.feedback where featured) = 0, 'nothing is featured by default';
+  perform set_config('t.fb_ok', (select id::text from public.feedback where kind = 'feedback' order by id desc limit 1), true);
+  perform set_config('t.fb_bug', (select id::text from public.feedback where kind = 'bug' order by id desc limit 1), true);
+end $$;
+select pg_temp.as_user(null);
+set local role anon;
+do $$ begin assert (select count(*) from public.public_testimonials()) = 0, 'the public sees no testimonials until one is chosen'; end $$;
+reset role;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+set local role authenticated;
+select pg_temp.expect_fail($$select public.admin_set_feedback_featured(current_setting('t.fb_ok')::bigint, true)$$, 'a student cannot feature feedback');
+select pg_temp.expect_fail($$select * from public.admin_feedback()$$, 'a student cannot read all feedback');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select pg_temp.expect_fail($$select public.admin_set_feedback_featured(current_setting('t.fb_bug')::bigint, true)$$, 'a bug report cannot be featured');
+select public.admin_set_feedback_featured(current_setting('t.fb_ok')::bigint, true);
+do $$ begin assert (select featured from public.admin_feedback() where id = current_setting('t.fb_ok')::bigint), 'admin sees the featured flag'; end $$;
+reset role;
+select pg_temp.as_user(null);
+set local role anon;
+do $$ declare t record; begin
+  select * into t from public.public_testimonials();
+  assert t.name = 'Ada O.', 'only the first name and surname initial are public: ' || t.name;
+  assert t.message like 'JAMBwise made my practice%' and t.rating = 5 and t.role = 'JAMBwise student', 'the testimonial text is public';
+end $$;
+select pg_temp.expect_fail($$select * from public.feedback$$, 'the public cannot read the feedback table');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_set_feedback_featured(current_setting('t.fb_ok')::bigint, false);
+reset role;
+do $$ begin assert (select count(*) from public.public_testimonials()) = 0, 'hiding removes it from the website'; end $$;
+
 -- ===== account deletion keeps payments, clears PIN references =====
 delete from auth.users where email='other@x.com';
 do $$ begin assert (select count(*) from public.payments where reference='R2')=1,'payment kept'; end $$;

@@ -7,7 +7,7 @@ import { useAction } from '../../../hooks.js'
 import { Empty, fmtDate, Pagination, TabLoader, useLoad } from './shared.jsx'
 
 const KIND = { feedback: 'Feedback', feature: 'Feature idea', bug: 'Bug' }
-const FILTERS = [['all', 'All'], ['new', 'New'], ['feedback', 'Feedback'], ['feature', 'Feature ideas'], ['bug', 'Bugs']]
+const FILTERS = [['all', 'All'], ['new', 'New'], ['feedback', 'Feedback'], ['feature', 'Feature ideas'], ['bug', 'Bugs'], ['web', 'On website']]
 const Stars = ({ n, size = 16 }) => <span className="fb-stars" style={{ fontSize: size }} role="img" aria-label={`${n} out of 5 stars`}>{[1, 2, 3, 4, 5].map((i) => <span key={i} className={i <= n ? 'on' : ''}>{i <= n ? '★' : '☆'}</span>)}</span>
 const ago = (d) => {
   const days = Math.floor((Date.now() - new Date(d).getTime()) / 864e5)
@@ -33,13 +33,15 @@ export default function Feedback() {
   }, [rows])
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
-  const count = (k) => (k === 'all' ? rows.length : k === 'new' ? rows.filter((r) => r.status === 'new').length : rows.filter((r) => r.kind === k).length)
-  const shown = rows.filter((r) => filter === 'all' || (filter === 'new' ? r.status === 'new' : r.kind === filter))
+  const count = (k) => (k === 'all' ? rows.length : k === 'web' ? rows.filter((r) => r.featured).length : k === 'new' ? rows.filter((r) => r.status === 'new').length : rows.filter((r) => r.kind === k).length)
+  const shown = rows.filter((r) => filter === 'all' || (filter === 'new' ? r.status === 'new' : filter === 'web' ? r.featured : r.kind === filter))
   const lastPage = Math.max(1, Math.ceil(shown.length / pageSize))
   const current = Math.min(page, lastPage)
   const pageRows = shown.slice((current - 1) * pageSize, current * pageSize)
   const top = Math.max(1, ...stats.dist)
   const toggle = (r) => act.run(async () => { await api.adminSetFeedbackStatus(r.id, r.status === 'new' ? 'done' : 'new'); await reload() })
+  const feature = (r) => act.run(async () => { await api.adminSetFeedbackFeatured(r.id, !r.featured); await reload() }, r.featured ? 'Hidden from the website' : 'Now showing on the website')
+  const canFeature = (r) => r.kind === 'feedback' && (r.message || '').trim().length >= 20
   const del = async (r) => {
     if (!(await confirm({ title: 'Delete this feedback?', message: 'It will be removed for good.', confirmLabel: 'Delete' }))) return
     act.run(async () => { await api.adminDeleteFeedback(r.id); await reload() }, 'Deleted')
@@ -70,7 +72,10 @@ export default function Feedback() {
                 <td><span className={'tag fb-kind ' + r.kind}>{KIND[r.kind]}</span></td>
                 <td style={{ minWidth: 200, overflowWrap: 'anywhere' }}>{r.message || <span className="mut">–</span>}</td>
                 <td><button className={'btn ' + (r.status === 'new' ? '' : 'ghost')} disabled={act.busy} onClick={() => toggle(r)}>{r.status === 'new' ? 'Mark done' : 'Done · reopen'}</button></td>
-                <td><button className="btn ghost" disabled={act.busy} onClick={() => del(r)} aria-label="Delete this feedback"><Icon name="trash" size={16} /></button></td>
+                <td>
+                  {canFeature(r) && <button className={'btn ' + (r.featured ? '' : 'ghost')} disabled={act.busy} onClick={() => feature(r)} title="Show this on the home page, with the person's first name and surname initial">{r.featured ? 'On website · hide' : 'Show on website'}</button>}{' '}
+                  <button className="btn ghost" disabled={act.busy} onClick={() => del(r)} aria-label="Delete this feedback"><Icon name="trash" size={16} /></button>
+                </td>
               </tr>
             ))}
           </tbody>

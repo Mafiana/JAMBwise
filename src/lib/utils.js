@@ -39,6 +39,7 @@ export function prepareQuestion(row, rnd = Math.random) {
     options: opts.map((o) => o.text),
     answer: opts.findIndex((o) => o.ok),
     explanation: row.explanation || '',
+    has_image: Boolean(row.has_image),
   }
 }
 

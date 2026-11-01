@@ -4,6 +4,7 @@ import { useExam } from '../../context/ExamContext.jsx'
 import Icon from '../../components/Icons.jsx'
 import ReportQuestion from '../../components/ReportQuestion.jsx'
 import RichText from '../../components/RichText.jsx'
+import QuestionImage from '../../components/QuestionImage.jsx'
 import { ErrorLine, Loader } from '../../components/ui.jsx'
 import { PRACTICE_SIZE, SUBJECTS, SUBJECT_KEYS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
@@ -46,6 +47,7 @@ function Question({ s }) {
       <div className="q-meta"><span>{SUBJECTS[s.subject].name}</span><span>Question {s.i + 1} of {s.qs.length}</span></div>
       <div className="progress-line"><i style={{ width: ((s.i + (s.sel != null ? 1 : 0)) / s.qs.length) * 100 + '%' }} /></div>
       <h3><RichText text={q.body} /></h3>
+      <QuestionImage q={q} />
       {q.options.map((o, j) => (
         <button
           key={j}

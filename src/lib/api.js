@@ -193,8 +193,18 @@ const readQ = (uid, subject) => { try { return JSON.parse(localStorage.getItem(q
 const writeQ = (uid, subject, rows) => { try { localStorage.setItem(qKey(uid, subject), JSON.stringify({ at: Date.now(), rows })) } catch { /* storage full */ } }
 const sessionUid = async () => (await supabase.auth.getSession())?.data?.session?.user?.id
 
+const QCOLS = 'id, subject, body, options, answer, explanation'
+const missingImageColumn = (error) => /has_image/i.test(error?.message || '') || error?.code === '42703'
+
+/** Selects questions with the picture flag; still works if migrate-question-images.sql has not been run yet. */
+async function selectQuestions(build) {
+  let res = await build(QCOLS + ', has_image')
+  if (res.error && missingImageColumn(res.error)) res = await build(QCOLS)
+  return res
+}
+
 async function fetchQuestions(subject) {
-  const { data, error } = await supabase.from('questions').select('id, subject, body, options, answer, explanation').eq('subject', subject)
+  const { data, error } = await selectQuestions((cols) => supabase.from('questions').select(cols).eq('subject', subject))
   if (error) fail(error, 'Could not load questions.')
   return data
 }
@@ -518,9 +528,29 @@ export async function adminPayments() {
 }
 
 export async function adminQuestions(subject) {
-  const { data, error } = await supabase.from('questions').select('id, subject, body, options, answer, explanation').eq('subject', subject).order('id', { ascending: false }).limit(1000)
+  const { data, error } = await selectQuestions((cols) => supabase.from('questions').select(cols).eq('subject', subject).order('id', { ascending: false }).limit(1000))
   if (error) fail(error, 'Could not load questions.')
   return data
+}
+
+const imageCache = new Map()   // question id -> data: URL (or null when none), kept for the session
+/** The picture of one question (null when it has none or cannot be loaded). Questions with has_image false never call this. */
+export async function getQuestionImage(id) {
+  if (imageCache.has(id)) return imageCache.get(id)
+  const { data, error } = await supabase.rpc('get_question_image', { p_id: id })
+  if (error) { if (isNetworkError(error)) throw new Error('No internet connection.'); return null }
+  imageCache.set(id, data || null)
+  return data || null
+}
+
+/** Admin: adds, replaces (a data: URL) or removes (null) a question's picture. */
+export async function adminSetQuestionImage(id, data) {
+  const { error } = await supabase.rpc('admin_set_question_image', { p_id: id, p_data: data || null })
+  if (error) {
+    const missing = /could not find the function|does not exist|schema cache/i.test(error.message || '')
+    fail(error, missing ? 'Pictures are not switched on in the database yet. Run supabase/migrate-question-images.sql in the Supabase SQL Editor, then try again.' : 'Could not save the picture.')
+  }
+  imageCache.delete(id)
 }
 
 export async function adminSaveQuestion(q) {
@@ -548,6 +578,22 @@ export async function adminFeedback() {
 export async function adminSetFeedbackStatus(id, status) {
   const { error } = await supabase.rpc('admin_set_feedback_status', { p_id: id, p_status: status })
   if (error) fail(error, 'Could not update this.')
+}
+/** Admin: show or hide one piece of feedback on the home page. */
+export async function adminSetFeedbackFeatured(id, featured) {
+  const { error } = await supabase.rpc('admin_set_feedback_featured', { p_id: id, p_featured: Boolean(featured) })
+  if (error) {
+    const off = !featureReady(error) || /admin_set_feedback_featured/.test(error.message || '')
+    fail(error, off ? 'Run supabase/migrate-testimonials.sql in the Supabase SQL Editor, then try again.' : 'Could not update this.')
+  }
+}
+/** The feedback the Admin chose to show on the home page. Never throws: no reviews just means no section. */
+export async function getTestimonials() {
+  try {
+    const { data, error } = await supabase.rpc('public_testimonials')
+    if (error || !Array.isArray(data)) return []
+    return data
+  } catch { return [] }
 }
 export async function adminDeleteFeedback(id) {
   const { error } = await supabase.rpc('admin_delete_feedback', { p_id: id })

@@ -435,6 +435,26 @@ const rpcs = {
     const f = (db.feedback || []).find((x) => x.id === a.p_id)
     if (f && ['new', 'done'].includes(a.p_status)) f.status = a.p_status
   },
+  admin_set_feedback_featured(a) {
+    adminOnly()
+    const f = (db.feedback || []).find((x) => x.id === a.p_id)
+    if (!f) throw new Error('That feedback no longer exists.')
+    if (a.p_featured) {
+      if (f.kind !== 'feedback' || String(f.message || '').trim().length < 20) throw new Error('Only feedback with a message of at least 20 characters can be shown on the website.')
+      if (db.feedback.filter((x) => x.featured && x.id !== f.id).length >= 6) throw new Error('Six are already on the website. Hide one first.')
+    }
+    f.featured = Boolean(a.p_featured)
+    log('feedback.featured', (f.featured ? 'shown #' : 'hidden #') + f.id)
+    return null
+  },
+  public_testimonials() {
+    return (db.feedback || []).filter((f) => f.featured && f.kind === 'feedback' && String(f.message || '').trim().length >= 20)
+      .sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 6)
+      .map((f) => {
+        const p = profileOf(f.user_id); const parts = String(p?.full_name || 'Student').trim().split(/\s+/)
+        return { id: f.id, name: parts[0] + (parts[1] ? ' ' + parts[1][0].toUpperCase() + '.' : ''), role: p?.is_teacher ? 'Teacher' : 'JAMBwise student', rating: f.rating, message: String(f.message).trim() }
+      })
+  },
   admin_delete_feedback(a) { adminOnly(); db.feedback = (db.feedback || []).filter((x) => x.id !== a.p_id) },
   admin_send_announcement(a) {
     adminOnly()
@@ -504,6 +524,29 @@ const rpcs = {
       Object.assign(s, { status: 'declined', decline_reason: why, reviewed_at: new Date().toISOString() })
       notify(s.submitted_by, 'review', 'Question not approved', 'Your question was not approved.' + (why ? ' Reason: ' + why : ''), '/app/admin/questions')
     }
+  },
+  get_question_image(a) {
+    if (!me()) throw new Error('JWT expired')
+    const q = allQuestions().find((x) => x.id === a.p_id)
+    if (!q || !(hasAccess(q.subject) || isStaff())) return null
+    return (db.qImages || {})[a.p_id] || null
+  },
+  admin_set_question_image(a) {
+    adminOnly()
+    const q = allQuestions().find((x) => x.id === a.p_id)
+    if (!q) throw new Error('That question no longer exists.')
+    const data = String(a.p_data || '').trim()
+    db.qImages = db.qImages || {}
+    if (!data) delete db.qImages[a.p_id]
+    else {
+      if (!/^data:image\/[^;]+;base64,/.test(data) || data.length > 300000) throw new Error('The picture is not valid or is too big.')
+      db.qImages[a.p_id] = data
+    }
+    const next = { ...q, has_image: Boolean(data) }
+    if (questions.some((o) => o.id === q.id)) db.qEdits.edited[q.id] = next
+    else db.qEdits.added = db.qEdits.added.map((o) => (o.id === q.id ? next : o))
+    log('question.image', (data ? 'set on #' : 'removed from #') + q.id)
+    return null
   },
   get_novel() {
     if (!me()) throw new Error('JWT expired')

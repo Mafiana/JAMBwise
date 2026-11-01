@@ -1,6 +1,7 @@
 // The timed exam screen shared by CBT Mock and ExamHall. They are the same exam (same questions, calculator, timer, one attempt
 // each); the only difference is that a student may see their CBT Mock result, while ExamHall results are visible to admins and to the teachers in charge of the student.
 import RichText from '../../components/RichText.jsx'
+import QuestionImage from '../../components/QuestionImage.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -294,6 +295,7 @@ function Running({ m }) {
       <div className="card">
         <div className="mut">Question {m.i - first + 1} of {inSubject}</div>
         <h3><RichText text={cur.body} /></h3>
+        <QuestionImage q={cur} />
         {cur.options.map((o, j) => (
           <button key={j} className={'opt ' + (m.a[m.i] === j ? 'sel' : '')} onClick={() => choose(j)} aria-pressed={m.a[m.i] === j}>
             <span className="k">{'ABCD'[j]}</span><span>{o}</span>
