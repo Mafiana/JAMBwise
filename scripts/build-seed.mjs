@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const dir = path.join(root, 'supabase', 'questions')
-const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
+const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
 const esc = (s) => String(s).replace(/'/g, "''")
 
 export function validate(subject, list) {

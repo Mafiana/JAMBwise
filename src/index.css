@@ -1241,3 +1241,11 @@ kbd{display:inline-block;min-width:22px;padding:1px 7px;margin-right:6px;border:
 .invite-link input{flex:1;min-width:0}
 .weak-card{margin:14px 0}
 .weak-card .tag{margin-left:6px;vertical-align:middle}
+
+.plan-badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 11px;font-size:13px;font-weight:700;white-space:nowrap}
+.pb-free{background:var(--g2);color:var(--mut,#64748b)}
+.pb-student{background:#DBEAFE;color:#1D4ED8}
+.pb-pro{background:#FEF3C7;color:#B45309}
+:root[data-theme="dark"] .pb-student{background:#1E3A8A;color:#BFDBFE}
+:root[data-theme="dark"] .pb-pro{background:#78350F;color:#FDE68A}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .pb-student{background:#1E3A8A;color:#BFDBFE}:root:not([data-theme="light"]) .pb-pro{background:#78350F;color:#FDE68A}}

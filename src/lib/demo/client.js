@@ -12,7 +12,6 @@ import eco from '../../../supabase/questions/eco.json'
 import com from '../../../supabase/questions/com.json'
 import agr from '../../../supabase/questions/agr.json'
 import acc from '../../../supabase/questions/acc.json'
-import mkt from '../../../supabase/questions/mkt.json'
 import lit from '../../../supabase/questions/lit.json'
 import irk from '../../../supabase/questions/irk.json'
 import crk from '../../../supabase/questions/crk.json'
@@ -23,11 +22,11 @@ import geo from '../../../supabase/questions/geo.json'
 import { DEFAULT_INSTITUTIONS } from '../constants.js'
 import { DB_KEY, DEMO_ADMIN, DEMO_PARENT, DEMO_PIN, DEMO_STUDENT, DEMO_TEACHER, SESSION_KEY } from './accounts.js'
 
-const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
+const SUBJECTS = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
 const PROFILE_EDITABLE = ['full_name', 'course', 'school', 'avatar', 'subjects', 'exam_date', 'study_hours']
 
 let nextQuestion = 1
-const questions = Object.entries({ eng, mat, phy, chm, bio, gov, eco, com, agr, acc, mkt, lit, irk, crk, hec, cst, geo }).flatMap(([subject, list]) =>
+const questions = Object.entries({ eng, mat, phy, chm, bio, gov, eco, com, agr, acc, lit, irk, crk, hec, cst, geo }).flatMap(([subject, list]) =>
   list.map((q) => ({ id: nextQuestion++, subject, body: q.q, options: q.o, answer: q.a, explanation: q.e })),
 )
 
@@ -213,7 +212,7 @@ function from(name) {
         if (keys.some((k) => k !== 'status') || !isStaff()) return err('permission denied')
         if (!['new', 'read', 'answered', 'resolved'].includes(q.patch.status)) return err('invalid status')
       } else if (name === 'questions') {
-        if (!isStaff()) return err('permission denied')
+        if (!isAdmin()) return err('permission denied')   // only the admin edits questions; teachers contact the admin
         for (const x of list) {
           const next = { ...x, ...q.patch }
           if (!validQuestion(next)) return err('invalid question')

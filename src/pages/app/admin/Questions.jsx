@@ -164,6 +164,7 @@ export default function Questions() {
   const [editing, setEditing] = useState(null)
   const [importing, setImporting] = useState(false)
   const [sent, setSent] = useState(false)           // teacher: "under review" box
+  const [locked, setLocked] = useState(false)       // teacher pressed the locked Edit button
   const [reviewing, setReviewing] = useState(false) // admin: the Accept / Decline box
   const [params, setParams] = useSearchParams()
   const sideFn = isAdmin ? api.adminPendingQuestions : api.mySubmittedQuestions
@@ -218,6 +219,15 @@ export default function Questions() {
       {!isAdmin && side && <MySubmissions rows={side} />}
       {importing && isAdmin && <ImportQuestions onCancel={() => setImporting(false)} onDone={() => { setImporting(false); reload() }} />}
       {editing && <Editor key={editing.id || 'new'} q={editing} review={!isAdmin && !editing.id} canPicture={isAdmin} onPicture={reload} onDone={(saved) => { setEditing(null); if (saved === 'review') { setSent(true); reloadSide() } else if (saved) reload() }} />}
+      {locked && (
+        <Modal title="Edit is locked" onClose={() => setLocked(false)}>
+          <div className="c" role="status">
+            <span className="ic" style={{ margin: '0 auto 12px' }}><Icon name="lock" /></span>
+            <h3 style={{ marginTop: 0 }}>Kindly Contact Admin to Edit this Question</h3>
+          </div>
+          <div className="modal-actions"><button type="button" className="btn" onClick={() => setLocked(false)}>Okay</button></div>
+        </Modal>
+      )}
       {sent && (
         <Modal title="Question under review" onClose={() => setSent(false)}>
           <div className="c" role="status">
@@ -243,7 +253,9 @@ export default function Questions() {
                     <td style={{ minWidth: 220 }}>{x.body}{x.has_image && <span className="tag" style={{ marginLeft: 8 }}><Icon name="camera" size={12} /> Picture</span>}</td>
                     <td>{'ABCD'[x.answer]}. {x.options[x.answer]}</td>
                     <td>
-                      <button className="btn ghost" onClick={() => { setEditing(x); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Edit</button>{' '}
+                      {isAdmin
+                        ? <button className="btn ghost" onClick={() => { setEditing(x); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Edit</button>
+                        : <button className="btn ghost" onClick={() => setLocked(true)} aria-label="Edit (locked)" title="Locked: contact the admin"><Icon name="lock" size={14} /> Edit</button>}{' '}
                       {isAdmin && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this question?', message: `"${x.body.length > 110 ? x.body.slice(0, 110) + '…' : x.body}" will be removed for every student.`, confirmLabel: 'Delete question' })) && act.run(async () => { await api.adminDeleteQuestion(x.id); await reload() })}>Delete</button>}
                     </td>
                   </tr>

@@ -287,7 +287,7 @@ do $$ begin
   assert (select count(*) from public.my_question_submissions() where status = 'declined' and decline_reason is not null) = 1, 'teacher sees the reason';
 end $$;
 update public.questions set explanation = 'edited by teacher' where body = 'Teacher added this?';
-do $$ begin assert (select explanation from public.questions where body = 'Teacher added this?') = 'edited by teacher', 'teacher edits questions'; end $$;
+do $$ begin assert (select explanation from public.questions where body = 'Teacher added this?') is distinct from 'edited by teacher', 'a teacher can no longer edit questions (edit is locked, contact the admin)'; end $$;
 delete from public.questions where body = 'Teacher added this?';
 do $$ begin assert (select count(*) from public.questions where body = 'Teacher added this?') = 1, 'teacher cannot delete questions'; end $$;
 update public.plans set price_kobo = 1 where id = 'student';

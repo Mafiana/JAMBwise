@@ -125,7 +125,7 @@ export default function Scoresheet() {
       subtitle: `${rows.length} student${rows.length === 1 ? '' : 's'}${q.trim() ? ` matching "${q.trim()}"` : ''}  |  Average ${shown.average}  |  Highest ${shown.highest}  |  300 and above: ${shown.over300}`,
       columns: hall ? PDF_COLUMNS_HALL : PDF_COLUMNS,
       rows: rows.map((r) => [String(r.rank), r.name, r.reg, breakdown(r), String(r.total), fmtDate(r.date), ...(hall ? [lefts(r.events).length ? String(lefts(r.events).length) : '-'] : [])]),
-      note: 'ENG English, MAT Mathematics, PHY Physics, CHM Chemistry, BIO Biology, GOV Government, ECO Economics, COM Commerce, AGR Agricultural Science, ACC Accounts, MKT Marketing, LIT Literature in English, IRK Islamic Religious Knowledge, CRK Christian Religious Knowledge. Scores are out of 400.',
+      note: 'ENG English, MAT Mathematics, PHY Physics, CHM Chemistry, BIO Biology, GOV Government, ECO Economics, COM Commerce, AGR Agricultural Science, ACC Accounts, LIT Literature in English, IRK Islamic Religious Knowledge, CRK Christian Religious Knowledge. Scores are out of 400.',
       generated: 'Generated ' + new Date().toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
     })
     downloadBytes(`jambwise-${kind === 'hall' ? 'examhall' : 'cbt-mock'}-scoresheet-${today}.pdf`, bytes)

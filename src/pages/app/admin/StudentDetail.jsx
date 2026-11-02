@@ -9,6 +9,7 @@ import { useAuth } from '../../../context/AuthContext.jsx'
 import { SUBJECTS } from '../../../lib/constants.js'
 import { naira, studentReport, TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
 import { fmtDate, fmtDateTime, PLAN_IDS, TabLoader, useLoad } from './shared.jsx'
+import PlanBadge from '../../../components/PlanBadge.jsx'
 import InstitutionAssign from './InstitutionAssign.jsx'
 
 const subjectName = (k) => SUBJECTS[k]?.name || k
@@ -196,7 +197,7 @@ export default function StudentDetail({ s, me, onClose, reloadList }) {
           <h2>{s.full_name}{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}</h2>
           <span className="sm">{s.reg_number} · {s.email}</span>
         </div>
-        <span className="tag">{s.plan}</span>
+        <PlanBadge plan={s.plan} />
       </div>
       <div className="stat-grid s4">
         <div className="card st"><b>{loading ? '–' : rep.total}</b><span>questions answered</span></div>

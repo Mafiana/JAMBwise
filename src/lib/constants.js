@@ -10,7 +10,6 @@ export const SUBJECTS = {
   com: { name: 'Commerce', level: 1 },
   agr: { name: 'Agricultural Science', level: 1 },
   acc: { name: 'Accounts', level: 1 },
-  mkt: { name: 'Marketing', level: 1 },
   lit: { name: 'Literature in English', level: 1 },
   irk: { name: 'Islamic Religious Knowledge', level: 1 },
   crk: { name: 'Christian Religious Knowledge', level: 1 },
@@ -41,7 +40,7 @@ export const PLANS = [
   ] },
   { id: 'student', name: 'Student', kobo: 150000, features: [
     'Everything in Free',
-    'All 17 subjects to practise, with explanations',
+    'All 16 subjects to practise, with explanations',
     'CBT Mock exams at the real pace (40 seconds a question), scored out of 400',
     'ExamHall: the one-time exam your administrator releases results for',
     'Mock score history and trend',

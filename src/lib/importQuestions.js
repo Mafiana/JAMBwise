@@ -1,7 +1,7 @@
 // Reads a CSV or JSON file of questions for the admin bulk import. Pure functions (no React, no network),
 // so they are covered by `npm test`. The server checks every row again before saving.
 
-export const SUBJECT_CODES = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'mkt', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
+export const SUBJECT_CODES = ['eng', 'mat', 'phy', 'chm', 'bio', 'gov', 'eco', 'com', 'agr', 'acc', 'lit', 'irk', 'crk', 'hec', 'cst', 'geo']
 const SUBJECT_ALIASES = {
   eng: 'eng', english: 'eng', 'use of english': 'eng', 'english language': 'eng',
   mat: 'mat', math: 'mat', maths: 'mat', mathematics: 'mat',
@@ -13,7 +13,6 @@ const SUBJECT_ALIASES = {
   com: 'com', commerce: 'com',
   agr: 'agr', agric: 'agr', agriculture: 'agr', 'agricultural science': 'agr',
   acc: 'acc', account: 'acc', accounts: 'acc', accounting: 'acc', 'principles of accounts': 'acc',
-  mkt: 'mkt', marketing: 'mkt',
   lit: 'lit', literature: 'lit', 'literature in english': 'lit', 'literature-in-english': 'lit',
   irk: 'irk', 'islamic religious knowledge': 'irk', islamic: 'irk', 'islamic studies': 'irk',
   crk: 'crk', 'christian religious knowledge': 'crk', christian: 'crk', 'christian religious studies': 'crk', crs: 'crk',

@@ -14,7 +14,7 @@ test('parseAnswer: letters, numbers 1-4, "Option B", and zero-based JSON numbers
 })
 test('normaliseSubject: codes, names and nicknames; blank uses the fallback', () => {
   assert.equal(normaliseSubject('Mathematics'), 'mat'); assert.equal(normaliseSubject(' ENG '), 'eng'); assert.equal(normaliseSubject('Use of English'), 'eng')
-  assert.equal(normaliseSubject('Agric'), 'agr'); assert.equal(normaliseSubject('Accounts'), 'acc'); assert.equal(normaliseSubject('Literature in English'), 'lit'); assert.equal(normaliseSubject('CRS'), 'crk'); assert.equal(normaliseSubject('Islamic Religious Knowledge'), 'irk'); assert.equal(normaliseSubject('Marketing'), 'mkt'); assert.equal(normaliseSubject('Latin'), ''); assert.equal(normaliseSubject('', 'bio'), 'bio'); assert.equal(normaliseSubject('Latin', 'bio'), '')
+  assert.equal(normaliseSubject('Agric'), 'agr'); assert.equal(normaliseSubject('Accounts'), 'acc'); assert.equal(normaliseSubject('Literature in English'), 'lit'); assert.equal(normaliseSubject('CRS'), 'crk'); assert.equal(normaliseSubject('Islamic Religious Knowledge'), 'irk'); assert.equal(normaliseSubject('Marketing'), ''); assert.equal(normaliseSubject('Latin'), ''); assert.equal(normaliseSubject('', 'bio'), 'bio'); assert.equal(normaliseSubject('Latin', 'bio'), '')
 })
 test('the downloadable template is itself a valid file', () => {
   const r = parseQuestionFile(TEMPLATE_CSV, 'questions.csv')

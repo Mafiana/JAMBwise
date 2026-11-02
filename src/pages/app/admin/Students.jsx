@@ -1,3 +1,4 @@
+import PlanBadge from '../../../components/PlanBadge.jsx'
 import { useMemo, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import Icon from '../../../components/Icons.jsx'
@@ -66,7 +67,7 @@ export default function Students() {
                 <td><button className="linkish" onClick={() => setOpen(s.id)}>{s.full_name}</button>{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{s.email}</span></td>
                 <td>{s.reg_number}</td>
                 {isAdmin && <td>{s.institution || <span className="sm">–</span>}</td>}
-                <td>{s.plan}{s.plan !== 'free' && s.plan_expires && <div className="sm">to {fmtDate(s.plan_expires)}</div>}</td>
+                <td><PlanBadge plan={s.plan} />{s.plan !== 'free' && s.plan_expires && <div className="sm">to {fmtDate(s.plan_expires)}</div>}</td>
                 <td>{Number(s.questions)}</td>
                 <td>{Number(s.questions) ? Math.round((Number(s.correct) / Number(s.questions)) * 100) : 0}%</td>
                 <td>{Number(s.mocks)}</td>
