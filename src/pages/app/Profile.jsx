@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { Avatar, ErrorLine } from '../../components/ui.jsx'
 import { PICKABLE, SUBJECTS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
+import InviteCard from '../../components/InviteCard.jsx'
 import PinCountdown from '../../components/PinCountdown.jsx'
 
 /** Crops the picture to a 200x200 square JPEG so it is small enough to store with the profile. */
@@ -102,6 +103,7 @@ export default function Profile() {
         <ErrorLine>{error}</ErrorLine>
         <button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
       </div>
+      {!isTeacher && <InviteCard />}
     </>
   )
 }

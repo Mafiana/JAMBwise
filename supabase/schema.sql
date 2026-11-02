@@ -2059,3 +2059,241 @@ revoke execute on function public.public_testimonials() from public;
 grant execute on function public.public_testimonials() to anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+-- ───────────── PIN deactivation and the public question count ─────────────
+-- Two small additions. Safe to run more than once.
+--  1) Admin > Access PINs: a Deactivate button for a PIN that is in use, to end that student's access straight away.
+--  2) The home page shows the real number of questions.
+
+alter table public.access_pins add column if not exists deactivated_at timestamptz;
+
+-- admin: end the access a used PIN gave (the student's paid time stops now)
+create or replace function public.admin_deactivate_pin(p_pin text) returns void
+language plpgsql security definer set search_path = public as $$
+declare r public.access_pins; p public.profiles;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  select * into r from public.access_pins where pin = p_pin for update;
+  if not found then raise exception 'That PIN does not exist.'; end if;
+  if r.used_by is null then raise exception 'This PIN has not been used yet. Delete it instead.'; end if;
+  if r.deactivated_at is not null then raise exception 'This PIN is already deactivated.'; end if;
+  select * into p from public.profiles where id = r.used_by;
+  if not found then raise exception 'The student of this PIN no longer exists.'; end if;
+  if p.plan = 'free' then raise exception 'This PIN did not give paid access.'; end if;
+  if p.plan_expires is not null and p.plan_expires <= now() then raise exception 'This PIN has already expired.'; end if;
+  update public.profiles set plan_expires = now() where id = r.used_by;
+  update public.access_pins set deactivated_at = now() where pin = p_pin;
+  perform public.admin_log('pin.deactivate', p_pin || ' (' || coalesce(p.full_name, 'student') || ')');
+end $$;
+revoke execute on function public.admin_deactivate_pin(text) from public, anon;
+grant execute on function public.admin_deactivate_pin(text) to authenticated;
+
+-- public: how many questions there are (a number only, nothing else), for the home page
+create or replace function public.public_question_count() returns integer
+language sql security definer stable set search_path = public as $$
+  select count(*)::int from public.questions;
+$$;
+revoke execute on function public.public_question_count() from public;
+grant execute on function public.public_question_count() to anon, authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── invite a friend, earn 15% off (migrate-referrals.sql) ─────────────
+-- Run once in the Supabase SQL Editor. Needs migrate-coupons.sql to have been run first. Safe to run again.
+-- A student shares a personal link. When the friend makes their FIRST payment, the student who invited them
+-- gets a one-time 15% code for their next payment. (To also reward the friend later, change the claim/reward code below.)
+
+alter table public.profiles add column if not exists referral_code text;
+alter table public.profiles add column if not exists referred_by uuid references auth.users on delete set null;
+alter table public.profiles add column if not exists referral_paid_at timestamptz;
+create unique index if not exists profiles_referral_code_uq on public.profiles (referral_code) where referral_code is not null;
+-- these columns are not in the "grant update (...)" list, so a student can never edit them directly.
+
+alter table public.coupons add column if not exists owner_id uuid references auth.users on delete cascade;
+alter table public.coupons add column if not exists source text;
+
+-- price with a code. A personal code (owner_id set) only works for its owner.
+-- p_user is only used when there is no logged-in caller (the paystack-init function, which runs as the service role).
+drop function if exists public.coupon_quote(text, text);
+drop function if exists public.coupon_quote(text, text, uuid);
+create function public.coupon_quote(p_code text, p_plan text, p_user uuid default null) returns table (valid boolean, message text, coupon_id bigint, code text, percent int, list_kobo int, discount_kobo int, final_kobo int)
+language plpgsql security definer stable set search_path = public as $$
+declare c public.coupons; lp int; disc int; fin int; cd text := upper(btrim(coalesce(p_code, ''))); who uuid := coalesce(auth.uid(), p_user);
+begin
+  select price_kobo into lp from public.plans where id = p_plan;
+  if lp is null or lp <= 0 then return query select false, 'Unknown plan.', null::bigint, cd, 0, 0, 0, 0; return; end if;
+  select * into c from public.coupons x where x.code = cd;
+  if not found or not c.active or (c.owner_id is not null and c.owner_id is distinct from who) then return query select false, 'That code is not valid.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.expires_at is not null and c.expires_at <= now() then return query select false, 'That code has expired.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.max_uses is not null and c.used_count >= c.max_uses then return query select false, 'That code has been fully used.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  if c.plan <> 'all' and c.plan <> p_plan then return query select false, 'That code is for the ' || initcap(c.plan) || ' plan only.', null::bigint, cd, 0, lp, 0, lp; return; end if;
+  fin := greatest(10000, (round(lp * (100 - c.percent) / 100.0 / 100.0) * 100)::int);
+  disc := lp - fin;
+  return query select true, c.percent || '% off applied.', c.id, c.code, c.percent, lp, disc, fin;
+end $$;
+revoke execute on function public.coupon_quote(text, text, uuid) from public, anon;
+grant execute on function public.coupon_quote(text, text, uuid) to authenticated, service_role;
+
+-- the admin's list shows only the admin's own codes, not students' personal reward codes
+create or replace function public.admin_coupons() returns table (id bigint, code text, percent int, plan text, expires_at timestamptz, max_uses int, used_count int, active boolean, created_at timestamptz)
+language plpgsql security definer stable set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+  return query select c.id, c.code, c.percent, c.plan, c.expires_at, c.max_uses, c.used_count, c.active, c.created_at from public.coupons c where c.owner_id is null order by c.created_at desc limit 500;
+end $$;
+revoke execute on function public.admin_coupons() from public, anon;
+grant execute on function public.admin_coupons() to authenticated;
+
+-- a student's own link code, made the first time it is needed
+create or replace function public.my_referral() returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); rc text; al text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; s text; i int; n_in int; n_paid int; cs jsonb;
+begin
+  if uid is null then raise exception 'not allowed'; end if;
+  select referral_code into rc from public.profiles where id = uid;
+  if rc is null then
+    loop
+      s := '';
+      for i in 1..7 loop s := s || substr(al, 1 + (get_byte(extensions.gen_random_bytes(1), 0) % 32), 1); end loop;
+      exit when not exists (select 1 from public.profiles where referral_code = s);
+    end loop;
+    update public.profiles set referral_code = s where id = uid and referral_code is null;
+    select referral_code into rc from public.profiles where id = uid;
+  end if;
+  select count(*), count(referral_paid_at) into n_in, n_paid from public.profiles where referred_by = uid;
+  select coalesce(jsonb_agg(jsonb_build_object('code', c.code, 'percent', c.percent, 'expires_at', c.expires_at, 'used', c.used_count >= 1, 'expired', c.expires_at <= now()) order by c.created_at desc), '[]'::jsonb)
+    into cs from public.coupons c where c.owner_id = uid and c.source = 'referral';
+  return jsonb_build_object('code', rc, 'signed_up', n_in, 'paid', n_paid, 'coupons', cs);
+end $$;
+revoke execute on function public.my_referral() from public, anon;
+grant execute on function public.my_referral() to authenticated;
+
+-- called once after a new person logs in with a link code. Returns 'ok' or a short reason; it never raises for a bad code.
+create or replace function public.claim_referral(p_code text) returns text
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); me public.profiles; inv uuid;
+begin
+  if uid is null then raise exception 'not allowed'; end if;
+  select * into me from public.profiles where id = uid;
+  if not found or me.referred_by is not null then return 'already'; end if;
+  if me.is_admin or me.is_teacher then return 'staff'; end if;
+  if me.created_at < now() - interval '7 days' then return 'too_late'; end if;
+  if exists (select 1 from public.payments where user_id = uid and status = 'paid') then return 'too_late'; end if;
+  select id into inv from public.profiles where referral_code = upper(btrim(coalesce(p_code, ''))) and not is_admin and not is_teacher;
+  if inv is null then return 'unknown'; end if;
+  if inv = uid then return 'self'; end if;
+  update public.profiles set referred_by = inv where id = uid and referred_by is null;
+  return 'ok';
+end $$;
+revoke execute on function public.claim_referral(text) from public, anon;
+grant execute on function public.claim_referral(text) to authenticated;
+
+-- paying: as before, plus the reward for the person who invited the payer (first paid payment only)
+create or replace function public.fulfil_payment(p_ref text, p_amount int) returns boolean
+language plpgsql security definer set search_path = public as $$
+declare pay public.payments; base timestamptz; pr public.profiles; lp int; al text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; s text; i int;
+begin
+  select * into pay from public.payments where reference = p_ref and status = 'pending' for update;
+  if not found or pay.amount_kobo <> p_amount or pay.user_id is null then return false; end if;
+  update public.payments set status = 'paid', paid_at = now() where reference = p_ref;
+  if pay.coupon_id is not null then update public.coupons set used_count = used_count + 1 where id = pay.coupon_id; end if;
+  select greatest(coalesce(plan_expires, now()), now()) into base from public.profiles where id = pay.user_id;
+  update public.profiles set plan = pay.plan, plan_expires = base + interval '30 days' where id = pay.user_id;
+
+  select * into pr from public.profiles where id = pay.user_id;
+  select price_kobo into lp from public.plans where id = pay.plan;
+  if pr.referred_by is not null and pr.referral_paid_at is null
+     and (select count(*) from public.payments where user_id = pay.user_id and status = 'paid') = 1
+     and lp is not null and pay.amount_kobo * 2 >= lp                       -- not a heavily discounted payment
+     and (select count(*) from public.coupons where owner_id = pr.referred_by and source = 'referral' and used_count = 0 and active and (expires_at is null or expires_at > now())) < 5
+  then
+    loop
+      s := 'REF';
+      for i in 1..8 loop s := s || substr(al, 1 + (get_byte(extensions.gen_random_bytes(1), 0) % 32), 1); end loop;
+      exit when not exists (select 1 from public.coupons where code = s);
+    end loop;
+    insert into public.coupons (code, percent, plan, expires_at, max_uses, owner_id, source)
+      values (s, 15, 'all', now() + interval '90 days', 1, pr.referred_by, 'referral');
+    update public.profiles set referral_paid_at = now() where id = pay.user_id;
+    insert into public.notifications (user_id, kind, title, body)
+      values (pr.referred_by, 'referral', 'You earned 15% off', 'A friend you invited has paid. Your 15% discount is waiting on the Plans page.');
+  end if;
+  return true;
+end $$;
+revoke execute on function public.fulfil_payment(text, int) from public, anon, authenticated;
+grant execute on function public.fulfil_payment(text, int) to service_role;
+
+notify pgrst, 'reload schema';
+
+-- ───────────── Pro: "Fix my weak spots" (migrate-weak-spots.sql) ─────────────
+-- Run once in the Supabase SQL Editor. Safe to run again.
+-- For Pro students only: the questions they get wrong are remembered. They re-drill them until they get each one
+-- right twice in a row, and then it is forgotten.
+create table if not exists public.question_misses (
+  user_id uuid not null references auth.users on delete cascade,
+  question_id bigint not null references public.questions(id) on delete cascade,
+  subject text not null,
+  misses int not null default 1,
+  streak int not null default 0,
+  last_missed_at timestamptz not null default now(),
+  primary key (user_id, question_id)
+);
+create index if not exists question_misses_sub_idx on public.question_misses (user_id, subject);
+alter table public.question_misses enable row level security;     -- no policies: only the functions below reach it
+revoke all on public.question_misses from anon, authenticated;
+
+create or replace function public.is_pro() returns boolean
+language sql security definer stable set search_path = public as
+$$ select coalesce((select plan = 'pro' and (plan_expires is null or plan_expires > now()) and not suspended
+                    from public.profiles where id = auth.uid()), false) $$;
+revoke execute on function public.is_pro() from public, anon;
+grant execute on function public.is_pro() to authenticated;
+
+-- after a practice round or a mock: the ids answered wrong and right. Ignored (returns 0) unless the caller is Pro.
+create or replace function public.record_misses(p_wrong bigint[], p_right bigint[]) returns int
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); n int := 0; room int;
+begin
+  if uid is null then raise exception 'not allowed'; end if;
+  if not public.is_pro() then return 0; end if;
+  p_wrong := coalesce(p_wrong, '{}'); p_right := coalesce(p_right, '{}');
+  if cardinality(p_wrong) + cardinality(p_right) > 300 then raise exception 'too many'; end if;
+  -- right answers: a question answered right twice in a row is fixed and forgotten
+  update public.question_misses set streak = streak + 1 where user_id = uid and question_id = any(p_right);
+  delete from public.question_misses where user_id = uid and streak >= 2;
+  -- wrong answers: remember them (at most 500 open questions per student)
+  select 500 - count(*) into room from public.question_misses where user_id = uid;
+  update public.question_misses set misses = misses + 1, streak = 0, last_missed_at = now() where user_id = uid and question_id = any(p_wrong);
+  get diagnostics n = row_count;
+  insert into public.question_misses (user_id, question_id, subject)
+    select uid, q.id, q.subject from public.questions q
+     where q.id = any(p_wrong) and not exists (select 1 from public.question_misses m where m.user_id = uid and m.question_id = q.id)
+     limit greatest(room, 0)
+    on conflict do nothing;
+  return n;
+end $$;
+revoke execute on function public.record_misses(bigint[], bigint[]) from public, anon;
+grant execute on function public.record_misses(bigint[], bigint[]) to authenticated;
+
+-- how many open weak questions per subject
+create or replace function public.weak_spots() returns table (subject text, open_count int)
+language sql security definer stable set search_path = public as $$
+  select m.subject, count(*)::int from public.question_misses m
+   where m.user_id = auth.uid() and public.is_pro() group by m.subject order by 2 desc;
+$$;
+revoke execute on function public.weak_spots() from public, anon;
+grant execute on function public.weak_spots() to authenticated;
+
+-- the questions to drill: the most-missed first
+create or replace function public.weak_question_ids(p_subject text, p_limit int default 20) returns bigint[]
+language sql security definer stable set search_path = public as $$
+  select coalesce(array_agg(x.question_id), '{}') from (
+    select m.question_id from public.question_misses m
+     where m.user_id = auth.uid() and m.subject = p_subject and public.is_pro()
+     order by m.misses desc, m.last_missed_at desc limit least(greatest(coalesce(p_limit, 20), 1), 40)
+  ) x;
+$$;
+revoke execute on function public.weak_question_ids(text, int) from public, anon;
+grant execute on function public.weak_question_ids(text, int) to authenticated;
+
+notify pgrst, 'reload schema';

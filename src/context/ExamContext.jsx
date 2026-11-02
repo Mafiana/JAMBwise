@@ -34,7 +34,7 @@ function pickFor(uid, subject, rows, n) {
 }
 
 export function ExamProvider({ children }) {
-  const { user } = useAuth()
+  const { user, level } = useAuth()
   const uid = user?.id
   const [version, setVersion] = useState(0) // bumps whenever new results are saved, so progress screens refresh
   const [practice, setPractice] = useState(null)
@@ -73,6 +73,14 @@ export function ExamProvider({ children }) {
     setPractice({ subject, qs, i: 0, score: 0, sel: null, done: false, saved: null, marks: [] })
   }, [uid])
 
+  /** Pro: a round made only of the questions this student keeps getting wrong. */
+  const startWeak = useCallback(async (subject) => {
+    const ids = new Set(await api.weakQuestionIds(subject))
+    const rows = (await api.getQuestions(subject)).filter((r) => ids.has(r.id))
+    if (!rows.length) throw new Error('No weak spots left in this subject. Well done!')
+    setPractice({ subject, qs: rows.map((r) => prepareQuestion(r)), i: 0, score: 0, sel: null, done: false, saved: null, marks: [], weak: true })
+  }, [])
+
   const pick = useCallback((j) => {
     setPractice((p) => {
       if (!p || p.sel != null) return p
@@ -90,6 +98,7 @@ export function ExamProvider({ children }) {
       return
     }
     setPractice({ ...p, done: true, saved: 'saving' })
+    if (level >= 2) api.recordMisses(p.qs.filter((_, n) => p.marks[n] === 0).map((q) => q.id), p.qs.filter((_, n) => p.marks[n] === 1).map((q) => q.id))
     try {
       const res = await api.insertAttempts([{ user_id: uid, subject: p.subject, correct: p.score, total: p.qs.length, kind: 'practice' }])
       setPractice((x) => (x ? { ...x, saved: res === 'queued' ? 'queued' : 'ok' } : x))
@@ -97,7 +106,7 @@ export function ExamProvider({ children }) {
     } catch (e) {
       setPractice((x) => (x ? { ...x, saved: e.message } : x))
     }
-  }, [practice, uid, refreshAttempts])
+  }, [practice, uid, level, refreshAttempts])
 
   const endPractice = useCallback(() => setPractice(null), [])
 
@@ -140,13 +149,17 @@ export function ExamProvider({ children }) {
         mock_score: idx === 0 ? m.total : null,
       })))
       setMock((x) => (x ? { ...x, saved: res === 'queued' ? 'queued' : 'ok' } : x))
+      if (level >= 2 && m.kind === 'mock') {       // Pro: remember the questions that were answered wrong
+        const asked = m.qs.map((q, n) => ({ id: q.id, got: m.a[n], ok: m.a[n] === q.answer })).filter((x) => x.got != null)
+        api.recordMisses(asked.filter((x) => !x.ok).map((x) => x.id), asked.filter((x) => x.ok).map((x) => x.id))
+      }
       clearExam()                                  // delivered (or safely queued): nothing left to resume
       leaveFullscreen()
       if (res === 'queued') setPending(api.pendingAttemptCount(uid)); else refreshAttempts()
     } catch (e) {
       setMock((x) => (x ? { ...x, saved: e.message } : x))
     }
-  }, [uid, refreshAttempts])
+  }, [uid, level, refreshAttempts])
 
   /** `why`: 'student' (pressed Submit), 'time' (the clock ran out) or 'warnings' (too many warnings). Recorded in the exam log. */
   const submitMock = useCallback(async (why = 'student') => {
@@ -222,9 +235,9 @@ export function ExamProvider({ children }) {
 
   const value = useMemo(() => ({
     version, refreshAttempts, pending, syncPending,
-    practice, startPractice, pick, nextQuestion, endPractice,
+    practice, startPractice, startWeak, pick, nextQuestion, endPractice,
     mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock, ackMock, ackWarn, needsFullscreen,
-  }), [version, refreshAttempts, pending, syncPending, practice, startPractice, pick, nextQuestion, endPractice, mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock, ackMock, ackWarn, needsFullscreen])
+  }), [version, refreshAttempts, pending, syncPending, practice, startPractice, startWeak, pick, nextQuestion, endPractice, mock, startMock, answerMock, gotoMock, submitMock, retryMockSave, endMock, ackMock, ackWarn, needsFullscreen])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

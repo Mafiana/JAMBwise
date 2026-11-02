@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   let couponId: number | null = null
   const code = String(body.coupon ?? '').trim()
   if (code) {
-    const { data: q, error: qe } = await db.rpc('coupon_quote', { p_code: code, p_plan: plan.id })
+    const { data: q, error: qe } = await db.rpc('coupon_quote', { p_code: code, p_plan: plan.id, p_user: user.id })
     const row = Array.isArray(q) ? q[0] : q
     if (qe || !row) return reply(req, { error: 'Could not check that code. Please try again.' }, 400)
     if (!row.valid) return reply(req, { error: row.message }, 400)

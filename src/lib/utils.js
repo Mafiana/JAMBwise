@@ -315,3 +315,16 @@ export function playChime() {
 
 /** Mail is what people send to support@jambwise.ng without a signed-in ticket: the contact form and the suspended-account box. */
 export const isMail = (m) => !m.user_id || m.topic === 'suspended' || Boolean(m.via_contact)
+
+/** True for an account opened in the last few days (used for the welcome box). */
+export function isNewAccount(profile, now = new Date(), days = 7) {
+  const t = profile?.created_at ? new Date(profile.created_at).getTime() : NaN
+  return Number.isFinite(t) && now.getTime() - t >= 0 && now.getTime() - t < days * 864e5
+}
+
+/** "3,200+" from a real question count (rounded down to the nearest 100); "1,000+" when the count is unknown or small. */
+export function questionsLabel(n) {
+  const v = Number(n)
+  if (!Number.isFinite(v) || v < 1000) return '1,000+'
+  return (Math.floor(v / 100) * 100).toLocaleString('en-NG') + '+'
+}

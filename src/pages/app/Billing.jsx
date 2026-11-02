@@ -44,8 +44,10 @@ export default function Billing() {
   const [applied, setApplied] = useState(null)   // { code, quotes: { student: quote, pro: quote } }
   const [codeMsg, setCodeMsg] = useState({ ok: false, text: '' })
   const [checking, setChecking] = useState(false)
-  const apply = async () => {
-    const c = code.trim().toUpperCase()
+  const [mine, setMine] = useState(null)   // my unused invite reward
+  useEffect(() => { api.myReferral().then((r) => setMine((r.coupons || []).find((c) => !c.used && !c.expired) || null)).catch(() => {}) }, [])
+  const apply = async (given) => {
+    const c = (typeof given === 'string' ? given : code).trim().toUpperCase()
     if (!c) return
     setChecking(true); setCodeMsg({ ok: false, text: '' })
     try {
@@ -77,6 +79,9 @@ export default function Billing() {
       {plan !== 'free' && expires && <p className="mut">Your <b>{plan}</b> plan is active until <b>{expires}</b>. Paying again adds 30 days.</p>}
       {profile.plan !== 'free' && plan === 'free' && <p className="err">Your paid plan expired on {expires}. Renew below to get your access back.</p>}
       <ErrorLine>{error}</ErrorLine>
+      {mine && !applied && (
+        <p className="notice" role="status">You have {mine.percent}% off from inviting a friend. <button type="button" className="linkish" onClick={() => apply(mine.code)}>Use it now</button></p>
+      )}
       <div className="coupon-box">
         <label htmlFor="cp">Have a discount code?</label>
         <div className="coupon-row">

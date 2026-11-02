@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import { initBackend, setupMissing } from './lib/supabase.js'
 import './index.css'
+import { captureReferral } from './lib/api.js'
+
+captureReferral()
 
 // choose the real Supabase or the built-in demo backend, then draw the app
 initBackend().then(() => {

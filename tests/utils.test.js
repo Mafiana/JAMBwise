@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   shuffle, sample, prepareQuestion, fmtTime, streak, effectivePlan, planLevel, daysUntil,
   summarize, weakest, scoreMock, aggregate, normalizePin, naira, dayKey, buildOverview, toCsv, pageList, ticketNo,
+  isNewAccount, questionsLabel,
 } from '../src/lib/utils.js'
 
 // deterministic "random" so shuffles are reproducible
@@ -235,4 +236,24 @@ test('pinTimeLeft counts down only in the last 3 days of a PIN student', async (
   assert.equal(pinTimeLeft(pin, exp(-1000), now), null)          // already over (the expired box handles it)
   assert.equal(pinTimeLeft({ email: 'a@b.com' }, exp(864e5), now), null)
   assert.equal(pinTimeLeft(pin, { plan: 'free', plan_expires: null }, now), null)
+})
+
+test('isNewAccount is true only for accounts opened in the last 7 days', () => {
+  const now = new Date('2026-11-01T12:00:00Z')
+  assert.equal(isNewAccount({ created_at: '2026-11-01T08:00:00Z' }, now), true)
+  assert.equal(isNewAccount({ created_at: '2026-10-27T12:00:00Z' }, now), true)
+  assert.equal(isNewAccount({ created_at: '2026-10-20T12:00:00Z' }, now), false)
+  assert.equal(isNewAccount({}, now), false)
+  assert.equal(isNewAccount(null, now), false)
+  assert.equal(isNewAccount({ created_at: '2026-11-05T12:00:00Z' }, now), false)   // a date in the future is not "new"
+})
+
+test('questionsLabel rounds down to the nearest 100 and has a safe default', () => {
+  assert.equal(questionsLabel(3278), '3,200+')
+  assert.equal(questionsLabel(1000), '1,000+')
+  assert.equal(questionsLabel(12345), '12,300+')
+  assert.equal(questionsLabel(null), '1,000+')
+  assert.equal(questionsLabel(undefined), '1,000+')
+  assert.equal(questionsLabel(420), '1,000+')
+  assert.equal(questionsLabel('abc'), '1,000+')
 })

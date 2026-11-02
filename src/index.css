@@ -1199,6 +1199,7 @@ kbd{display:inline-block;min-width:22px;padding:1px 7px;margin-right:6px;border:
 /* access PIN status */
 .tag.pin-unused{background:rgba(127,127,127,.15);color:var(--mut)}
 .tag.pin-expired{background:rgba(192,57,43,.14);color:var(--bad)}
+.tag.pin-deactivated{background:rgba(120,120,120,.18);color:var(--mut)}
 .tag.pin-used{background:var(--g2);color:var(--g)}
 .pin-late{color:var(--bad)}
 .pin-lock{border-top:4px solid var(--bad)}
@@ -1227,5 +1228,16 @@ kbd{display:inline-block;min-width:22px;padding:1px 7px;margin-right:6px;border:
 .tm-stars{color:#d5ddd8;letter-spacing:2px;font-size:15px;margin-bottom:6px}.tm-stars .on{color:#F5B301}
 .tm-name{display:block}.tm-role{display:block;font-size:13px;color:var(--mut);margin-bottom:10px}
 .tm-card blockquote{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}
-.tm-cta{text-align:center;margin-top:26px}
 @media(max-width:800px){.tm-grid,.tm-grid.n2{grid-template-columns:minmax(0,1fr);gap:34px}.tm-grid.n3 .tm-card:nth-child(2){margin-top:0}.tm-card:first-child{margin-top:12px}.tm-panel{padding:36px 16px 30px}}
+
+/* welcome box for new students */
+.welcome-box{text-align:center;padding:4px 2px 2px}
+.welcome-box .ic{margin:0 auto 12px}
+.welcome-box h3{margin:0 0 8px}
+.welcome-box p{margin:0 0 10px;color:var(--mut)}
+.welcome-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.invite-card{margin-top:16px}
+.invite-link{display:flex;gap:8px;align-items:center;margin:10px 0}
+.invite-link input{flex:1;min-width:0}
+.weak-card{margin:14px 0}
+.weak-card .tag{margin-left:6px;vertical-align:middle}

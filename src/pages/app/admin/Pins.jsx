@@ -21,9 +21,10 @@ export default function Pins() {
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{loadError}</ErrorLine>
   const used = (x) => Boolean(x.used_by || x.used_at)
-  // unused | active | expired | used (used, but the student's account is gone or could not be read)
+  // unused | active | expired | deactivated | used (used, but the student's account is gone or could not be read)
   const state = (x) => {
     if (!used(x)) return 'unused'
+    if (x.deactivated_at) return 'deactivated'
     if (!x.used_by || !x.has_status) return 'used'
     return x.expires_at && new Date(x.expires_at) <= new Date() ? 'expired' : 'active'
   }
@@ -60,13 +61,13 @@ export default function Pins() {
 
       <div className="adm-filters">
         <select aria-label="Filter PINs" value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="all">All PINs</option><option value="unused">Unused</option><option value="active">Active</option><option value="expired">Expired</option>
+          <option value="all">All PINs</option><option value="unused">Unused</option><option value="active">Active</option><option value="expired">Expired</option><option value="deactivated">Deactivated</option>
         </select>
         <button className="btn" onClick={() => downloadText('jambwise-pins.csv', toCsv(shown, [
           { label: 'PIN', value: (x) => x.pin }, { label: 'Plan', value: (x) => x.plan }, { label: 'Days', value: (x) => x.days },
           { label: 'For', value: (x) => x.student_name }, { label: 'Status', value: (x) => state(x) }, { label: 'Access ends', value: (x) => x.expires_at || '' }, { label: 'Created', value: (x) => x.created_at },
         ]))}>Export CSV</button>
-        <span className="sm">{tally('unused')} unused · {tally('active')} active · {tally('expired')} expired · {data.length} in all</span>
+        <span className="sm">{tally('unused')} unused · {tally('active')} active · {tally('expired')} expired · {tally('deactivated')} deactivated · {data.length} in all</span>
       </div>
       <div className="card tw">
         <table>
@@ -75,10 +76,11 @@ export default function Pins() {
             {shown.map((x) => (
               <tr key={x.pin}>
                 <td><b className="mono">{x.pin}</b></td><td>{x.plan}</td><td>{x.days}</td><td>{x.student_name || '–'}</td>
-                <td><span className={'tag pin-' + state(x)}>{{ unused: 'Unused', active: 'Active', expired: 'Expired', used: 'Used' }[state(x)]}</span>{used(x) && <div className="sm">Used {fmtDate(x.used_at)}</div>}</td>
+                <td><span className={'tag pin-' + state(x)}>{{ unused: 'Unused', active: 'Active', expired: 'Expired', deactivated: 'Deactivated', used: 'Used' }[state(x)]}</span>{used(x) && <div className="sm">Used {fmtDate(x.used_at)}</div>}</td>
                 <td>{state(x) === 'expired' ? <b className="pin-late">{fmtDate(x.expires_at)}</b> : x.expires_at ? fmtDate(x.expires_at) : '–'}</td><td>{fmtDate(x.created_at)}</td>
                 <td>
                   <CopyButton text={x.pin} label={'PIN ' + x.pin} />{' '}
+                  {state(x) === 'active' && <button className="btn danger" disabled={busy} onClick={async () => (await confirm({ title: 'Deactivate this PIN?', message: `${x.student_name ? `${x.student_name} (${x.pin})` : `The student using PIN ${x.pin}`} will lose access straight away and will not be able to use the app until you give them a new PIN. This cannot be undone.`, confirmLabel: 'Deactivate PIN' })) && run(async () => { await api.adminDeactivatePin(x.pin); await reload() }, 'PIN deactivated')}>Deactivate</button>}{' '}
                   {!used(x) && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this PIN?', message: `${x.pin} will stop working immediately.`, confirmLabel: 'Delete PIN' })) && run(async () => { await api.adminDeletePin(x.pin); await reload() })}>Delete</button>}
                 </td>
               </tr>

@@ -61,6 +61,11 @@ export function AuthProvider({ children }) {
     Promise.resolve(supabase.rpc('log_sign_in')).catch(() => {})   // never block anything on the log
   }, [profileId])
 
+  // a friend's invite link: hand the remembered code to the server once, right after login
+  useEffect(() => {
+    if (profileId) api.claimStoredReferral()
+  }, [profileId])
+
   // presence: tell the server once a minute that this person is here (only while the tab is visible), for Admin > Online
   useEffect(() => {
     if (!profileId) return undefined

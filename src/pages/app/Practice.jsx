@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import * as api from '../../lib/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useExam } from '../../context/ExamContext.jsx'
 import Icon from '../../components/Icons.jsx'
@@ -44,7 +46,7 @@ function Question({ s }) {
   const answered = s.sel != null
   return (
     <div className="card">
-      <div className="q-meta"><span>{SUBJECTS[s.subject].name}</span><span>Question {s.i + 1} of {s.qs.length}</span></div>
+      <div className="q-meta"><span>{SUBJECTS[s.subject].name}{s.weak ? ' · weak spots' : ''}</span><span>Question {s.i + 1} of {s.qs.length}</span></div>
       <div className="progress-line"><i style={{ width: ((s.i + (s.sel != null ? 1 : 0)) / s.qs.length) * 100 + '%' }} /></div>
       <h3><RichText text={q.body} /></h3>
       <QuestionImage q={q} />
@@ -65,9 +67,43 @@ function Question({ s }) {
   )
 }
 
+/** Pro: the questions this student keeps getting wrong, ready to re-drill. Everyone else sees what Pro adds. */
+function WeakSpots({ level, start, busy }) {
+  const nav = useNavigate()
+  const [rows, setRows] = useState(null)
+  useEffect(() => { if (level >= 2) api.weakSpots().then(setRows).catch(() => setRows([])) }, [level])
+  if (level < 2)
+    return (
+      <div className="card weak-card">
+        <h3 style={{ margin: 0 }}>Fix my weak spots <span className="tag">Pro</span></h3>
+        <p className="mut">JAMBwise remembers the questions you get wrong and drills only those, until you get each one right twice in a row.</p>
+        <button className="btn ghost" onClick={() => nav('/app/billing')}>See Pro</button>
+      </div>
+    )
+  return (
+    <div className="card weak-card">
+      <h3 style={{ margin: 0 }}>Fix my weak spots <span className="tag">Pro</span></h3>
+      {rows == null ? <p className="mut">Loading…</p> : !rows.length ? (
+        <p className="mut">Nothing here yet. Practise or take a mock, and the questions you get wrong will appear here to drill.</p>
+      ) : (
+        <>
+          <p className="mut">Questions you got wrong. Get each one right twice in a row and it leaves this list.</p>
+          <div className="chips">
+            {rows.map((r) => (
+              <button key={r.subject} className="chip" disabled={busy} onClick={() => start(r.subject)}>
+                {SUBJECTS[r.subject]?.name || r.subject} · {r.open_count}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Practice() {
   const { level } = useAuth()
-  const { practice, startPractice, endPractice } = useExam()
+  const { practice, startPractice, startWeak, endPractice } = useExam()
   const nav = useNavigate()
   const { busy, error, run } = useAction()
   const wrap = (node) => <div className="pwrap"><Side s={practice} />{node}</div>
@@ -83,6 +119,7 @@ export default function Practice() {
         <div className="row" style={{ justifyContent: 'space-between' }}><h1>Practice</h1><button className="btn ghost" onClick={() => nav('/app/dashboard')}><Icon name="back" size={16} /> Back to dashboard</button></div>
         <p className="mut">{PRACTICE_SIZE} random questions per session. Wrong answers come with a short explanation.</p>
         <ErrorLine>{error}</ErrorLine>
+        <WeakSpots level={level} busy={busy} start={(k) => run(() => startWeak(k))} />
         <div className="grid">
           {SUBJECT_KEYS.map((k) => {
             const locked = SUBJECTS[k].level > level
@@ -109,7 +146,7 @@ export default function Practice() {
         {practice.saved === 'queued' && <p className="notice" role="status"><Icon name="offline" size={16} /> You are offline. Your result is saved on this phone and will sync when you are back online.</p>}
         {practice.saved && !['saving', 'ok', 'queued'].includes(practice.saved) && <ErrorLine>{practice.saved}</ErrorLine>}
         <ErrorLine>{error}</ErrorLine>
-        <button className="btn" disabled={busy} onClick={() => run(() => startPractice(practice.subject))}>Try again</button>{' '}
+        <button className="btn" disabled={busy} onClick={() => run(() => (practice.weak ? startWeak(practice.subject) : startPractice(practice.subject)))}>{practice.weak ? 'Drill again' : 'Try again'}</button>{' '}
         <button className="btn ghost" onClick={endPractice}>Choose subject</button>{' '}<button className="btn ghost" onClick={() => { endPractice(); nav('/app/dashboard') }}>Back to dashboard</button>
       </div>
     )

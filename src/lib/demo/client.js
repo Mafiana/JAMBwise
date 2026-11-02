@@ -386,14 +386,60 @@ const rpcs = {
     const no = (message) => [{ valid: false, message, coupon_id: null, code: cd, percent: 0, list_kobo: lp, discount_kobo: 0, final_kobo: lp }]
     if (!lp) return no('Unknown plan.')
     const c = (db.coupons || []).find((x) => x.code === cd)
-    if (!c || !c.active) return no('That code is not valid.')
+    if (!c || !c.active || (c.owner_id && c.owner_id !== me())) return no('That code is not valid.')
     if (c.expires_at && new Date(c.expires_at) <= new Date()) return no('That code has expired.')
     if (c.max_uses != null && c.used_count >= c.max_uses) return no('That code has been fully used.')
     if (c.plan !== 'all' && c.plan !== a.p_plan) return no('That code is for the ' + c.plan[0].toUpperCase() + c.plan.slice(1) + ' plan only.')
     const final = Math.max(10000, Math.round((lp * (100 - c.percent)) / 100 / 100) * 100)
     return [{ valid: true, message: c.percent + '% off applied.', coupon_id: c.id, code: c.code, percent: c.percent, list_kobo: lp, discount_kobo: lp - final, final_kobo: final }]
   },
-  admin_coupons() { adminOnly(); return (db.coupons || []).slice().sort((a, b) => (a.created_at < b.created_at ? 1 : -1)) },
+  record_misses(a) {
+    const p = profileOf(me())
+    if (!p || p.plan !== 'pro' || (p.plan_expires && new Date(p.plan_expires) <= new Date())) return 0
+    db.misses = db.misses || []
+    const mine = (id) => db.misses.find((m) => m.user_id === p.id && m.question_id === id)
+    ;(a.p_right || []).forEach((id) => { const m = mine(id); if (m) m.streak += 1 })
+    db.misses = db.misses.filter((m) => !(m.user_id === p.id && m.streak >= 2))
+    let n = 0
+    ;(a.p_wrong || []).forEach((id) => {
+      const m = mine(id)
+      if (m) { m.misses += 1; m.streak = 0; n++ } else {
+        const q = allQuestions().find((x) => x.id === id)
+        if (q && db.misses.filter((x) => x.user_id === p.id).length < 500) db.misses.push({ user_id: p.id, question_id: id, subject: q.subject, misses: 1, streak: 0 })
+      }
+    })
+    save(); return n
+  },
+  weak_spots() {
+    const p = profileOf(me())
+    if (!p || p.plan !== 'pro') return []
+    const by = {}
+    ;(db.misses || []).filter((m) => m.user_id === p.id).forEach((m) => { by[m.subject] = (by[m.subject] || 0) + 1 })
+    return Object.entries(by).map(([subject, open_count]) => ({ subject, open_count })).sort((x, y) => y.open_count - x.open_count)
+  },
+  weak_question_ids(a) {
+    const p = profileOf(me())
+    if (!p || p.plan !== 'pro') return []
+    return (db.misses || []).filter((m) => m.user_id === p.id && m.subject === a.p_subject).sort((x, y) => y.misses - x.misses).slice(0, Math.min(a.p_limit || 20, 40)).map((m) => m.question_id)
+  },
+  my_referral() {
+    const p = profileOf(me())
+    if (!p.referral_code) { const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; p.referral_code = Array.from({ length: 7 }, () => al[Math.floor(Math.random() * 32)]).join(''); save() }
+    const kids = db.profiles.filter((x) => x.referred_by === p.id)
+    const coupons = (db.coupons || []).filter((c) => c.owner_id === p.id && c.source === 'referral').map((c) => ({ code: c.code, percent: c.percent, expires_at: c.expires_at, used: c.used_count >= 1, expired: new Date(c.expires_at) <= new Date() }))
+    return { code: p.referral_code, signed_up: kids.length, paid: kids.filter((x) => x.referral_paid_at).length, coupons }
+  },
+  claim_referral(a) {
+    const p = profileOf(me())
+    if (p.referred_by) return 'already'
+    if (p.is_admin || p.is_teacher) return 'staff'
+    if (Date.now() - new Date(p.created_at || Date.now()).getTime() > 7 * 864e5 || db.payments.some((x) => x.user_id === p.id && x.status === 'paid')) return 'too_late'
+    const inv = db.profiles.find((x) => x.referral_code && x.referral_code === String(a.p_code || '').trim().toUpperCase() && !x.is_admin && !x.is_teacher)
+    if (!inv) return 'unknown'
+    if (inv.id === p.id) return 'self'
+    p.referred_by = inv.id; save(); return 'ok'
+  },
+  admin_coupons() { adminOnly(); return (db.coupons || []).filter((c) => !c.owner_id).slice().sort((a, b) => (a.created_at < b.created_at ? 1 : -1)) },
   admin_save_coupon(a) {
     adminOnly()
     const code = String(a.p_code || '').trim().toUpperCase()
@@ -524,6 +570,22 @@ const rpcs = {
       Object.assign(s, { status: 'declined', decline_reason: why, reviewed_at: new Date().toISOString() })
       notify(s.submitted_by, 'review', 'Question not approved', 'Your question was not approved.' + (why ? ' Reason: ' + why : ''), '/app/admin/questions')
     }
+  },
+  public_question_count() { return allQuestions().length },
+  admin_deactivate_pin(a) {
+    adminOnly()
+    const r = db.pins.find((x) => x.pin === a.p_pin)
+    if (!r) throw new Error('That PIN does not exist.')
+    if (!r.used_by) throw new Error('This PIN has not been used yet. Delete it instead.')
+    if (r.deactivated_at) throw new Error('This PIN is already deactivated.')
+    const p = profileOf(r.used_by)
+    if (!p) throw new Error('The student of this PIN no longer exists.')
+    if (p.plan === 'free') throw new Error('This PIN did not give paid access.')
+    if (p.plan_expires && new Date(p.plan_expires) <= new Date()) throw new Error('This PIN has already expired.')
+    p.plan_expires = new Date().toISOString()
+    r.deactivated_at = new Date().toISOString()
+    log('pin.deactivate', a.p_pin)
+    return null
   },
   get_question_image(a) {
     if (!me()) throw new Error('JWT expired')
@@ -1010,6 +1072,15 @@ const functions = {
     base.setDate(base.getDate() + 30)
     db.payments.push({ reference, user_id: p.id, plan, amount_kobo: amount, discount_kobo: planRow.price_kobo - amount, status: 'paid', paid_at: new Date().toISOString(), created_at: new Date().toISOString() })
     if (used) used.used_count += 1
+    const firstPaid = db.payments.filter((x) => x.user_id === p.id && x.status === 'paid').length === 1
+    if (p.referred_by && !p.referral_paid_at && firstPaid && amount * 2 >= planRow.price_kobo) {
+      const mineOpen = (db.coupons || []).filter((c) => c.owner_id === p.referred_by && c.source === 'referral' && c.used_count === 0 && c.active && new Date(c.expires_at) > new Date()).length
+      if (mineOpen < 5) {
+        db.coupons = db.coupons || []
+        db.coupons.push({ id: Date.now(), code: 'REF' + Math.random().toString(36).slice(2, 10).toUpperCase(), percent: 15, plan: 'all', expires_at: new Date(Date.now() + 90 * 864e5).toISOString(), max_uses: 1, used_count: 0, active: true, created_at: new Date().toISOString(), owner_id: p.referred_by, source: 'referral' })
+        p.referral_paid_at = new Date().toISOString()
+      }
+    }
     Object.assign(p, { plan, plan_expires: base.toISOString() })
     save()
     return { data: { url: `${location.origin}/app/billing?reference=${reference}`, reference }, error: null }

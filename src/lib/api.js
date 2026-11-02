@@ -246,6 +246,48 @@ export function clearLocalStudentData() {
   } catch { /* storage blocked */ }
 }
 
+// ── Pro: fix my weak spots ──
+/** After a round or mock: tell the server which questions were wrong and right (it ignores anyone who is not Pro). Never blocks. */
+export function recordMisses(wrong, right) {
+  if (!wrong.length && !right.length) return Promise.resolve()
+  return Promise.resolve(supabase.rpc('record_misses', { p_wrong: wrong, p_right: right })).catch(() => {})
+}
+/** [{ subject, open_count }] */
+export async function weakSpots() {
+  const { data, error } = await supabase.rpc('weak_spots')
+  if (error) throw new Error('Could not load your weak spots.')
+  return data || []
+}
+export async function weakQuestionIds(subject) {
+  const { data, error } = await supabase.rpc('weak_question_ids', { p_subject: subject, p_limit: 20 })
+  if (error) throw new Error('Could not load your weak spots.')
+  return data || []
+}
+
+// ── invite a friend ──
+const REF_KEY = 'jw_ref'
+/** Remember a ?ref=CODE from the link the visitor came by, until they sign up or log in. */
+export function captureReferral() {
+  try {
+    const c = new URLSearchParams(window.location.search).get('ref')
+    if (c && /^[A-Za-z0-9]{4,12}$/.test(c)) localStorage.setItem(REF_KEY, c.toUpperCase())
+  } catch { /* storage blocked */ }
+}
+/** After login: hand a remembered code to the server once, then forget it. */
+export async function claimStoredReferral() {
+  let c = ''
+  try { c = localStorage.getItem(REF_KEY) || '' } catch { return }
+  if (!c) return
+  try { await supabase.rpc('claim_referral', { p_code: c }) } catch { /* never block a login on this */ }
+  try { localStorage.removeItem(REF_KEY) } catch { /* ignore */ }
+}
+/** { code, signed_up, paid, coupons: [{ code, percent, expires_at, used, expired }] } */
+export async function myReferral() {
+  const { data, error } = await supabase.rpc('my_referral')
+  if (error) throw new Error(couponReady(error) ? 'Could not load your invite link.' : 'Invites are not switched on yet.')
+  return data
+}
+
 export const startCheckout = (plan, coupon = '') => callFn('paystack-init', { plan, origin: window.location.origin, ...(coupon ? { coupon } : {}) })
 
 // ── discount codes ──
@@ -308,6 +350,23 @@ export async function adminMakePin(plan, name, days) {
   const { data, error } = await supabase.rpc('admin_make_pin', { p_plan: plan, p_name: name, p_days: days })
   if (error) fail(error, 'Could not make a PIN.')
   return data
+}
+
+/** Admin: ends the access a used PIN gave. */
+export async function adminDeactivatePin(pin) {
+  const { error } = await supabase.rpc('admin_deactivate_pin', { p_pin: pin })
+  if (error) {
+    const missing = /could not find the function|does not exist|schema cache/i.test(error.message || '') && /admin_deactivate_pin/.test(error.message || '')
+    fail(error, missing ? 'Run supabase/migrate-home-updates.sql in the Supabase SQL Editor, then try again.' : 'Could not deactivate the PIN.')
+  }
+}
+
+/** How many questions there are, for the home page. null when it cannot be read (the page then shows a safe default). */
+export async function getPublicQuestionCount() {
+  try {
+    const { data, error } = await supabase.rpc('public_question_count')
+    return error || typeof data !== 'number' ? null : data
+  } catch { return null }
 }
 
 export async function adminDeletePin(pin) {

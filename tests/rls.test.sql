@@ -1231,6 +1231,174 @@ select public.admin_set_feedback_featured(current_setting('t.fb_ok')::bigint, fa
 reset role;
 do $$ begin assert (select count(*) from public.public_testimonials()) = 0, 'hiding removes it from the website'; end $$;
 
+-- ===== PIN deactivation and the public question count =====
+select pg_temp.as_user(null);
+set local role anon;
+do $$ begin assert public.public_question_count() > 100, 'anyone can read the question count'; end $$;
+select pg_temp.expect_fail($$select public.admin_deactivate_pin('AAAA-BBBB')$$, 'anonymous cannot deactivate a PIN');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select pg_temp.expect_fail($$select public.admin_deactivate_pin('ZZZZ-ZZZZ')$$, 'a missing PIN is refused');
+do $$ declare pn text; begin
+  pn := public.admin_make_pin('student', 'Deact Test', 30);
+  perform set_config('t.dpin', pn, true);
+  begin perform public.admin_deactivate_pin(pn); raise exception 'should have failed'; exception when others then
+    assert sqlerrm like '%not been used%', 'an unused PIN cannot be deactivated: ' || sqlerrm; end;
+end $$;
+reset role;
+-- use the PIN for a fresh account
+insert into auth.users(email, raw_app_meta_data) values ('dpinuser2345@pin.jambwise.ng','{"pin":"true"}');
+do $$ declare u uuid; begin
+  select id into u from auth.users where email = 'dpinuser2345@pin.jambwise.ng';
+  perform public.redeem_pin(current_setting('t.dpin'), u);
+  assert (select plan_expires from public.profiles where id = u) > now() + interval '29 days', 'the PIN gave 30 days';
+end $$;
+select pg_temp.as_user((select id from t_ids where name='free'));
+set local role authenticated;
+select pg_temp.expect_fail($$select public.admin_deactivate_pin(current_setting('t.dpin'))$$, 'a student cannot deactivate a PIN');
+reset role;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+select public.admin_deactivate_pin(current_setting('t.dpin'));
+do $$ begin
+  assert (select deactivated_at from public.access_pins where pin = current_setting('t.dpin')) is not null, 'the PIN is marked deactivated';
+  assert (select plan_expires from public.profiles where email = 'dpinuser2345@pin.jambwise.ng') <= now(), 'the student access ends at once';
+  begin perform public.admin_deactivate_pin(current_setting('t.dpin')); raise exception 'should have failed'; exception when others then
+    assert sqlerrm like '%already deactivated%', 'deactivating twice is refused: ' || sqlerrm; end;
+end $$;
+reset role;
+
+-- ===== invite a friend (referrals) =====
+insert into auth.users(email) values ('refa@x.com'),('refb@x.com'),('refc@x.com');
+create temp table r_ids as select split_part(email,'@',1) as name, id from auth.users where email in ('refa@x.com','refb@x.com','refc@x.com');
+grant all on r_ids to anon, authenticated, service_role;
+select pg_temp.as_user((select id from r_ids where name='refa'));
+set local role authenticated;
+do $$ declare r jsonb; begin
+  r := public.my_referral();
+  assert length(r->>'code') = 7, 'a link code is made';
+  assert r->>'code' = public.my_referral()->>'code', 'the code stays the same';
+  assert public.claim_referral(r->>'code') = 'self', 'you cannot invite yourself';
+  perform set_config('t.rc', r->>'code', true);
+end $$;
+select pg_temp.expect_fail($$update public.profiles set referral_code = 'HACKED1' where id = auth.uid()$$, 'a student cannot edit their own code');
+select pg_temp.expect_fail($$update public.profiles set referred_by = auth.uid() where id = auth.uid()$$, 'a student cannot set referred_by');
+reset role;
+select pg_temp.as_user((select id from r_ids where name='refb'));
+set local role authenticated;
+do $$ begin
+  assert public.claim_referral('NOSUCH12') = 'unknown', 'an unknown code does nothing';
+  assert public.claim_referral(lower(current_setting('t.rc'))) = 'ok', 'a friend claims the link';
+  assert public.claim_referral(current_setting('t.rc')) = 'already', 'only once';
+end $$;
+reset role;
+-- the friend pays: the inviter gets one personal 15% code
+insert into public.payments (reference, user_id, plan, amount_kobo) select 'RREF1', id, 'student', 150000 from r_ids where name='refb';
+select public.fulfil_payment('RREF1', 150000);
+do $$ begin
+  assert (select count(*) from public.coupons where owner_id = (select id from r_ids where name='refa') and source='referral' and percent=15 and max_uses=1) = 1, 'the inviter got a code';
+  assert (select count(*) from public.notifications where user_id = (select id from r_ids where name='refa') and kind='referral') = 1, 'the inviter is told';
+end $$;
+-- a second payment by the friend earns nothing more
+insert into public.payments (reference, user_id, plan, amount_kobo) select 'RREF2', id, 'student', 150000 from r_ids where name='refb';
+select public.fulfil_payment('RREF2', 150000);
+do $$ begin assert (select count(*) from public.coupons where source='referral') = 1, 'only the first payment rewards'; end $$;
+-- the code works for its owner only
+select set_config('t.refcode', (select code from public.coupons where source='referral'), true);
+select pg_temp.as_user((select id from r_ids where name='refa'));
+set local role authenticated;
+do $$ declare cd text := current_setting('t.refcode'); begin
+  assert (select valid from public.coupon_quote(cd, 'student')), 'the owner can use it';
+  assert (select count(*) from public.coupon_quote(cd, 'student', (select id from r_ids where name='refc'))) = 1, 'a spoofed p_user is ignored';
+  assert (select valid from public.coupon_quote(cd, 'student', (select id from r_ids where name='refc'))), 'still the owner (login wins over p_user)';
+  assert (public.my_referral()->>'signed_up')::int = 1 and (public.my_referral()->>'paid')::int = 1, 'the counts';
+  assert jsonb_array_length(public.my_referral()->'coupons') = 1, 'the code is listed';
+end $$;
+select pg_temp.expect_fail($$select * from public.coupons$$, 'coupons stay locked');
+reset role;
+select pg_temp.as_user((select id from r_ids where name='refc'));
+set local role authenticated;
+do $$ begin assert not (select valid from public.coupon_quote(current_setting('t.refcode'), 'student')), 'someone else cannot use it'; end $$;
+select pg_temp.expect_fail($$select * from public.admin_coupons()$$, 'a student cannot list codes');
+reset role;
+select pg_temp.as_user((select id from r_ids where name='refa'));
+set local role authenticated;
+-- the service role (paystack-init) passes p_user
+reset role;
+select set_config('request.jwt.claim.sub', '', true);   -- the service role has no logged-in user
+set local role service_role;
+do $$ begin
+  assert (select valid from public.coupon_quote(current_setting('t.refcode'), 'student', (select id from r_ids where name='refa'))), 'paystack-init: owner ok';
+  assert not (select valid from public.coupon_quote(current_setting('t.refcode'), 'student', (select id from r_ids where name='refc'))), 'paystack-init: others refused';
+end $$;
+reset role;
+-- admin list hides personal codes
+select pg_temp.as_user((select id from t_ids where name='admin'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.admin_coupons() where code like 'REF%') = 0, 'personal codes are not in the admin list'; end $$;
+reset role;
+-- too-late claim: a friend who has already paid cannot be claimed
+select pg_temp.as_user((select id from r_ids where name='refc'));
+insert into public.payments (reference, user_id, plan, amount_kobo, status) select 'RREF3', id, 'student', 150000, 'paid' from r_ids where name='refc';
+set local role authenticated;
+do $$ begin assert public.claim_referral(current_setting('t.rc')) = 'too_late', 'a paying account cannot be claimed'; end $$;
+reset role;
+delete from auth.users where email in ('refa@x.com','refb@x.com','refc@x.com');
+
+-- ===== Pro: fix my weak spots =====
+insert into auth.users(email) values ('weakpro@x.com'),('weakstu@x.com'),('weakoth@x.com');
+update public.profiles set plan='pro', plan_expires = now() + interval '10 days' where email = 'weakpro@x.com';
+update public.profiles set plan='student', plan_expires = now() + interval '10 days' where email = 'weakstu@x.com';
+update public.profiles set plan='pro', plan_expires = now() + interval '10 days' where email = 'weakoth@x.com';
+create temp table w_ids as select split_part(email,'@',1) as name, id from auth.users where email in ('weakpro@x.com','weakstu@x.com','weakoth@x.com');
+grant all on w_ids to anon, authenticated, service_role;
+create temp table w_q as select id from public.questions where subject='mat' order by id limit 5;
+grant all on w_q to authenticated;
+select pg_temp.as_user((select id from w_ids where name='weakstu'));
+set local role authenticated;
+do $$ begin
+  assert public.record_misses((select array_agg(id) from w_q), '{}') = 0, 'a Student-plan account records nothing';
+  assert not public.is_pro(), 'student is not pro';
+  assert (select count(*) from public.weak_spots()) = 0, 'and sees no weak spots';
+end $$;
+select pg_temp.expect_fail($$select * from public.question_misses$$, 'the table is locked');
+reset role;
+select pg_temp.as_user((select id from w_ids where name='weakpro'));
+set local role authenticated;
+do $$ declare ids bigint[] := (select array_agg(id order by id) from w_q); begin
+  assert public.is_pro(), 'pro is pro';
+  perform public.record_misses(ids[1:3], '{}');
+  assert (select open_count from public.weak_spots() where subject='mat') = 3, 'three weak questions are remembered';
+  perform public.record_misses(ids[1:1], '{}');
+  assert (public.weak_question_ids('mat'))[1] = ids[1], 'the most-missed comes first';
+  assert cardinality(public.weak_question_ids('mat')) = 3 and cardinality(public.weak_question_ids('eng')) = 0, 'ids are per subject';
+  perform public.record_misses('{}', ids[2:3]);
+  assert (select open_count from public.weak_spots() where subject='mat') = 3, 'once right is not enough';
+  perform public.record_misses('{}', ids[2:3]);
+  assert (select open_count from public.weak_spots() where subject='mat') = 1, 'twice right in a row clears them';
+  perform public.record_misses(ids[1:1], '{}');
+  perform public.record_misses('{}', ids[1:1]);
+  perform public.record_misses(ids[1:1], '{}');
+  perform public.record_misses('{}', ids[1:1]);
+  assert (select open_count from public.weak_spots() where subject='mat') = 1, 'a miss in between resets the streak';
+  begin perform public.record_misses((select array_agg(g) from generate_series(1,301) g), '{}'); raise exception 'should have failed'; exception when others then
+    assert sqlerrm like '%too many%', 'oversized calls are refused'; end;
+end $$;
+reset role;
+select pg_temp.as_user((select id from w_ids where name='weakoth'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.weak_spots()) = 0 and cardinality(public.weak_question_ids('mat')) = 0, 'nobody sees another student''s weak spots'; end $$;
+reset role;
+-- when the plan ends the list is hidden
+update public.profiles set plan_expires = now() - interval '1 day' where email = 'weakpro@x.com';
+select pg_temp.as_user((select id from w_ids where name='weakpro'));
+set local role authenticated;
+do $$ begin assert (select count(*) from public.weak_spots()) = 0 and public.record_misses((select array_agg(id) from w_q), '{}') = 0, 'an expired Pro sees and records nothing'; end $$;
+reset role;
+delete from auth.users where email in ('weakpro@x.com','weakstu@x.com','weakoth@x.com');
+do $$ begin assert (select count(*) from public.question_misses) = 0, 'deleting an account clears its weak spots'; end $$;
+
 -- ===== account deletion keeps payments, clears PIN references =====
 delete from auth.users where email='other@x.com';
 do $$ begin assert (select count(*) from public.payments where reference='R2')=1,'payment kept'; end $$;

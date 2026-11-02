@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import * as api from '../lib/api.js'
 
 const initials = (name) => String(name || '?').replace(/\./g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
 
 /** "Trusted by students": real feedback the Admin chose to show. Renders nothing until there is some. */
-export default function Testimonials({ signedIn = false }) {
+export default function Testimonials() {
   const [items, setItems] = useState([])
   useEffect(() => {
     let live = true
@@ -18,7 +17,7 @@ export default function Testimonials({ signedIn = false }) {
       <div className="tm-panel">
         <div className="band-head">
           <h2>Trusted by students across Nigeria</h2>
-          <p>Real words from people who practise on JAMBwise.</p>
+          <p>Real words from students who practise on JAMBwise.</p>
         </div>
         <div className={'tm-grid n' + Math.min(items.length, 3)}>
           {items.map((t) => (
@@ -31,7 +30,6 @@ export default function Testimonials({ signedIn = false }) {
             </figure>
           ))}
         </div>
-        <div className="tm-cta"><Link className="btn lg" to={signedIn ? '/app/dashboard' : '/auth/signup'}>{signedIn ? 'Continue practising' : 'Start free'}</Link></div>
       </div>
     </section>
   )

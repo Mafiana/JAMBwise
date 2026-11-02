@@ -8,6 +8,7 @@ import Icon from './Icons.jsx'
 import { AnnouncementBanner } from './Announcements.jsx'
 import NotificationBell from './NotificationBell.jsx'
 import OfflineBanner from './OfflineBanner.jsx'
+import WelcomeModal from './WelcomeModal.jsx'
 import Prefetch from './Prefetch.jsx'
 import * as api from '../lib/api.js'
 import { isMail, playChime } from '../lib/utils.js'
@@ -225,6 +226,7 @@ export default function AppLayout() {
           {!inExam && <AnnouncementBanner />}
           <ExamBanner />
           <Prefetch />
+          {!isStaff && !inExam && <WelcomeModal key={profile.id} profile={profile} />}
           <Outlet />
         </main>
       </div>

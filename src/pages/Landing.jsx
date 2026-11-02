@@ -11,6 +11,8 @@ import ParentForm from '../components/ParentForm.jsx'
 import InstitutionPicker from '../components/InstitutionPicker.jsx'
 import { HOW, SUBJECT_KEYS } from '../lib/constants.js'
 import { useAction, usePlans } from '../hooks.js'
+import * as api from '../lib/api.js'
+import { questionsLabel } from '../lib/utils.js'
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
@@ -52,6 +54,8 @@ export default function Landing() {
   const plans = usePlans()
   const [scrolled, setScrolled] = useState(false)
   const [menu, setMenu] = useState(false)   // the phone menu
+  const [qCount, setQCount] = useState(null)   // the real number of questions
+  useEffect(() => { let live = true; api.getPublicQuestionCount().then((n) => { if (live) setQCount(n) }); return () => { live = false } }, [])
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 8)
     f()
@@ -129,7 +133,7 @@ export default function Landing() {
       <section className="wrap" style={{ paddingTop: 24 }}>
         <div className="stats">
           <div><b>{SUBJECT_KEYS.length}</b><span>subjects to practise</span></div>
-          <div><b>600+</b><span>questions with explanations</span></div>
+          <div><b>{questionsLabel(qCount)}</b><span>questions with explanations</span></div>
           <div><b>400</b><span>point mock score, like the UTME</span></div>
           <div><b>40s</b><span>per question, the real pace</span></div>
         </div>
@@ -161,7 +165,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <Testimonials signedIn={Boolean(session)} />
+      <Testimonials />
 
       <section className="wrap band" id="pricing" style={{ paddingTop: 16 }}>
         <div className="band-head">
