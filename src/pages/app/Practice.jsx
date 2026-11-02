@@ -77,7 +77,7 @@ function WeakSpots({ level, start, busy }) {
       <div className="card weak-card">
         <h3 style={{ margin: 0 }}>Fix my weak spots <span className="tag">Pro</span></h3>
         <p className="mut">JAMBwise remembers the questions you get wrong and drills only those, until you get each one right twice in a row.</p>
-        <button className="btn ghost" onClick={() => nav('/app/billing')}>See Pro</button>
+        <button className="btn ghost" onClick={() => nav('/app/billing')}><Icon name="crown" size={16} /> See Pro</button>
       </div>
     )
   return (

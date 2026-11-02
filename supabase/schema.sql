@@ -988,7 +988,7 @@ create policy att_delete on public.attempts for delete to authenticated using (u
 
 create policy q_read on public.questions for select to authenticated using (public.has_access(subject) or public.is_staff());
 create policy q_admin_ins on public.questions for insert to authenticated with check (public.is_admin());   -- teachers send questions for review instead (see the end of this file)
-create policy q_admin_upd on public.questions for update to authenticated using (public.is_staff()) with check (public.is_staff());
+create policy q_admin_upd on public.questions for update to authenticated using (public.is_admin()) with check (public.is_admin());   -- teachers cannot edit questions: they contact the admin
 create policy q_admin_del on public.questions for delete to authenticated using (public.is_admin());
 
 create policy plans_admin_upd on public.plans for update to authenticated using (public.is_admin()) with check (public.is_admin());

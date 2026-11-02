@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { Avatar, ErrorLine } from '../../components/ui.jsx'
 import { PICKABLE, SUBJECTS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
+import PlanBadge from '../../components/PlanBadge.jsx'
 import InviteCard from '../../components/InviteCard.jsx'
 import PinCountdown from '../../components/PinCountdown.jsx'
 
@@ -31,7 +32,7 @@ function toAvatar(file) {
 }
 
 export default function Profile() {
-  const { profile, saveProfile, isTeacher } = useAuth()
+  const { profile, saveProfile, isTeacher, plan } = useAuth()
   const nav = useNavigate()
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({
@@ -66,7 +67,7 @@ export default function Profile() {
   return (
     <>
       <PinCountdown />
-      <h1>My Profile</h1>
+      <div className="row" style={{ gap: 12, alignItems: 'center' }}><h1 style={{ margin: 0 }}>My Profile</h1>{!isTeacher && <PlanBadge plan={plan} />}</div>
       <p className="mut">{isTeacher ? 'Your name and photo, as the admin and students see them.' : 'Complete your profile so JAMBwise can track your preparation.'}</p>
       <div className="card">
         <div className="photo-row">
