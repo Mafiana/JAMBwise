@@ -18,6 +18,8 @@ grant execute on function pg_temp.expect_fail(text,text), pg_temp.as_user(uuid) 
 insert into auth.users(email, raw_user_meta_data) values ('free@x.com','{"full_name":"Free User"}'),('paid@x.com','{}'),('admin@x.com','{}'),('other@x.com','{}');
 insert into t_ids select split_part(email,'@',1), id from auth.users;
 update public.profiles set plan='student', plan_expires=now()+interval '10 days' where email='paid@x.com';
+-- a complete profile (photo, course, university, 3 subjects) is needed to write the CBT Mock or ExamHall
+update public.profiles set avatar='data:image/jpeg;base64,AAAA', course='Medicine', school='UNILAG', subjects='{mat,phy,chm}' where email='paid@x.com';
 update public.profiles set is_admin=true where email='admin@x.com';
 do $$ begin
   assert (select count(*) from public.profiles)=4, 'profile trigger';
@@ -66,13 +68,24 @@ reset role;
 set local role authenticated;
 select pg_temp.as_user((select id from t_ids where name='paid'));
 do $$ begin assert (select count(*) from public.questions where subject='phy')>0, 'paid reads physics'; end $$;
+reset role;
+update public.profiles set avatar=null where email='paid@x.com';
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+select pg_temp.expect_fail($$insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'phy',3,5,'mock',60)$$, 'mock with an incomplete profile');
+reset role;
+update public.profiles set avatar='data:image/jpeg;base64,AAAA' where email='paid@x.com';
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
 insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'phy',3,5,'mock',60);
 -- one mock per student: a second scored mock is refused, the plain subject rows of the same mock are fine, and a student cannot delete a mock to write again
-select pg_temp.expect_fail($$insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'eng',4,5,'mock',320)$$, 'second mock refused');
+insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'eng',4,5,'mock',320);   -- the 2nd CBT Mock is free
+select pg_temp.expect_fail($$insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'eng',4,5,'mock',330)$$, 'third mock refused without XP');
+select pg_temp.expect_fail($$select public.buy_mock_retake()$$, 'buying a retake with no XP');
 insert into public.attempts(user_id,subject,correct,total,kind) values (auth.uid(),'eng',4,5,'mock');
 delete from public.attempts where user_id=auth.uid() and kind='mock';
 do $$ begin
-  assert (select count(*) from public.attempts where kind='mock' and mock_score is not null)=1, 'student can read their own CBT Mock score';
+  assert (select count(*) from public.attempts where kind='mock' and mock_score is not null)=2, 'student can read their own CBT Mock score';
   assert public.my_exam_status('mock') is not null, 'status shows the mock was submitted';
 end $$;
 -- ExamHall: same one-attempt rule, but the student can never read the score back
@@ -91,9 +104,46 @@ delete from public.attempts where user_id=auth.uid() and kind='practice';
 do $$ begin assert (select count(*) from public.attempts where user_id=auth.uid() and kind='practice')=0, 'student can clear practice history'; end $$;
 reset role;
 do $$ begin
-  assert (select count(*) from public.attempts where kind='mock' and mock_score is not null and user_id=(select id from t_ids where name='paid'))=1, 'a submitted mock survives the student deleting';
+  assert (select count(*) from public.attempts where kind='mock' and mock_score is not null and user_id=(select id from t_ids where name='paid'))=2, 'a submitted mock survives the student deleting';
   assert (select count(*) from public.attempts where kind='hall' and mock_score=310 and user_id=(select id from t_ids where name='paid'))=1, 'a submitted ExamHall survives the student deleting';
 end $$;
+
+-- ===== XP: earned by practice (capped per day), spent on a CBT Mock retake =====
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+insert into public.attempts(user_id,subject,correct,total,kind) values (auth.uid(),'eng',60,60,'practice');
+insert into public.attempts(user_id,subject,correct,total,kind) values (auth.uid(),'eng',60,60,'practice');
+insert into public.attempts(user_id,subject,correct,total,kind) values (auth.uid(),'eng',5,5,'practice');
+do $$ begin
+  assert (public.my_xp()->>'balance')::int = 100, 'practice XP is capped at 100 a day';
+  assert (public.my_xp()->>'sittings')::int = 2 and (public.my_xp()->>'cost')::int = 2000, 'xp summary';
+end $$;
+select pg_temp.expect_fail($$select public.buy_mock_retake()$$, 'not enough XP');
+select pg_temp.expect_fail($$insert into public.xp_ledger(user_id,delta,reason) values (auth.uid(),5000,'practice')$$, 'student writes own XP');
+select pg_temp.expect_fail($$select * from public.xp_ledger$$, 'student reads the ledger table');
+reset role;
+insert into public.xp_ledger(user_id,delta,reason) values ((select id from t_ids where name='paid'),2000,'practice');
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+do $$ begin
+  assert (public.buy_mock_retake()->>'balance')::int = 100, 'buying a retake costs 2000 XP';
+  assert (public.my_xp()->>'paid_retakes')::int = 1, 'a paid retake is waiting';
+end $$;
+select pg_temp.expect_fail($$select public.buy_mock_retake()$$, 'paying twice for one retake');
+insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'eng',4,5,'mock',350);   -- the paid 3rd sitting
+insert into public.attempts(user_id,subject,correct,total,kind) values (auth.uid(),'phy',2,5,'mock');                   -- plain subject rows are never blocked
+select pg_temp.expect_fail($$insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values (auth.uid(),'eng',4,5,'mock',360)$$, 'the paid retake is used up');
+do $$ begin
+  assert (public.my_xp()->>'paid_retakes')::int = 0 and (public.my_xp()->>'sittings')::int = 3, 'retake used';
+  assert public.reset_my_progress() >= 3, 'reset clears practice history';
+  assert (select count(*) from public.attempts where kind='practice' and user_id=auth.uid())=0, 'practice cleared';
+  assert (select count(*) from public.attempts where kind='mock' and mock_score is not null and user_id=auth.uid())=3, 'reset keeps submitted mocks';
+  assert (public.my_xp()->>'balance')::int = 100, 'reset keeps XP';
+end $$;
+reset role;
+set local role anon;
+select pg_temp.expect_fail($$select public.my_xp()$$, 'anon reads XP');
+reset role;
 
 -- expired plan loses access
 update public.profiles set plan_expires=now()-interval '1 day' where email='paid@x.com';
@@ -354,7 +404,7 @@ end $$;
 select public.mark_notifications_read((select id from public.my_notifications() limit 1));
 do $$ begin assert (select count(*) from public.my_notifications() where read_at is null) = 0, 'marked read'; end $$;
 select pg_temp.as_user((select id from t_ids where name='free'));
-do $$ begin assert (select count(*) from public.my_notifications()) = 0, 'a student who did not sit gets no result alert'; end $$;
+do $$ begin assert (select count(*) from public.my_notifications() where kind = 'result') = 1, 'a student who did not sit also gets the result alert'; end $$;
 select pg_temp.expect_fail($$insert into public.notifications(user_id, kind, title) values (auth.uid(), 'result', 'fake')$$, 'student writes a notification');
 select pg_temp.expect_fail($$update public.notifications set read_at = null$$, 'student edits notifications directly');
 select pg_temp.as_user((select id from t_ids where name='admin'));
@@ -814,6 +864,7 @@ do $$ begin
 end $$;
 reset role;
 insert into public.attempts(user_id,subject,correct,total,kind) values ((select id from t_ids where name='insta'),'eng',9,10,'practice'),((select id from t_ids where name='instb'),'eng',4,10,'practice');
+update public.profiles set avatar='data:image/jpeg;base64,AAAA', course='Law', school='UI', subjects='{mat,phy,chm}' where email in ('insta@x.com','instb@x.com');
 insert into public.attempts(user_id,subject,correct,total,kind,mock_score) values ((select id from t_ids where name='insta'),'eng',30,40,'hall',301),((select id from t_ids where name='instb'),'eng',20,40,'hall',250);
 insert into public.messages(name,email,topic,body,user_id,status) values ('A','insta@x.com','general','ticket from school A',(select id from t_ids where name='insta'),'new'),('B','instb@x.com','general','ticket from school B',(select id from t_ids where name='instb'),'new');
 -- the assigned teacher sees only school A
@@ -1398,6 +1449,28 @@ do $$ begin assert (select count(*) from public.weak_spots()) = 0 and public.rec
 reset role;
 delete from auth.users where email in ('weakpro@x.com','weakstu@x.com','weakoth@x.com');
 do $$ begin assert (select count(*) from public.question_misses) = 0, 'deleting an account clears its weak spots'; end $$;
+
+-- ===== ExamHall bells: admin hears when a student starts; every student hears when results are released =====
+delete from public.notifications;
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='paid'));
+select public.log_exam_event('hall','started',now(),null);
+select public.log_exam_event('mock','started',now(),null);
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications where kind='exam' and user_id=(select id from t_ids where name='admin'))=1, 'admin is told a student entered ExamHall (not for the CBT mock)';
+end $$;
+set local role authenticated;
+select pg_temp.as_user((select id from t_ids where name='admin'));
+select public.admin_set_results_released('hall', false);
+select public.admin_set_results_released('hall', true);
+reset role;
+do $$ begin
+  assert (select count(*) from public.notifications n join public.profiles p on p.id=n.user_id where n.kind='result' and not p.is_admin and not p.is_teacher and not p.suspended)
+       = (select count(*) from public.profiles where not is_admin and not is_teacher and not suspended), 'every active student is told results are out (also those who did not sit)';
+  assert (select count(*) from public.notifications n join public.profiles p on p.id=n.user_id where n.kind='result' and (p.suspended or p.is_teacher))=0, 'suspended students and teachers are not told';
+  assert (select count(*) from public.notifications where kind='result' and user_id=(select id from t_ids where name='admin'))=0, 'admin is not told';
+end $$;
 
 -- ===== account deletion keeps payments, clears PIN references =====
 delete from auth.users where email='other@x.com';

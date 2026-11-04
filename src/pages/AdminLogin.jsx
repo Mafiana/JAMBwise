@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo, Spinner } from '../components/ui.jsx'
+import GoogleG from '../components/GoogleG.jsx'
 import PasswordInput from '../components/PasswordInput.jsx'
 import { useAction } from '../hooks.js'
 import { supabase } from '../lib/supabase.js'
@@ -9,7 +10,7 @@ import * as api from '../lib/api.js'
 
 /** yoursite/admin: the Admin's own login. Teachers sign in from the home page (For institutions) and students from the normal login; anyone else is refused here. */
 export default function AdminLogin() {
-  const { session, profile, profileLoading, isAdmin, signIn, signOut } = useAuth()
+  const { session, profile, profileLoading, isAdmin, signIn, signInWithGoogle, signOut } = useAuth()
   const { busy, error, run } = useAction()
   const [f, setF] = useState({ email: '', password: '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
@@ -56,6 +57,10 @@ export default function AdminLogin() {
         <PasswordInput id="ap" value={f.password} onChange={set('password')} placeholder="Password" autoComplete="current-password" />
         <ErrorLine>{error}</ErrorLine>
         <button className="btn w" disabled={busy}>{busy ? 'Please wait…' : 'Log in'}</button>
+        <div className="or-line"><span>or</span></div>
+        <button type="button" className="btn ghost w gbtn" disabled={busy} onClick={() => run(() => signInWithGoogle('/app/admin'))}>
+          <GoogleG /> Continue with Google
+        </button>
         <p className="mut"><Link to="/auth/forgot">Forgot password?</Link></p>
       </form>
     </div>

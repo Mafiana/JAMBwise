@@ -67,6 +67,8 @@ export const FAQ = [
   ['How does the CBT mock work?', 'Choose your 3 subjects. You get English plus those subjects, with a countdown at the real exam pace of 40 seconds a question, scored out of 400.'],
   ['How do I get an Access PIN?', 'Your tutor, school or the JAMBwise team can give you one. Type it in the Access PIN box on the homepage to get in without an email.'],
   ['Can I use JAMBwise on my phone?', 'Yes. It works in any modern phone browser.'],
+  ['Where or how can I get my Parent Code?', 'Log in, open Settings and find the "Parent access" box. Tap "Make a parent code". Share the code and your Student ID (shown in the same box) with your parent or guardian. They enter both under "Parents" on the JAMBwise home page. The code lasts 7 days and you can renew it or switch it off any time.'],
+  ['How many times can I write the CBT mock?', 'You can write the CBT mock 2 times for free. After that, each extra CBT mock costs 2000 XP. You earn 1 XP for every practice question you answer correctly (up to 100 XP a day), and you can see your XP under My Progress.'],
   ['How do I change my plan?', 'Open Plans in the sidebar and choose a plan. You pay securely with Paystack and your plan is active for 30 days.'],
   ['How is my data kept?', 'Read our Privacy Policy. You can delete your account any time in Settings.'],
 ]

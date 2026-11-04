@@ -11,6 +11,7 @@ import { useAction } from '../../hooks.js'
 import { useLoad } from './admin/shared.jsx'
 import InstallApp from '../../components/InstallApp.jsx'
 import { useConfirm } from '../../components/Confirm.jsx'
+import Modal from '../../components/Modal.jsx'
 
 function Password() {
   const { setPassword } = useAuth()
@@ -34,23 +35,33 @@ function Password() {
 }
 
 function Danger() {
-  const { user, signOut, isTeacher } = useAuth()
+  const { user, signOut, isStaff: isTeacher } = useAuth()
   const { refreshAttempts } = useExam()
   const nav = useNavigate()
   const reset = useAction()
   const del = useAction()
   const confirm = useConfirm()
   const [text, setText] = useState('')
+  const [ask, setAsk] = useState(false)   // the Reset progress pop-up
   return (
     <div className="card">
       <h3>Danger zone</h3>
-      <p className="mut">{isTeacher ? 'Deleting removes your teacher account for good.' : 'Reset clears your practice history (a submitted CBT mock stays on record). Deleting removes your account and results for good.'}</p>
+      <p className="mut">{isTeacher ? 'Deleting removes your account for good.' : 'Reset clears your practice history (your XP and a submitted CBT mock stay on record). Deleting removes your account and results for good.'}</p>
       <ErrorLine>{reset.error}</ErrorLine>
-      {!isTeacher && <button className="btn ghost" disabled={reset.busy} onClick={async () => {
-        if (await confirm({ title: 'Reset your progress?', message: 'Your practice history and scores will be cleared. A submitted CBT mock stays on record. This cannot be undone.', confirmLabel: 'Reset progress' })) {
-          reset.run(async () => { await api.deleteMyAttempts(user.id); refreshAttempts() })
-        }
-      }}>Reset progress</button>}
+      {!isTeacher && <button type="button" className="btn ghost" onClick={() => { reset.setError(''); setAsk(true) }}>Reset progress</button>}
+      {ask && (
+        <Modal title="Reset your progress?" onClose={() => !reset.busy && setAsk(false)}>
+          <p className="mut">Your practice history and weak-spot list will be cleared. Your XP and any submitted CBT mock or ExamHall result stay on record. This cannot be undone.</p>
+          <ErrorLine>{reset.error}</ErrorLine>
+          <div className="modal-actions">
+            <button type="button" className="btn ghost" disabled={reset.busy} onClick={() => setAsk(false)}>Cancel</button>
+            <button type="button" className="btn danger" disabled={reset.busy} onClick={async () => {
+              const ok = await reset.run(async () => { await api.resetMyProgress(user.id); refreshAttempts(); return true }, 'Progress reset')
+              if (ok) setAsk(false)
+            }}>{reset.busy ? 'Resetting…' : 'Yes, reset progress'}</button>
+          </div>
+        </Modal>
+      )}
       <label htmlFor="dl">{!isTeacher && <br />}Type DELETE to delete your account</label>
       <input id="dl" value={text} onChange={(e) => setText(e.target.value)} autoComplete="off" />
       <ErrorLine>{del.error}</ErrorLine>
@@ -120,7 +131,8 @@ function ParentAccess() {
 }
 
 export default function Settings() {
-  const { user, profile, plan, isStaff, isTeacher } = useAuth()
+  const { user, profile, plan, isStaff, isAdmin } = useAuth()
+  const isTeacher = isStaff   // admin and teachers see no student items (plan, reg number, billing, support)
   const { dark, setTheme } = useTheme()
   const isPin = user.email?.endsWith('@pin.jambwise.ng')
   return (
@@ -138,7 +150,7 @@ export default function Settings() {
         <h3>Account</h3>
         <div className="ln"><span>Login email</span><b>{user.email}</b></div>
         {isTeacher
-          ? <div className="ln"><span>Role</span><b>Teacher</b></div>
+          ? <div className="ln"><span>Role</span><b>{isAdmin ? 'Admin' : 'Teacher'}</b></div>
           : <><div className="ln"><span>Plan</span><b>{plan}</b></div>
             <div className="ln"><span>JAMBwise number</span><b>{profile.reg_number}</b></div></>}
         <div className="ln"><span>Joined</span><b>{new Date(profile.created_at).toLocaleDateString('en-NG')}</b></div>

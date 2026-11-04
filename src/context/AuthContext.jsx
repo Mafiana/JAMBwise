@@ -121,10 +121,10 @@ export function AuthProvider({ children }) {
       try { await supabase.rpc('teacher_signed_in') } catch { /* never block a login on a notification */ }
     },
     /** Google sign-in. On a real project this leaves the page for Google and comes back signed in; the new-user trigger makes the profile. */
-    async signInWithGoogle() {
+    async signInWithGoogle(path = '/app/dashboard') {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/app/dashboard', queryParams: { prompt: 'select_account' } },
+        options: { redirectTo: window.location.origin + (typeof path === 'string' ? path : '/app/dashboard'), queryParams: { prompt: 'select_account' } },
       })
       if (error) throw new Error(/provider is not enabled|Unsupported provider/i.test(error.message) ? 'Google sign-in is not switched on yet. Please use your email and password.' : error.message)
     },

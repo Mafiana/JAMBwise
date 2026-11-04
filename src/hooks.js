@@ -31,6 +31,19 @@ export function useMyExam(uid, kind) {
   return state
 }
 
+/** The student's XP summary (null until loaded, or when the database has no XP update yet). `reload` fetches it again. */
+export function useXp() {
+  const { version } = useExam()
+  const [state, setState] = useState({ loading: true, xp: null, error: '' })
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    let alive = true
+    api.myXp().then((xp) => alive && setState({ loading: false, xp, error: '' }), (e) => alive && setState({ loading: false, xp: null, error: e.message }))
+    return () => { alive = false }
+  }, [version, n])
+  return { ...state, reload: () => setN((x) => x + 1), set: (xp) => setState({ loading: false, xp, error: '' }) }
+}
+
 /** Plans with live prices from the database; falls back to the built-in prices if the request fails. */
 export function usePlans() {
   // the last prices we got are remembered, so a reload shows the right price straight away; with nothing remembered yet the price stays blank until it arrives (never the old built-in one)

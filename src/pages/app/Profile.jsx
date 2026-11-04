@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { Avatar, ErrorLine } from '../../components/ui.jsx'
 import { PICKABLE, SUBJECTS } from '../../lib/constants.js'
 import { useAction } from '../../hooks.js'
+import { profileCompletion } from '../../lib/profileCompletion.js'
 import PlanBadge from '../../components/PlanBadge.jsx'
 import InviteCard from '../../components/InviteCard.jsx'
 import PinCountdown from '../../components/PinCountdown.jsx'
@@ -32,7 +33,7 @@ function toAvatar(file) {
 }
 
 export default function Profile() {
-  const { profile, saveProfile, isTeacher, plan } = useAuth()
+  const { profile, saveProfile, isStaff, plan } = useAuth()
   const nav = useNavigate()
   const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({
@@ -67,8 +68,18 @@ export default function Profile() {
   return (
     <>
       <PinCountdown />
-      <div className="row" style={{ gap: 12, alignItems: 'center' }}><h1 style={{ margin: 0 }}>My Profile</h1>{!isTeacher && <PlanBadge plan={plan} />}</div>
-      <p className="mut">{isTeacher ? 'Your name and photo, as the admin and students see them.' : 'Complete your profile so JAMBwise can track your preparation.'}</p>
+      <div className="row" style={{ gap: 12, alignItems: 'center' }}><h1 style={{ margin: 0 }}>My Profile</h1>{!isStaff && <PlanBadge plan={plan} />}</div>
+      <p className="mut">{isStaff ? 'Your name and photo, as students see them.' : 'Complete your profile so JAMBwise can track your preparation.'}</p>
+      {!isStaff && (() => {
+        const c = profileCompletion(f)
+        return (
+          <div className="card pf-pct">
+            <div className="pf-pct-top"><b>Profile {c.pct}% complete</b>{c.pct === 100 && <span className="sm">All done</span>}</div>
+            <div className="pg-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={c.pct} aria-label="Profile completion"><i style={{ width: c.pct + '%' }} /></div>
+            {c.missing.length > 0 && <p className="sm" style={{ margin: '8px 0 0' }}>Still to add: {c.missing.join(', ')}.</p>}
+          </div>
+        )
+      })()}
       <div className="card">
         <div className="photo-row">
           <div className="photo-land">
@@ -81,8 +92,8 @@ export default function Profile() {
         </div>
         <label htmlFor="pn">Full name</label>
         <input id="pn" value={f.full_name} onChange={set('full_name')} maxLength={100} />
-        {isTeacher && (<><label htmlFor="pe">Login email</label><input id="pe" value={profile.email || ''} readOnly /></>)}
-        {!isTeacher && (
+        {isStaff && (<><label htmlFor="pe">Login email</label><input id="pe" value={profile.email || ''} readOnly /></>)}
+        {!isStaff && (
           <>
             <label htmlFor="rn">JAMBwise registration number</label>
             <input id="rn" value={profile.reg_number} readOnly />
@@ -104,7 +115,7 @@ export default function Profile() {
         <ErrorLine>{error}</ErrorLine>
         <button className="btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
       </div>
-      {!isTeacher && <InviteCard />}
+      {!isStaff && <InviteCard />}
     </>
   )
 }

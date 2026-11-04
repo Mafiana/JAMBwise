@@ -235,10 +235,27 @@ function from(name) {
           if (!ok) return err('new row violates row-level security policy')
           // one CBT Mock and one ExamHall per student, like the database trigger
           if (r.kind !== 'practice' && r.mock_score != null) {
+            if (!(p.avatar && String(p.course || '').trim() && String(p.school || '').trim() && String(p.full_name || '').trim() && (p.subjects || []).length >= 3)) return err('profile_incomplete: Complete your profile to 100% before you write this exam.')
             const w = db.examSettings[r.kind]
             if (w?.opens_at && Date.now() < new Date(w.opens_at).getTime()) return err('exam_not_open: This exam has not opened yet.')
-            if (scored.has(r.kind)) return err('mock_already_taken: You have already submitted this exam.')
-            scored.add(r.kind)
+            if (r.kind === 'hall') {
+              if (scored.has('hall')) return err('mock_already_taken: You have already submitted this exam.')
+              scored.add('hall')
+            } else {
+              // CBT Mock: 2 free sittings, then one paid retake each (same rules as supabase/migrate-xp.sql)
+              const n = db.attempts.filter((x) => x.user_id === uid && x.kind === 'mock' && x.mock_score != null).length
+              if (n >= XP_CFG.free) {
+                const tok = (db.retakes ||= []).find((t) => t.user_id === uid && !t.used_at)
+                if (!tok) return err('mock_limit: You have already used your free CBT mocks. Spend XP on the CBT Mock page to write again.')
+                tok.used_at = new Date().toISOString()
+              }
+            }
+          }
+          if (r.kind === 'practice') {
+            const day = new Date().toDateString()
+            const got = (db.xp ||= []).filter((x) => x.user_id === uid && x.reason === 'practice' && new Date(x.created_at).toDateString() === day).reduce((a, x) => a + x.delta, 0)
+            const give = Math.min(r.correct, XP_CFG.daily_cap - got)
+            if (give > 0) db.xp.push({ user_id: uid, delta: give, reason: 'practice', created_at: new Date().toISOString() })
           }
           db.attempts.push({ id: db.nextAttempt++, created_at: new Date().toISOString(), mock_score: null, ...r })
         }
@@ -375,7 +392,39 @@ const randomPin = () => {
   do pin = part() + '-' + part(); while (db.pins.some((x) => x.pin === pin))
   return pin
 }
+const XP_CFG = { free: 2, cost: 2000, daily_cap: 100 }
+function xpSummary(uid) {
+  const led = (db.xp ||= []).filter((x) => x.user_id === uid)
+  const day = new Date().toDateString()
+  return {
+    balance: led.reduce((a, x) => a + x.delta, 0), earned: led.filter((x) => x.delta > 0).reduce((a, x) => a + x.delta, 0),
+    today: led.filter((x) => x.reason === 'practice' && new Date(x.created_at).toDateString() === day).reduce((a, x) => a + x.delta, 0),
+    daily_cap: XP_CFG.daily_cap, cost: XP_CFG.cost, free: XP_CFG.free,
+    sittings: db.attempts.filter((x) => x.user_id === uid && x.kind === 'mock' && x.mock_score != null).length,
+    paid_retakes: (db.retakes || []).filter((t) => t.user_id === uid && !t.used_at).length,
+    recent: led.slice().reverse().slice(0, 12).map((x) => ({ delta: x.delta, reason: x.reason, created_at: x.created_at })),
+  }
+}
 const rpcs = {
+  my_xp() { return xpSummary(me()) },
+  buy_mock_retake() {
+    const uid = me(), x = xpSummary(uid)
+    if (!isPaid(profileOf(uid))) throw new Error('not allowed')
+    if (x.sittings < x.free) throw new Error('not_needed: You still have a free CBT mock.')
+    if (x.paid_retakes > 0) throw new Error('not_needed: You have already paid for your next CBT mock.')
+    if (x.balance < x.cost) throw new Error(`not_enough_xp: You need ${x.cost} XP to write the CBT mock again and you have ${x.balance} XP.`)
+    db.xp.push({ user_id: uid, delta: -x.cost, reason: 'mock_retake', created_at: new Date().toISOString() });
+    (db.retakes ||= []).push({ user_id: uid, bought_at: new Date().toISOString(), used_at: null })
+    save()
+    return xpSummary(uid)
+  },
+  reset_my_progress() {
+    const uid = me(), n = db.attempts.filter((x) => x.user_id === uid && x.kind === 'practice').length
+    db.attempts = db.attempts.filter((x) => !(x.user_id === uid && x.kind === 'practice'))
+    if (db.misses) db.misses = db.misses.filter((m) => m.user_id !== uid)
+    save()
+    return n
+  },
   report_question(a) { return reportQuestion(a) },
   coupon_quote(a) {
     if (!me()) throw new Error('JWT expired')
@@ -714,6 +763,10 @@ const rpcs = {
     if (!me() || !['mock', 'hall'].includes(a.p_kind) || !['started', 'resumed', 'left_tab', 'left_fullscreen', 'limit_reached', 'submitted'].includes(a.p_type)) return null
     if (db.events.filter((e) => e.user_id === me() && e.kind === a.p_kind).length >= 300) return null
     db.events.push({ user_id: me(), kind: a.p_kind, type: a.p_type, occurred_at: a.p_at && new Date(a.p_at) < new Date() ? a.p_at : new Date().toISOString(), detail: String(a.p_detail || '').slice(0, 200) })
+    if (a.p_kind === 'hall' && a.p_type === 'started') {   // every admin hears it at once
+      const st = profileOf(me())
+      db.profiles.filter((p) => p.is_admin).forEach((adm) => notify(adm.id, 'exam', 'A student entered ExamHall', `${st?.full_name || 'A student'} (${st?.reg_number || ''}) has started ExamHall.`, '/app/admin/scoresheet'))
+    }
     return null
   },
   admin_set_results_released(a) {
@@ -723,8 +776,8 @@ const rpcs = {
     db.examSettings[a.p_kind] = { ...(db.examSettings[a.p_kind] || {}), results_released: Boolean(a.p_released) }
     if (a.p_released && !was) {   // ring the bell of everyone who sat the exam
       const hall = a.p_kind === 'hall'
-      new Set(db.attempts.filter((x) => x.kind === a.p_kind && x.mock_score != null).map((x) => x.user_id)).forEach((uid) =>
-        notify(uid, 'result', hall ? 'Your ExamHall result is out' : 'Your CBT Mock result is out', 'Your result has been released. Tap to see your score.', hall ? '/app/examhall' : '/app/mock'))
+      db.profiles.filter((p) => !p.is_admin && !p.is_teacher && !p.suspended).forEach((p) =>
+        notify(p.id, 'result', hall ? 'ExamHall results are out' : 'CBT Mock results are out', 'The administrator has released the results. Tap to see your score.', hall ? '/app/examhall' : '/app/mock'))
     }
     log(a.p_kind + (a.p_released ? '.release' : '.unrelease'), a.p_released ? 'results shown to students' : 'results hidden from students')
   },

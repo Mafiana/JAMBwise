@@ -19,6 +19,8 @@ function friendly(error) {
   const limited = m.match(/rate_limited:\s*(.*)$/s)    // the database's spam limits carry a message written for people
   if (limited) return limited[1].trim()
   if (/exam_not_open/.test(m)) return 'This exam has not opened yet. Please come back at the scheduled time.'
+  const xp = m.match(/(?:not_enough_xp|not_needed|mock_limit|profile_incomplete):\s*(.*)$/s)
+  if (xp) return xp[1].trim()
   if (/mock_already_taken/.test(m)) return 'You have already submitted this exam. It can only be written once.'
   if (/PGRST20[25]|42P01|42883|schema cache|does not exist/i.test(String(error?.code || '') + ' ' + m))
     return 'Your database is missing the latest admin update. In Supabase, open the SQL Editor and run supabase/migrate-admin-panel.sql, then reload.'
@@ -34,7 +36,14 @@ async function callFn(name, body, fallback = 'Something went wrong. Please try a
   if (error) {
     let reply = null
     try { reply = await error.context.json() } catch { /* not a JSON error */ }
-    const e = new Error(reply?.error || friendly(error) || fallback)
+    const status = error?.context?.status
+    // No JSON body from the function itself: say what most likely happened instead of a blank "something went wrong"
+    const noBody = status === 404 ? 'This feature is not switched on yet (its server function is not deployed). Please tell the admin.'
+      : status === 401 || status === 403 ? 'Your session has expired. Please log in again.'
+      : status >= 500 ? 'The server had a problem. Please try again in a minute.'
+      : /FunctionsFetchError|FunctionsRelayError/.test(String(error?.name || '')) ? 'Could not reach the server. Check your internet and try again. If it keeps happening, the site settings (allowed origins) may need fixing.'
+      : ''
+    const e = new Error(reply?.error || friendly(error) || noBody || fallback)
     e.captcha = Boolean(reply?.captcha)
     e.ended = Boolean(reply?.ended)
     e.network = NETWORK.test(String(error?.message || ''))
@@ -119,7 +128,8 @@ export async function getMyExam(uid, kind = 'mock') {
   }
   if (kind === 'mock') {
     const m = latestMocks(data, 'mock')[0]
-    return m ? { date: m.date, total: m.total, subjects: m.subjects } : waiting ? { queued: true } : null
+    const count = (data || []).filter((r) => r.mock_score != null).length
+    return m ? { date: m.date, total: m.total, subjects: m.subjects, count } : waiting ? { queued: true, count: 1 } : null
   }
   if (data) return { date: data.date, released: Boolean(data.released), ...(data.released ? { total: data.total, subjects: data.subjects } : {}) }
   return waiting ? { queued: true } : null
@@ -180,9 +190,34 @@ export async function flushPendingAttempts(uid) {
   return error ? 0 : mine.length
 }
 
-export async function deleteMyAttempts(uid) {
-  const { error } = await supabase.from('attempts').delete().eq('user_id', uid)
-  if (error) fail(error, 'Could not reset your progress.')
+/** Settings → Reset progress. Clears practice history and weak spots; XP and submitted exams stay. */
+export async function resetMyProgress(uid) {
+  const { error } = await supabase.rpc('reset_my_progress')
+  if (!error) return
+  if (/reset_my_progress|42883|PGRST202|schema cache/i.test(String(error.code || '') + ' ' + String(error.message || ''))) {
+    // a database from before supabase/migrate-xp.sql: clear the practice rows directly
+    const old = await supabase.from('attempts').delete().eq('user_id', uid).eq('kind', 'practice')
+    if (!old.error) return
+    fail(old.error, 'Could not reset your progress.')
+  }
+  fail(error, 'Could not reset your progress.')
+}
+
+/** The student's XP: { balance, earned, today, daily_cap, cost, free, sittings, paid_retakes, recent }. Null if the database has no XP yet. */
+export async function myXp() {
+  const { data, error } = await supabase.rpc('my_xp')
+  if (error) {
+    if (/my_xp|42883|PGRST202|schema cache/i.test(String(error.code || '') + ' ' + String(error.message || ''))) return null
+    fail(error, 'Could not load your XP.')
+  }
+  return data
+}
+
+/** Spend XP on one more CBT Mock sitting. Returns the new XP summary. */
+export async function buyMockRetake() {
+  const { data, error } = await supabase.rpc('buy_mock_retake')
+  if (error) fail(error, 'Could not buy another CBT mock. Please try again.')
+  return data
 }
 
 // Questions are kept on the device (per student) after each load, so practice and mocks still work on a weak or dropped

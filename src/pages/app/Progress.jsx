@@ -5,9 +5,10 @@ import SubjectIcon, { SUBJECT_COLOR, SubjectBadge } from '../../components/Subje
 import { SUBJECTS, SUBJECT_KEYS } from '../../lib/constants.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { activityGrid, badges, heat, levelFor, radarPoints, standing } from '../../lib/progressViz.js'
-import { breakdown } from '../../lib/scoresheet.js'
 import { firstName, streak } from '../../lib/utils.js'
-import { useMyExam, useProgress } from '../../hooks.js'
+import { useMyExam, useProgress, useXp } from '../../hooks.js'
+import ResultSlip from '../../components/ResultSlip.jsx'
+import XpCard from '../../components/XpCard.jsx'
 
 const SHORT = { eng: 'ENG', mat: 'MAT', phy: 'PHY', chm: 'CHM', bio: 'BIO', gov: 'GOV', eco: 'ECO', com: 'COM', agr: 'AGR', acc: 'ACC', lit: 'LIT', irk: 'IRK', crk: 'CRK', hec: 'HEC', cst: 'CST', geo: 'GEO' }
 const tone = (pct) => (pct >= 75 ? 'hi' : pct >= 55 ? 'mid' : 'lo')
@@ -87,6 +88,7 @@ export default function Progress() {
   const p = useProgress()
   const { user, profile } = useAuth()
   const { mock: hall } = useMyExam(user.id, 'hall')
+  const { xp } = useXp()
   const attempts = p.attempts || []
   const accuracy = p.total ? Math.round((p.correct / p.total) * 100) : 0
   const run = useMemo(() => streak(p.attemptDays), [p.attemptDays])
@@ -116,6 +118,8 @@ export default function Progress() {
           <span className="sm">{lvl.next ? `${lvl.toNext} more question${lvl.toNext === 1 ? '' : 's'} to reach ${lvl.next}` : 'You reached the top level. Legend!'}</span>
         </div>
       </section>
+
+      <XpCard xp={xp} />
 
       <div className="pg-tiles">
         <div className="pg-tile t1"><Icon name="book" /><b>{p.total}</b><span>questions answered</span></div>
@@ -187,12 +191,7 @@ export default function Progress() {
               {hall.queued ? 'You have submitted ExamHall. It will sync when you are back online.' : `You submitted ExamHall on ${new Date(hall.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}.`}{' '}
               {hall.released ? '' : 'Your result has not been released yet. It will show here once your administrator releases it.'}
             </p>
-            {hall.released && hall.total != null && (
-              <>
-                <div className="score-big">{hall.total}<span className="mut" style={{ fontSize: 28 }}> / 400</span></div>
-                <p className="sm">{breakdown(hall)}</p>
-              </>
-            )}
+            {hall.released && hall.total != null && <ResultSlip taken={hall} exam="ExamHall" />}
           </>
         ) : (
           <p className="mut" style={{ margin: 0 }}>You have not taken ExamHall yet. It can only be written once. Open it from <Link to="/app/examhall">ExamHall</Link> when you are ready.</p>

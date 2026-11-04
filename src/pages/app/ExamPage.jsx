@@ -17,7 +17,10 @@ import * as api from '../../lib/api.js'
 import { fmtTime } from '../../lib/utils.js'
 import { canFullscreen, enterFullscreen, fmtCountdown, fmtWhen, inFullscreen, leaveFullscreen, windowState } from '../../lib/integrity.js'
 import { breakdown } from '../../lib/scoresheet.js'
-import { isDesktop, useAction, useMyExam, useNow } from '../../hooks.js'
+import { isDesktop, useAction, useMyExam, useNow, useXp } from '../../hooks.js'
+import { profileCompletion } from '../../lib/profileCompletion.js'
+import ResultSlip from '../../components/ResultSlip.jsx'
+import XpCard from '../../components/XpCard.jsx'
 
 const EXAMS = {
   mock: {
@@ -43,12 +46,13 @@ function AlreadyTaken({ cfg, taken }) {
         {taken.queued
           ? <p className="mut">Your answers were saved on this phone and will be sent as soon as you are back online.</p>
           : <p className="mut">Submitted on {dateText(taken.date)}</p>}
-        {(cfg.showScore || taken.released) && taken.total != null && (
+        {cfg.showScore && taken.total != null && (
           <>
             <div className="score-big">{taken.total}<span className="mut" style={{ fontSize: 28 }}> / 400</span></div>
             <p className="sm">{breakdown(taken)}</p>
           </>
         )}
+        {!cfg.showScore && taken.released && taken.total != null && <ResultSlip taken={taken} exam={cfg.title} />}
         {!cfg.showScore && !taken.released && <p className="sm">Your result has not been released yet. The administrator will release it, and it will then show here and under My Progress.</p>}
         <p className="sm">This exam can only be written once, so it cannot be started again. You can keep improving with <Link to="/app/practice">Practice</Link>. If something went wrong during your exam, <Link to="/app/help">contact support</Link>.</p>
       </div>
@@ -132,10 +136,41 @@ function HallInstructions({ win, chosen, busy, onProceed, onCancel, hall = true 
   )
 }
 
+/** CBT Mock after the free sittings: spend XP to write it again. */
+function MockLocked({ taken }) {
+  const { busy, error, run } = useAction()
+  const { loading, xp, error: xpError, set } = useXp()
+  const free = xp?.free ?? 2
+  const ok = xp && xp.balance >= xp.cost
+  return (
+    <>
+      <Link className="back-link" to="/app/dashboard"><Icon name="chevl" size={16} /> Back to dashboard</Link>
+      <h1>CBT Mock</h1>
+      <div className="card c taken">
+        <span className="ok-ring" aria-hidden="true"><Icon name="check" size={30} /></span>
+        <h3>You have used your {free} free CBT mocks</h3>
+        {taken.date && <p className="mut">Last written on {dateText(taken.date)}</p>}
+        <p className="sm">To write it again, spend XP. You earn XP by answering practice questions correctly.</p>
+      </div>
+      {taken.total != null && <ResultSlip taken={taken} exam="CBT Mock" />}
+      {loading ? <Loader label="Loading your XP…" /> : <XpCard xp={xp} compact />}
+      {xpError && <ErrorLine>{xpError}</ErrorLine>}
+      <ErrorLine>{error}</ErrorLine>
+      {xp && (
+        <button className="btn" disabled={busy || !ok} onClick={() => run(async () => set(await api.buyMockRetake()), 'CBT mock unlocked')}>
+          {busy ? 'Please wait…' : `Spend ${xp.cost.toLocaleString('en-NG')} XP to write again`}
+        </button>
+      )}
+      <p className="sm"><Link to="/app/practice">Practice</Link> to earn XP. If something went wrong during your exam, <Link to="/app/help">contact support</Link>.</p>
+    </>
+  )
+}
+
 function Picker({ cfg, kind }) {
   const { profile, saveProfile, user } = useAuth()
   const { startMock } = useExam()
   const { loading: checking, mock: taken } = useMyExam(user.id, kind)
+  const xpState = useXp()
   const { busy, error, run } = useAction()
   const hall = kind === 'hall'
   const [win, setWin] = useState(hall ? undefined : null)            // undefined while loading; null = no schedule
@@ -148,19 +183,27 @@ function Picker({ cfg, kind }) {
   const now = useNow(hall)
   const state = win ? windowState(win, now + win.offset) : 'open'
   const chosen = profile.subjects || []
+  const prof = profileCompletion(profile)   // CBT Mock and ExamHall need a 100% complete profile
   const [ins, setIns] = useState(false)   // the instructions box (ExamHall)
   const toggle = (k) => {
     const next = chosen.includes(k) ? chosen.filter((x) => x !== k) : chosen.length < 3 ? [...chosen, k] : chosen
     if (next !== chosen) run(() => saveProfile({ subjects: next }))
   }
-  if (checking || win === undefined) return <><h1>{cfg.title}</h1><Loader label="Checking your exam status…" /></>
+  if (checking || win === undefined || (!hall && taken && xpState.loading)) return <><h1>{cfg.title}</h1><Loader label="Checking your exam status…" /></>
   const back = <Link className="back-link" to="/app/dashboard"><Icon name="chevl" size={16} /> Back to dashboard</Link>
-  if (taken) return <AlreadyTaken cfg={cfg} taken={taken} />
+  // CBT Mock: 2 free sittings, then a paid retake (XP). ExamHall can only be written once.
+  const freeMocks = xpState.xp?.free ?? 2
+  const paidRetake = (xpState.xp?.paid_retakes ?? 0) > 0
+  if (taken && (hall || ((taken.count ?? 1) >= freeMocks && !paidRetake))) return hall ? <AlreadyTaken cfg={cfg} taken={taken} /> : <MockLocked taken={taken} />
+  const mockNote = !hall && taken
+    ? paidRetake ? 'You paid XP for this sitting.' : `Free sitting ${(taken.count ?? 1) + 1} of ${freeMocks}. Your last score was ${taken.total ?? '–'} / 400.`
+    : ''
   return (
     <>
       {back}
       <h1>{cfg.title}</h1>
       <p className="mut">{cfg.intro}</p>
+      {mockNote && <p className="notice" role="status"><Icon name="clock" size={16} /> {mockNote}</p>}
       <div className="chips">
         {PICKABLE.map((k) => (
           <button key={k} className={'chip ' + (chosen.includes(k) ? 'on' : '')} onClick={() => toggle(k)} aria-pressed={chosen.includes(k)}>
@@ -170,8 +213,13 @@ function Picker({ cfg, kind }) {
       </div>
       <p className="sm">Choose exactly 3 subjects with English.</p>
       {hall && <HallRules win={win} state={state} now={now} />}
+      {prof.pct < 100 && (
+        <div className="notice" role="status">
+          <Icon name="alert" size={16} /> Your profile is <b>{prof.pct}%</b> complete. Complete it to 100% before you write {cfg.title}. Still to add: {prof.missing.join(', ')}. <Link to="/app/profile">Complete my profile</Link>
+        </div>
+      )}
       <ErrorLine>{error}</ErrorLine>
-      <button className="btn" disabled={chosen.length !== 3 || busy || state !== 'open'} onClick={() => {
+      <button className="btn" disabled={chosen.length !== 3 || busy || state !== 'open' || prof.pct < 100} onClick={() => {
         setIns(true)                                                   // both exams: show the instructions first
       }}>
         {busy ? 'Preparing your exam…' : cfg.start}
@@ -344,7 +392,7 @@ function SubmittedModal({ cfg, m }) {
           <h3 id="sub-t">Successfully submitted</h3>
           <p className="mut">
             {cfg.showScore
-              ? 'Your CBT mock has been recorded. It can only be written once, so you will not be able to start it again.'
+              ? 'Your CBT mock has been recorded. You get 2 free CBT mocks; after that, each one costs XP that you earn from practice.'
               : 'Your ExamHall exam has been recorded. It can only be written once, and your result will be released to you by the administrator.'}
           </p>
           {m.saved === 'queued' && <p className="notice" role="status"><Icon name="offline" size={16} /> You are offline. Your answers are saved on this phone and will be sent when you are back online.</p>}
@@ -371,14 +419,10 @@ function Result({ cfg, m }) {
   }
   return (
     <div className="card c">
-      <div className="score-big">{m.total}<span className="mut" style={{ fontSize: 28 }}> / 400</span></div>
-      <p className="mut">{m.total >= 300 ? 'Excellent, that is a 300+ score.' : m.total >= 200 ? 'Good. Keep pushing for 300.' : 'Keep practising. You will climb.'}</p>
-      {m.results.map((r) => (
-        <div className="ln" key={r.subject}><span>{SUBJECTS[r.subject].name}</span><b>{r.correct} of {r.total}</b></div>
-      ))}
+      {m.total >= 200 && <p className="mut">{m.total >= 300 ? 'Excellent, that is a 300+ score.' : 'Good. Keep pushing for 300.'}</p>}
+      <ResultSlip exam="CBT Mock" taken={{ date: new Date().toISOString(), total: m.total, subjects: m.results.map((r) => ({ subject: r.subject, correct: r.correct, total: r.total })) }} />
       {m.saved === 'queued' && <p className="notice" role="status"><Icon name="offline" size={16} /> You are offline. Your result is saved on this phone and will sync when you are back online.</p>}
       {m.saved && !['saving', 'ok', 'queued'].includes(m.saved) && <ErrorLine>{m.saved}</ErrorLine>}
-      <p className="sm">This exam can only be written once.</p>
       <button className="btn exit" onClick={() => { endMock(); navigate('/app/dashboard') }}>{cfg.exit}</button>
     </div>
   )
