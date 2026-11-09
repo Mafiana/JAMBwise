@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import * as api from '../lib/api.js'
 import Icon from './Icons.jsx'
@@ -81,7 +82,7 @@ export default function NotificationBell() {
         <Icon name="bell" />
         {unread > 0 && <span className="bell-n" aria-hidden="true">{unread > 9 ? '9+' : unread}</span>}
       </button>
-      {open && (
+      {open && createPortal(
         <div ref={panel} className="bell-pop" role="dialog" aria-label="Notifications" style={{ top: pos.top, left: pos.left }}>
           <div className="bell-head">
             <b>Notifications</b>
@@ -99,7 +100,8 @@ export default function NotificationBell() {
               ))}
             </ul>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

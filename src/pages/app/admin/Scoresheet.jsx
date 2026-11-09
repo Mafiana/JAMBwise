@@ -178,7 +178,7 @@ export default function Scoresheet() {
                       : <span className="flag none">None</span>}
                   </td>
                 )}
-                {isAdmin && <td><button className="btn ghost" disabled={busy} onClick={() => retake(r)}>Allow retake</button></td>}
+                {isAdmin && <td><button className="btn danger" disabled={busy} onClick={() => retake(r)}>Allow retake</button></td>}
               </tr>
             ))}
           </tbody>

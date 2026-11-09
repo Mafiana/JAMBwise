@@ -635,6 +635,18 @@ const rpcs = {
     log('pin.deactivate', a.p_pin)
     return null
   },
+  admin_delete_pin(a) {
+    adminOnly()
+    const r = db.pins.find((x) => x.pin === a.p_pin)
+    if (!r) throw new Error('That PIN does not exist.')
+    if ((r.used_by || r.used_at) && !r.deactivated_at && r.used_by) {
+      const p = profileOf(r.used_by)
+      if (p && (!p.plan_expires || new Date(p.plan_expires) > new Date())) throw new Error('This PIN is still active. Deactivate it first, then delete it.')
+    }
+    db.pins = db.pins.filter((x) => x !== r)
+    log('pin.delete', a.p_pin)
+    return null
+  },
   get_question_image(a) {
     if (!me()) throw new Error('JWT expired')
     const q = allQuestions().find((x) => x.id === a.p_id)

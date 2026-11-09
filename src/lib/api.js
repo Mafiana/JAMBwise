@@ -373,7 +373,7 @@ export async function adminStudents() {
 }
 
 export async function adminPins() {
-  const { data, error } = await supabase.from('access_pins').select('*').order('created_at', { ascending: false }).limit(200)
+  const { data, error } = await supabase.from('access_pins').select('*').order('created_at', { ascending: false }).limit(1000)
   if (error) fail(error, 'Could not load PINs.')
   // when each used PIN's access ends = that student's plan end date (so the list can say Active or Expired)
   let ends = new Map()
@@ -404,9 +404,13 @@ export async function getPublicQuestionCount() {
   } catch { return null }
 }
 
+/** Admin: removes a PIN that is unused, deactivated or expired. An active PIN has to be deactivated first. */
 export async function adminDeletePin(pin) {
-  const { error } = await supabase.from('access_pins').delete().eq('pin', pin)
-  if (error) fail(error, 'Could not delete the PIN.')
+  const { error } = await supabase.rpc('admin_delete_pin', { p_pin: pin })
+  if (error) {
+    const missing = /could not find the function|does not exist|schema cache/i.test(error.message || '') && /admin_delete_pin/.test(error.message || '')
+    fail(error, missing ? 'Run supabase/migrate-pin-delete.sql in the Supabase SQL Editor, then try again.' : 'Could not delete the PIN.')
+  }
 }
 
 export async function adminSetStudent(id, { name, course, school, suspended }) {

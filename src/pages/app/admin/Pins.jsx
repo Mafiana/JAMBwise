@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import * as api from '../../../lib/api.js'
@@ -6,7 +6,8 @@ import { useAction } from '../../../hooks.js'
 import { downloadText } from '../../../lib/download.js'
 import { toCsv } from '../../../lib/utils.js'
 import CopyButton from '../../../components/CopyButton.jsx'
-import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader } from './shared.jsx'
+import Icon from '../../../components/Icons.jsx'
+import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader, Pagination } from './shared.jsx'
 
 export default function Pins() {
   const { data, error: loadError, loading, reload } = useLoad(api.adminPins)
@@ -18,6 +19,9 @@ export default function Pins() {
   const [count, setCount] = useState(1)
   const [fresh, setFresh] = useState([])
   const [filter, setFilter] = useState('all')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  useEffect(() => { setPage(1) }, [filter, pageSize])
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{loadError}</ErrorLine>
   const used = (x) => Boolean(x.used_by || x.used_at)
@@ -29,6 +33,9 @@ export default function Pins() {
     return x.expires_at && new Date(x.expires_at) <= new Date() ? 'expired' : 'active'
   }
   const shown = data.filter((x) => filter === 'all' || filter === state(x) || (filter === 'active' && state(x) === 'used'))
+  const lastPage = Math.max(1, Math.ceil(shown.length / pageSize))
+  const current = Math.min(page, lastPage)
+  const pageRows = shown.slice((current - 1) * pageSize, current * pageSize)
   const tally = (k) => data.filter((x) => state(x) === k).length
   const make = () => run(async () => {
     const n = Math.max(1, Math.min(100, Number(count) || 1))
@@ -73,7 +80,7 @@ export default function Pins() {
         <table>
           <thead><tr><th>PIN</th><th>Plan</th><th>Days</th><th>For</th><th>Status</th><th>Access ends</th><th>Created</th><th /></tr></thead>
           <tbody>
-            {shown.map((x) => (
+            {pageRows.map((x) => (
               <tr key={x.pin}>
                 <td><b className="mono">{x.pin}</b></td><td>{x.plan}</td><td>{x.days}</td><td>{x.student_name || '–'}</td>
                 <td><span className={'tag pin-' + state(x)}>{{ unused: 'Unused', active: 'Active', expired: 'Expired', deactivated: 'Deactivated', used: 'Used' }[state(x)]}</span>{used(x) && <div className="sm">Used {fmtDate(x.used_at)}</div>}</td>
@@ -81,13 +88,14 @@ export default function Pins() {
                 <td>
                   <CopyButton text={x.pin} label={'PIN ' + x.pin} />{' '}
                   {state(x) === 'active' && <button className="btn danger" disabled={busy} onClick={async () => (await confirm({ title: 'Deactivate this PIN?', message: `${x.student_name ? `${x.student_name} (${x.pin})` : `The student using PIN ${x.pin}`} will lose access straight away and will not be able to use the app until you give them a new PIN. This cannot be undone.`, confirmLabel: 'Deactivate PIN' })) && run(async () => { await api.adminDeactivatePin(x.pin); await reload() }, 'PIN deactivated')}>Deactivate</button>}{' '}
-                  {!used(x) && <button className="btn danger" onClick={async () => (await confirm({ title: 'Delete this PIN?', message: `${x.pin} will stop working immediately.`, confirmLabel: 'Delete PIN' })) && run(async () => { await api.adminDeletePin(x.pin); await reload() })}>Delete</button>}
+                  {state(x) !== 'active' && <button type="button" className="btn danger icon" disabled={busy} title="Delete PIN" aria-label={'Delete PIN ' + x.pin} onClick={async () => (await confirm({ title: 'Delete this PIN?', message: state(x) === 'unused' ? `${x.pin} will stop working immediately.` : `${x.pin} (${state(x)}) will be removed from the database for good. The student's account and exam history are kept, but this PIN can no longer be used to sign in.`, confirmLabel: 'Delete PIN' })) && run(async () => { await api.adminDeletePin(x.pin); await reload() }, 'PIN deleted')}><Icon name="trash" size={16} /></button>}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         {shown.length === 0 && <Empty>No PINs here yet.</Empty>}
+        {shown.length > 0 && <Pagination page={current} pageSize={pageSize} total={shown.length} onPage={setPage} onPageSize={setPageSize} sizes={[10, 20, 50, 100]} />}
       </div>
     </>
   )
