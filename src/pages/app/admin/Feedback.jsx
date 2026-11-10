@@ -4,7 +4,7 @@ import Icon from '../../../components/Icons.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
-import { Empty, fmtDate, Pagination, TabLoader, useLoad } from './shared.jsx'
+import { Empty, fmtDate, Pagination, TabLoader, useLoad, PersonAvatar } from './shared.jsx'
 
 const KIND = { feedback: 'Feedback', feature: 'Feature idea', bug: 'Bug' }
 const FILTERS = [['all', 'All'], ['new', 'New'], ['feedback', 'Feedback'], ['feature', 'Feature ideas'], ['bug', 'Bugs'], ['web', 'On website']]
@@ -41,6 +41,7 @@ export default function Feedback() {
   const top = Math.max(1, ...stats.dist)
   const toggle = (r) => act.run(async () => { await api.adminSetFeedbackStatus(r.id, r.status === 'new' ? 'done' : 'new'); await reload() })
   const feature = (r) => act.run(async () => { await api.adminSetFeedbackFeatured(r.id, !r.featured); await reload() }, r.featured ? 'Hidden from the website' : 'Now showing on the website')
+  const photo = (r) => act.run(async () => { await api.adminSetFeedbackPhoto(r.id, !r.show_photo); await reload() }, r.show_photo ? 'Photo hidden on the website' : 'Photo now showing on the website')
   const canFeature = (r) => r.kind === 'feedback' && (r.message || '').trim().length >= 20
   const del = async (r) => {
     if (!(await confirm({ title: 'Delete this feedback?', message: 'It will be removed for good.', confirmLabel: 'Delete' }))) return
@@ -67,13 +68,14 @@ export default function Feedback() {
             {pageRows.map((r) => (
               <tr key={r.id}>
                 <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(r.created_at)}<br /><span className="sm">{ago(r.created_at)}</span></td>
-                <td><b>{r.name || 'Someone'}</b>{r.role === 'teacher' && <span className="tag muted">Teacher</span>}<br /><span className="sm">{r.email}</span></td>
+                <td><span className="who-cell"><PersonAvatar id={r.user_id} name={r.name} /><span><b>{r.name || 'Someone'}</b>{r.role === 'teacher' && <span className="tag muted">Teacher</span>}<br /><span className="sm">{r.email}</span></span></span></td>
                 <td>{r.rating ? <Stars n={r.rating} /> : <span className="mut">–</span>}</td>
                 <td><span className={'tag fb-kind ' + r.kind}>{KIND[r.kind]}</span></td>
                 <td style={{ minWidth: 200, overflowWrap: 'anywhere' }}>{r.message || <span className="mut">–</span>}</td>
                 <td><button className={'btn ' + (r.status === 'new' ? '' : 'ghost')} disabled={act.busy} onClick={() => toggle(r)}>{r.status === 'new' ? 'Mark done' : 'Done · reopen'}</button></td>
                 <td>
                   {canFeature(r) && <button className={'btn ' + (r.featured ? '' : 'ghost')} disabled={act.busy} onClick={() => feature(r)} title="Show this on the home page, with the person's first name and surname initial">{r.featured ? 'On website · hide' : 'Show on website'}</button>}{' '}
+                  {canFeature(r) && r.featured && <><button className={'btn ' + (r.show_photo ? '' : 'ghost')} disabled={act.busy} onClick={() => photo(r)} title="Show this person's profile photo on the home page, instead of their initials">{r.show_photo ? 'Photo on · hide' : 'Show photo'}</button>{' '}</>}
                   <button className="btn ghost" disabled={act.busy} onClick={() => del(r)} aria-label="Delete this feedback"><Icon name="trash" size={16} /></button>
                 </td>
               </tr>

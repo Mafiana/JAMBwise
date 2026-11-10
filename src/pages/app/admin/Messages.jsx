@@ -7,7 +7,7 @@ import { useAuth } from '../../../context/AuthContext.jsx'
 import * as api from '../../../lib/api.js'
 import { useAction } from '../../../hooks.js'
 import { TICKET_STATUS, isMail, ticketNo } from '../../../lib/utils.js'
-import { Empty, fmtDateTime, TabLoader, useLoad } from './shared.jsx'
+import { Empty, fmtDateTime, PersonAvatar, TabLoader, useLoad } from './shared.jsx'
 
 export const TOPIC = { general: 'General', payment: 'Payment', pin: 'Access PIN', bug: 'Bug', question: 'Question report', suspended: 'Suspended account', other: 'Other' }
 const chip = (s) => 'tag' + (s === 'new' ? ' bad' : s === 'answered' ? ' ok' : s === 'resolved' ? ' muted' : '')
@@ -55,6 +55,7 @@ export default function Messages({ mail = false }) {
         <div className={'card ticket msg' + (openId === m.id ? ' open' : '')} key={m.id}>
           <button className="ticket-head" aria-expanded={openId === m.id} onClick={() => { setOpenId(openId === m.id ? null : m.id); if (openId !== m.id && m.status === 'new') setStatus(m, 'read') }}>
             <span className="ticket-id">{ticketNo(m.id)}</span>
+            {m.user_id && <PersonAvatar id={m.user_id} name={m.name} />}
             <span className="ticket-sub"><b>{m.subject || m.body.slice(0, 60)}</b><span className="sm"> · {m.name}{m.user_id ? '' : ' (guest)'} · {TOPIC[m.topic] || m.topic}</span></span>
             <span className={chip(m.status)}>{TICKET_STATUS[m.status]}</span>
             <span className="ticket-date">{fmtDateTime(m.created_at)}</span>

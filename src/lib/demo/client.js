@@ -538,7 +538,20 @@ const rpcs = {
       if (db.feedback.filter((x) => x.featured && x.id !== f.id).length >= 6) throw new Error('Six are already on the website. Hide one first.')
     }
     f.featured = Boolean(a.p_featured)
+    if (!f.featured) f.show_photo = false
     log('feedback.featured', (f.featured ? 'shown #' : 'hidden #') + f.id)
+    return null
+  },
+  admin_set_feedback_photo(a) {
+    adminOnly()
+    const f = (db.feedback || []).find((x) => x.id === a.p_id)
+    if (!f) throw new Error('That feedback no longer exists.')
+    if (a.p_show) {
+      if (!f.featured) throw new Error('Show this feedback on the website first, then turn the photo on.')
+      if (!profileOf(f.user_id)?.avatar) throw new Error('This person has not uploaded a profile photo yet.')
+    }
+    f.show_photo = Boolean(a.p_show)
+    log('feedback.photo', (f.show_photo ? 'shown #' : 'hidden #') + f.id)
     return null
   },
   public_testimonials() {
@@ -546,7 +559,7 @@ const rpcs = {
       .sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 6)
       .map((f) => {
         const p = profileOf(f.user_id); const parts = String(p?.full_name || 'Student').trim().split(/\s+/)
-        return { id: f.id, name: parts[0] + (parts[1] ? ' ' + parts[1][0].toUpperCase() + '.' : ''), role: p?.is_teacher ? 'Teacher' : 'JAMBwise student', rating: f.rating, message: String(f.message).trim() }
+        return { id: f.id, name: parts[0] + (parts[1] ? ' ' + parts[1][0].toUpperCase() + '.' : ''), role: p?.is_teacher ? 'Teacher' : 'JAMBwise student', rating: f.rating, message: String(f.message).trim(), photo: f.show_photo ? (p?.avatar || null) : null }
       })
   },
   admin_delete_feedback(a) { adminOnly(); db.feedback = (db.feedback || []).filter((x) => x.id !== a.p_id) },

@@ -1,12 +1,12 @@
 import PlanBadge from '../../../components/PlanBadge.jsx'
-import { useMemo, useState } from 'react'
-import { ErrorLine } from '../../../components/ui.jsx'
+import { useEffect, useMemo, useState } from 'react'
+import { Avatar, ErrorLine } from '../../../components/ui.jsx'
 import Icon from '../../../components/Icons.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import * as api from '../../../lib/api.js'
 import { downloadText } from '../../../lib/download.js'
 import { toCsv } from '../../../lib/utils.js'
-import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader } from './shared.jsx'
+import { Empty, fmtDate, PLAN_IDS, useLoad, TabLoader, Pagination, useAvatars } from './shared.jsx'
 import StudentDetail from './StudentDetail.jsx'
 import ExamLog from './ExamLog.jsx'
 import AddUser from './AddUser.jsx'
@@ -30,6 +30,13 @@ export default function Students() {
       (instF === 'all' || (instF === 'none' ? !s.institution_id : s.institution_id === instF)) &&
       (!needle || [s.full_name, s.email, s.reg_number, s.school].some((v) => String(v || '').toLowerCase().includes(needle))))
   }, [data, q, planF, instF])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  useEffect(() => { setPage(1) }, [q, planF, instF, pageSize])
+  const lastPage = Math.max(1, Math.ceil(shown.length / pageSize))
+  const pageNo = Math.min(page, lastPage)
+  const pageRows = useMemo(() => shown.slice((pageNo - 1) * pageSize, pageNo * pageSize), [shown, pageNo, pageSize])
+  const pics = useAvatars(pageRows.map((s) => s.id))
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const current = data.find((s) => s.id === open)
@@ -62,9 +69,9 @@ export default function Students() {
         <table>
           <thead><tr><th>Student</th><th>Reg number</th>{isAdmin && <th>Institution</th>}<th>Plan</th><th>Qs</th><th>Acc</th><th>Mocks</th><th>Last active</th><th /></tr></thead>
           <tbody>
-            {shown.map((s) => (
+            {pageRows.map((s) => (
               <tr key={s.id}>
-                <td><button className="linkish" onClick={() => setOpen(s.id)}>{s.full_name}</button>{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{s.email}</span></td>
+                <td><span className="who-cell"><Avatar profile={{ full_name: s.full_name, avatar: pics.get(s.id) || null }} /><span><button className="linkish" onClick={() => setOpen(s.id)}>{s.full_name}</button>{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{s.email}</span></span></span></td>
                 <td>{s.reg_number}</td>
                 {isAdmin && <td>{s.institution || <span className="sm">–</span>}</td>}
                 <td><PlanBadge plan={s.plan} />{s.plan !== 'free' && s.plan_expires && <div className="sm">to {fmtDate(s.plan_expires)}</div>}</td>
@@ -78,6 +85,7 @@ export default function Students() {
           </tbody>
         </table>
         {shown.length === 0 && <Empty>No students match.</Empty>}
+        {shown.length > 0 && <Pagination page={pageNo} pageSize={pageSize} total={shown.length} onPage={(n) => { setPage(n); window.scrollTo({ top: 0 }) }} onPageSize={setPageSize} sizes={[10, 20, 50, 100]} />}
       </div>
       {adding && <AddUser role="student" onClose={() => setAdding(false)} onDone={reload} />}
       {logOf && <ExamLog student={logOf} onClose={() => setLogOf(null)} />}

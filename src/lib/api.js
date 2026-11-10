@@ -372,6 +372,40 @@ export async function adminStudents() {
   return data
 }
 
+/** Profile pictures for the given people, as Map(id -> data URL). Admins can read any profile; staff only their own institution's students. */
+const avatarCache = new Map()   // id -> { at, avatar }
+export async function adminAvatars(ids) {
+  const now = Date.now()
+  const want = [...new Set(ids)].filter((id) => id && !(avatarCache.get(id) && now - avatarCache.get(id).at < 120000))
+  for (let i = 0; i < want.length; i += 40) {
+    const chunk = want.slice(i, i + 40)
+    const { data, error } = await supabase.from('profiles').select('id, avatar').in('id', chunk)
+    if (error) fail(error, 'Could not load profile pictures.')
+    const got = new Map((data || []).map((r) => [r.id, r.avatar || null]))
+    chunk.forEach((id) => avatarCache.set(id, { at: now, avatar: got.get(id) || null }))
+  }
+  return new Map(ids.map((id) => [id, avatarCache.get(id)?.avatar || null]))
+}
+
+let avatarWait = new Map()   // id -> callbacks, collected for a moment and fetched in one request
+let avatarTimer = null
+/** One person's picture (or null). Calls made together are sent as one request, so a long list does not send one request per row. */
+export function adminAvatar(id) {
+  const hit = avatarCache.get(id)
+  if (hit && Date.now() - hit.at < 120000) return Promise.resolve(hit.avatar)
+  return new Promise((resolve) => {
+    ;(avatarWait.get(id) || avatarWait.set(id, []).get(id)).push(resolve)
+    if (!avatarTimer) {
+      avatarTimer = setTimeout(async () => {
+        const batch = avatarWait; avatarWait = new Map(); avatarTimer = null
+        let got = new Map()
+        try { got = await adminAvatars([...batch.keys()]) } catch { /* the initial letter stays */ }
+        batch.forEach((cbs, bid) => cbs.forEach((cb) => cb(got.get(bid) || null)))
+      }, 60)
+    }
+  })
+}
+
 export async function adminPins() {
   const { data, error } = await supabase.from('access_pins').select('*').order('created_at', { ascending: false }).limit(1000)
   if (error) fail(error, 'Could not load PINs.')
@@ -683,6 +717,14 @@ export async function adminSetFeedbackFeatured(id, featured) {
   if (error) {
     const off = !featureReady(error) || /admin_set_feedback_featured/.test(error.message || '')
     fail(error, off ? 'Run supabase/migrate-testimonials.sql in the Supabase SQL Editor, then try again.' : 'Could not update this.')
+  }
+}
+/** Admin: show or hide the person's profile photo on a testimonial that is on the home page. */
+export async function adminSetFeedbackPhoto(id, show) {
+  const { error } = await supabase.rpc('admin_set_feedback_photo', { p_id: id, p_show: Boolean(show) })
+  if (error) {
+    const off = /admin_set_feedback_photo|show_photo/.test(error.message || '') && /could not find|does not exist|schema cache|column/i.test(error.message || '')
+    fail(error, off ? 'Run supabase/migrate-testimonial-photo.sql in the Supabase SQL Editor, then try again.' : 'Could not update this.')
   }
 }
 /** The feedback the Admin chose to show on the home page. Never throws: no reviews just means no section. */

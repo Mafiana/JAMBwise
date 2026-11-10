@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Icon from '../../../components/Icons.jsx'
+import { Avatar } from '../../../components/ui.jsx'
 import { pageList } from '../../../lib/utils.js'
+import * as api from '../../../lib/api.js'
 import AdminLoader from '../../../components/AdminLoader.jsx'
 
 /** Small loader for data inside an admin tab. */
@@ -40,6 +42,36 @@ export function Bars({ values, labels, format = String, label }) {
       ))}
     </div>
   )
+}
+
+/** Profile pictures of the people on screen: Map(id -> picture). Missing ones stay empty, so the initial letter shows. */
+export function useAvatars(ids) {
+  const [map, setMap] = useState(() => new Map())
+  const key = ids.join(',')
+  useEffect(() => {
+    let alive = true
+    if (!ids.length) return undefined
+    api.adminAvatars(ids).then((m) => { if (alive) setMap(m) }).catch(() => { /* the initial letter stays */ })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+  return map
+}
+
+/** A person's picture in a long list: it is fetched only when the row scrolls into view, and the initial letter shows until then. */
+export function PersonAvatar({ id, name }) {
+  const ref = useRef(null)
+  const [pic, setPic] = useState(null)
+  useEffect(() => {
+    if (!id) return undefined
+    let alive = true
+    const load = () => api.adminAvatar(id).then((a) => { if (alive) setPic(a) })
+    if (typeof IntersectionObserver === 'undefined' || !ref.current) { load(); return () => { alive = false } }
+    const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); load() } }, { rootMargin: '200px' })
+    io.observe(ref.current)
+    return () => { alive = false; io.disconnect() }
+  }, [id])
+  return <span ref={ref} style={{ display: 'inline-flex', flex: 'none' }}><Avatar profile={{ full_name: name, avatar: pic }} /></span>
 }
 
 export const Empty = ({ children }) => <p className="sm adm-empty">{children}</p>

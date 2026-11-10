@@ -2,12 +2,38 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import Icon from '../../../components/Icons.jsx'
 import * as api from '../../../lib/api.js'
-import { Empty, TabLoader, useLoad } from './shared.jsx'
+import { Empty, Pagination, PersonAvatar, TabLoader, useLoad } from './shared.jsx'
 
 const ROLES = { admin: 'Admin', teacher: 'Teacher', student: 'Student', parent: 'Parent' }
 const ago = (d) => {
   const m = Math.max(0, Math.round((Date.now() - new Date(d).getTime()) / 60000))
   return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} hr ago`
+}
+
+/** One table of people, 20 at a time. */
+function PeopleTable({ list }) {
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  const pageNo = Math.min(page, Math.max(1, Math.ceil(list.length / pageSize)))
+  const rows = list.slice((pageNo - 1) * pageSize, pageNo * pageSize)
+  return (
+    <>
+      <div className="card tw">
+        <table>
+          <thead><tr><th>Person</th><th>Role</th><th>Institution</th><th>Last seen</th></tr></thead>
+          <tbody>{rows.map((r) => (
+            <tr key={r.id}>
+              <td><span className="who-cell"><PersonAvatar id={r.role === 'parent' ? null : r.id} name={r.full_name} /><span><span className={'on-dot' + (r.online ? ' live' : '')} aria-hidden="true" /> {r.full_name || '–'}<br /><span className="sm">{r.email || r.reg_number || ''}{r.role === 'parent' && r.reg_number ? ` · child ${r.reg_number}` : ''}</span></span></span></td>
+              <td><span className={'tag' + (r.role === 'admin' ? ' bad' : r.role === 'teacher' ? ' ok' : ' muted')}>{ROLES[r.role]}{r.inst_title && r.role === 'teacher' ? ' · ' + r.inst_title : ''}</span></td>
+              <td>{r.institution || '–'}</td>
+              <td>{r.online ? <b className="on-now">Online now</b> : ago(r.last_seen)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+      {list.length > 10 && <Pagination page={pageNo} pageSize={pageSize} total={list.length} onPage={setPage} onPageSize={(n) => { setPageSize(n); setPage(1) }} sizes={[10, 20, 50, 100]} />}
+    </>
+  )
 }
 
 /** Who is using JAMBwise right now (heard from in the last 3 minutes), and who was here earlier today. Refreshes itself every 20 seconds. */
@@ -33,21 +59,6 @@ export default function Online() {
   const now = rows.filter((r) => r.online)
   const earlier = rows.filter((r) => !r.online)
   const count = (r) => data.filter((x) => x.online && x.role === r).length
-  const table = (list) => (
-    <div className="card tw">
-      <table>
-        <thead><tr><th>Person</th><th>Role</th><th>Institution</th><th>Last seen</th></tr></thead>
-        <tbody>{list.map((r) => (
-          <tr key={r.id}>
-            <td><span className={'on-dot' + (r.online ? ' live' : '')} aria-hidden="true" /> {r.full_name || '–'}<br /><span className="sm">{r.email || r.reg_number || ''}{r.role === 'parent' && r.reg_number ? ` · child ${r.reg_number}` : ''}</span></td>
-            <td><span className={'tag' + (r.role === 'admin' ? ' bad' : r.role === 'teacher' ? ' ok' : ' muted')}>{ROLES[r.role]}{r.inst_title && r.role === 'teacher' ? ' · ' + r.inst_title : ''}</span></td>
-            <td>{r.institution || '–'}</td>
-            <td>{r.online ? <b className="on-now">Online now</b> : ago(r.last_seen)}</td>
-          </tr>
-        ))}</tbody>
-      </table>
-    </div>
-  )
   return (
     <>
       <div className="on-sum">
@@ -66,9 +77,9 @@ export default function Online() {
       <p className="sm">Updated {at.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}, and it refreshes by itself every 20 seconds. "Online" means seen in the last 3 minutes; the list keeps the last 24 hours.</p>
       <ErrorLine>{error}</ErrorLine>
       <h3>Online now ({now.length})</h3>
-      {now.length ? table(now) : <Empty>Nobody matching is online right now.</Empty>}
+      {now.length ? <PeopleTable key={'now' + role + needle} list={now} /> : <Empty>Nobody matching is online right now.</Empty>}
       <h3>Seen earlier today ({earlier.length})</h3>
-      {earlier.length ? table(earlier) : <Empty>No one else in the last 24 hours.</Empty>}
+      {earlier.length ? <PeopleTable key={'earlier' + role + needle} list={earlier} /> : <Empty>No one else in the last 24 hours.</Empty>}
     </>
   )
 }

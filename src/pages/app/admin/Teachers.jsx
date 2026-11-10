@@ -5,7 +5,7 @@ import Icon from '../../../components/Icons.jsx'
 import { useConfirm } from '../../../components/Confirm.jsx'
 import { useAction } from '../../../hooks.js'
 import * as api from '../../../lib/api.js'
-import { Empty, fmtDate, TabLoader, useLoad } from './shared.jsx'
+import { Empty, fmtDate, Pagination, TabLoader, useAvatars, useLoad } from './shared.jsx'
 import AddUser, { makePassword } from './AddUser.jsx'
 import StaffChat from './StaffChat.jsx'
 import InstitutionAssign, { useInstitutions } from './InstitutionAssign.jsx'
@@ -79,6 +79,12 @@ export default function Teachers() {
     return teachers.filter((s) => (instF === 'all' || (instF === 'none' ? !s.institution_id : s.institution_id === instF)) && (!needle || [s.full_name, s.email].some((v) => String(v || '').toLowerCase().includes(needle))))
   }, [teachers, q, instF])
   const last = useMemo(() => new Map((inbox.data || []).map((m) => [m.teacher_id, m])), [inbox.data])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  useEffect(() => { setPage(1) }, [q, instF, pageSize])
+  const pageNo = Math.min(page, Math.max(1, Math.ceil(shown.length / pageSize)))
+  const pageRows = useMemo(() => shown.slice((pageNo - 1) * pageSize, pageNo * pageSize), [shown, pageNo, pageSize])
+  const pics = useAvatars(pageRows.map((t) => t.id))
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const chatWith = teachers.find((t) => t.id === chatId)
@@ -113,11 +119,11 @@ export default function Teachers() {
         <table>
           <thead><tr><th>Teacher</th><th>Institution</th><th>Last message</th><th>Joined</th><th /></tr></thead>
           <tbody>
-            {shown.map((t) => {
+            {pageRows.map((t) => {
               const m = last.get(t.id)
               return (
                 <tr key={t.id}>
-                  <td><span className="who-cell"><Avatar profile={{ full_name: t.full_name, avatar: null }} /><span><b>{t.full_name}</b>{t.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{t.email}</span></span></span></td>
+                  <td><span className="who-cell"><Avatar profile={{ full_name: t.full_name, avatar: pics.get(t.id) || null }} /><span><b>{t.full_name}</b>{t.suspended && <span className="tag bad">suspended</span>}<br /><span className="sm">{t.email}</span></span></span></td>
                   <td>{t.institution ? <>{t.institution}<br /><span className="sm">{t.inst_title || 'Teacher'}</span></> : <span className="sm">–</span>}</td>
                   <td className="sm">{m ? <>{m.last_from === t.id ? 'Teacher: ' : 'You: '}{String(m.last_body).slice(0, 40)}{m.last_body.length > 40 ? '…' : ''}</> : '–'}</td>
                   <td>{fmtDate(t.created_at)}</td>
@@ -128,6 +134,7 @@ export default function Teachers() {
           </tbody>
         </table>
         {shown.length === 0 && <Empty>{teachers.length ? 'No teachers match.' : 'No teachers yet. Use Add teacher to make the first one.'}</Empty>}
+        {shown.length > 0 && <Pagination page={pageNo} pageSize={pageSize} total={shown.length} onPage={(n) => { setPage(n); window.scrollTo({ top: 0 }) }} onPageSize={setPageSize} sizes={[10, 20, 50, 100]} />}
       </div>
       {adding && <AddUser role="teacher" onClose={() => setAdding(false)} onDone={reload} />}
       {editing && <EditTeacher key={editing.id} t={editing} onClose={() => setEdit(null)} reload={reload} />}

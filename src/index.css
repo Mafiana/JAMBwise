@@ -378,7 +378,7 @@ textarea:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 4px var(--g2)
 .ticket{padding:0;overflow:hidden}
 .ticket.open{border-color:var(--g3)}
 .ticket-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 18px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.ticket-head:hover{background:var(--bg)}
+.ticket-head:hover{background:var(--bg)}.ticket-head .av{width:32px;height:32px;font-size:13px}
 .ticket-id{font:700 13px ui-monospace,Menlo,monospace;color:var(--g);flex:none}
 .ticket-sub{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ticket-date{color:var(--mut);font-size:13px;flex:none}
@@ -1225,6 +1225,7 @@ kbd{display:inline-block;min-width:22px;padding:1px 7px;margin-right:6px;border:
 .tm-card{position:relative;margin:0;padding:44px 20px 20px;text-align:center;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--shadow)}
 .tm-grid.n3 .tm-card:nth-child(2){margin-top:26px}
 .tm-av{position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;color:var(--on);background:var(--g);border:3px solid var(--card);box-shadow:var(--shadow)}
+.tm-av[src]{object-fit:cover;background:var(--g2)}
 .tm-stars{color:#d5ddd8;letter-spacing:2px;font-size:15px;margin-bottom:6px}.tm-stars .on{color:#F5B301}
 .tm-name{display:block}.tm-role{display:block;font-size:13px;color:var(--mut);margin-bottom:10px}
 .tm-card blockquote{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}

@@ -8,7 +8,7 @@ import { useAction } from '../../../hooks.js'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import { SUBJECTS } from '../../../lib/constants.js'
 import { naira, studentReport, TICKET_STATUS, ticketNo } from '../../../lib/utils.js'
-import { fmtDate, fmtDateTime, PLAN_IDS, TabLoader, useLoad } from './shared.jsx'
+import { fmtDate, fmtDateTime, PLAN_IDS, TabLoader, useAvatars, useLoad } from './shared.jsx'
 import PlanBadge from '../../../components/PlanBadge.jsx'
 import InstitutionAssign from './InstitutionAssign.jsx'
 
@@ -181,6 +181,7 @@ export default function StudentDetail({ s, me, onClose, reloadList }) {
   const [tab, setTab] = useState('overview')
   const fetchDetail = useCallback(() => api.adminStudentDetail(s.id), [s.id])
   const { data, error, loading, reload } = useLoad(fetchDetail)
+  const pic = useAvatars([s.id]).get(s.id) || null
   const rep = useMemo(() => studentReport(data?.attempts || []), [data])
   const paid = (data?.payments || []).filter((p) => p.status === 'paid').reduce((n, p) => n + p.amount_kobo, 0)
   const open = (data?.tickets || []).filter((t) => t.status === 'new' || t.status === 'read').length
@@ -192,7 +193,7 @@ export default function StudentDetail({ s, me, onClose, reloadList }) {
     <div aria-label={`Student ${s.reg_number}`}>
       <button className="btn ghost back" onClick={onClose}><Icon name="chevl" size={16} /> All students</button>
       <div className="card sd-head">
-        <Avatar profile={{ full_name: s.full_name, avatar: null }} />
+        <Avatar profile={{ full_name: s.full_name, avatar: pic }} />
         <div className="sd-id">
           <h2>{s.full_name}{s.is_admin && <span className="tag">admin</span>}{s.is_teacher && <span className="tag">teacher</span>}{s.suspended && <span className="tag bad">suspended</span>}</h2>
           <span className="sm">{s.reg_number} · {s.email}</span>

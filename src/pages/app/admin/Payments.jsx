@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import * as api from '../../../lib/api.js'
 import { downloadText } from '../../../lib/download.js'
 import { naira, toCsv } from '../../../lib/utils.js'
-import { Empty, fmtDateTime, useLoad, TabLoader } from './shared.jsx'
+import { Empty, fmtDateTime, useLoad, TabLoader, PersonAvatar, Pagination } from './shared.jsx'
 
 const fetchBoth = async () => {
   const [payments, students] = await Promise.all([api.adminPayments(), api.adminStudents()])
@@ -14,6 +14,11 @@ export default function Payments() {
   const { data, error, loading } = useLoad(fetchBoth)
   const [status, setStatus] = useState('all')
   const rows = useMemo(() => (data?.payments || []).filter((p) => status === 'all' || p.status === status), [data, status])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  useEffect(() => { setPage(1) }, [status, pageSize])
+  const pageNo = Math.min(page, Math.max(1, Math.ceil(rows.length / pageSize)))
+  const pageRows = useMemo(() => rows.slice((pageNo - 1) * pageSize, pageNo * pageSize), [rows, pageNo, pageSize])
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const name = (p) => data.who[p.user_id]?.full_name || (p.user_id ? 'Unknown' : 'Deleted account')
@@ -39,9 +44,9 @@ export default function Payments() {
         <table>
           <thead><tr><th>Reference</th><th>Student</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
           <tbody>
-            {rows.map((p) => (
+            {pageRows.map((p) => (
               <tr key={p.reference}>
-                <td className="mono">{p.reference}</td><td>{name(p)}<br /><span className="sm">{data.who[p.user_id]?.email}</span></td>
+                <td className="mono">{p.reference}</td><td><span className="who-cell"><PersonAvatar id={p.user_id} name={name(p)} /><span>{name(p)}<br /><span className="sm">{data.who[p.user_id]?.email}</span></span></span></td>
                 <td>{p.plan}</td><td>{naira(p.amount_kobo)}</td><td><span className={'tag ' + (p.status === 'paid' ? 'ok' : p.status === 'failed' ? 'bad' : '')}>{p.status}</span></td>
                 <td>{fmtDateTime(p.paid_at || p.created_at)}</td>
               </tr>
@@ -49,6 +54,7 @@ export default function Payments() {
           </tbody>
         </table>
         {rows.length === 0 && <Empty>No payments yet.</Empty>}
+        {rows.length > 0 && <Pagination page={pageNo} pageSize={pageSize} total={rows.length} onPage={(n) => { setPage(n); window.scrollTo({ top: 0 }) }} onPageSize={setPageSize} sizes={[10, 20, 50, 100]} />}
       </div>
       <p className="sm">Payments are recorded by the Paystack webhook, so this list cannot be edited here. If a student says they paid but is still on Free, find their reference in your Paystack dashboard, then use Students → Manage → Apply plan.</p>
     </>

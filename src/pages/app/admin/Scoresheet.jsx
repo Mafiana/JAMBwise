@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ErrorLine } from '../../../components/ui.jsx'
 import { useAuth } from '../../../context/AuthContext.jsx'
 import Icon from '../../../components/Icons.jsx'
@@ -10,7 +10,7 @@ import { breakdown, EXAMS, scoreStats } from '../../../lib/scoresheet.js'
 import { useAction } from '../../../hooks.js'
 import Modal from '../../../components/Modal.jsx'
 import { EVENT_LABEL, fmtWhen, isLeave } from '../../../lib/integrity.js'
-import { Empty, fmtDate, fmtDateTime, TabLoader, useLoad } from './shared.jsx'
+import { Empty, fmtDate, fmtDateTime, Pagination, PersonAvatar, TabLoader, useLoad } from './shared.jsx'
 
 const PDF_COLUMNS = [
   { label: 'Rank', width: 40, align: 'center' }, { label: 'Student', width: 175 }, { label: 'Reg. number', width: 105 },
@@ -112,6 +112,11 @@ export default function Scoresheet() {
     const needle = q.trim().toLowerCase()
     return (all || []).filter((r) => !needle || [r.name, r.reg, r.email, r.school].some((v) => String(v || '').toLowerCase().includes(needle)))
   }, [all, q])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  useEffect(() => { setPage(1) }, [q, kind, pageSize])
+  const pageNo = Math.min(page, Math.max(1, Math.ceil(rows.length / pageSize)))
+  const pageRows = useMemo(() => rows.slice((pageNo - 1) * pageSize, pageNo * pageSize), [rows, pageNo, pageSize])
   if (loading) return <TabLoader />
   if (!data) return <ErrorLine>{error}</ErrorLine>
   const st = scoreStats(all)
@@ -163,10 +168,10 @@ export default function Scoresheet() {
         <table>
           <thead><tr><th>Rank</th><th>Student</th><th>Reg. number</th><th>Subjects</th><th>Score</th><th>Date</th>{kind === 'hall' && <th>Left screen</th>}{isAdmin && <th></th>}</tr></thead>
           <tbody>
-            {rows.map((r) => (
+            {pageRows.map((r) => (
               <tr key={r.id}>
                 <td data-label="Rank"><b>{r.rank}</b></td>
-                <td data-label="Student">{r.name}<br /><span className="sm">{r.email}</span></td>
+                <td data-label="Student"><span className="who-cell"><PersonAvatar id={r.id} name={r.name} /><span>{r.name}<br /><span className="sm">{r.email}</span></span></span></td>
                 <td data-label="Reg. number">{r.reg}</td>
                 <td data-label="Subjects" className="sm">{breakdown(r)}</td>
                 <td data-label="Score"><b>{r.total}</b> / 400</td>
@@ -184,6 +189,7 @@ export default function Scoresheet() {
           </tbody>
         </table>
         {rows.length === 0 && <Empty>{all.length ? 'No student matches that search.' : `No one has submitted ${exam.label} yet.`}</Empty>}
+        {rows.length > 0 && <Pagination page={pageNo} pageSize={pageSize} total={rows.length} onPage={(n) => { setPage(n); window.scrollTo({ top: 0 }) }} onPageSize={setPageSize} sizes={[10, 20, 50, 100]} />}
       </div>
       {kind === 'hall' && data.flagged.hall.length > 0 && (
         <div className="card" style={{ marginTop: 16 }}>

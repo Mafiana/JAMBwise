@@ -22,7 +22,7 @@ export default function Testimonials() {
         <div className={'tm-grid n' + Math.min(items.length, 3)}>
           {items.map((t) => (
             <figure className="tm-card" key={t.id}>
-              <span className="tm-av" aria-hidden="true">{initials(t.name)}</span>
+              {t.photo ? <img className="tm-av" src={t.photo} alt={`Photo of ${t.name}`} loading="lazy" /> : <span className="tm-av" aria-hidden="true">{initials(t.name)}</span>}
               {t.rating ? <div className="tm-stars" role="img" aria-label={`${t.rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map((i) => <span key={i} className={i <= t.rating ? 'on' : ''}>★</span>)}</div> : null}
               <b className="tm-name">{t.name}</b>
               <span className="tm-role">{t.role}</span>
