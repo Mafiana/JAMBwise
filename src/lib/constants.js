@@ -133,6 +133,12 @@ export const DEFAULT_INSTITUTIONS = [
   { slug: 'grange-school', name: 'Grange School', location: 'Ikeja, Lagos State', note: null },
   { slug: 'greensprings-school', name: 'Greensprings School', location: 'Anthony/Lekki, Lagos State', note: null },
   { slug: 'atlantic-hall', name: 'Atlantic Hall', location: 'Poka, Epe, Lagos State', note: null },
+  { slug: 'bright-future-international-school', name: 'Bright Future International School', location: 'Ikeja, Lagos', note: null },
+  { slug: 'golden-crown-secondary-school', name: 'Golden Crown Secondary School', location: 'Warri, Delta State', note: null },
+  { slug: 'excel-heights-college', name: 'Excel Heights College', location: 'Asaba, Delta State', note: null },
+  { slug: 'royal-heritage-academy', name: 'Royal Heritage Academy', location: 'Abuja, FCT', note: null },
+  { slug: 'wisdom-gate-secondary-school', name: 'Wisdom Gate Secondary School', location: 'Benin City, Edo State', note: null },
+  { slug: 'great-scholars-college', name: 'Great Scholars College', location: 'Port Harcourt, Rivers State', note: null },
 ]
 
 /** Where people are sent when their password reset link does not arrive, and how long they wait first. */

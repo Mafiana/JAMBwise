@@ -762,13 +762,26 @@ export async function myAnnouncements() {
 }
 
 // ── Blog ──
-const BLOG_OFF = 'The blog is not switched on yet. Run supabase/migrate-blog.sql in the Supabase SQL Editor, then try again.'
+const BLOG_OFF = 'The blog is not switched on yet. Run supabase/migrate-blog.sql and then supabase/migrate-blog-v2.sql in the Supabase SQL Editor, then try again.'
 /** Student, teacher or admin: published posts, newest first. Returns { rows, total }; rows have no body (open one with getBlogPost). */
-export async function getBlogPosts(limit = 9, offset = 0) {
-  const { data, error } = await supabase.rpc('blog_list', { p_limit: limit, p_offset: offset })
+export async function getBlogPosts(limit = 9, offset = 0, { q = '', category = '' } = {}) {
+  const { data, error } = await supabase.rpc('blog_list', { p_limit: limit, p_offset: offset, p_q: q.trim() || null, p_category: category || null })
   if (error) fail(error, featureReady(error) ? 'Could not load the blog.' : BLOG_OFF)
   const rows = data || []
   return { rows, total: rows.length ? Number(rows[0].total) : 0 }
+}
+/** The categories that have published posts: [{ category, n }]. [] when the database does not have them yet. */
+export async function getBlogCategories() {
+  const { data, error } = await supabase.rpc('blog_categories')
+  if (error) return []
+  return data || []
+}
+/** Like a post, or take the like back. Returns { liked, likes }. */
+export async function toggleBlogLike(id) {
+  const { data, error } = await supabase.rpc('blog_toggle_like', { p_id: Number(id) })
+  if (error) fail(error, featureReady(error) ? 'Could not save your like. Please try again.' : BLOG_OFF)
+  const r = (data || [])[0] || {}
+  return { liked: Boolean(r.liked), likes: Number(r.likes || 0) }
 }
 /** One post to read. null when it does not exist (or is still a draft and you are not the admin). */
 export async function getBlogPost(id) {
@@ -787,8 +800,8 @@ export async function adminBlogPost(id) {
   return (data || [])[0] || null
 }
 /** Admin: creates (id null) or changes a post. publish true shows it to students and teachers; false keeps it as a draft. Returns the post id. */
-export async function adminSaveBlogPost({ id = null, title, summary = '', cover = null, body, publish = false }) {
-  const { data, error } = await supabase.rpc('admin_save_blog_post', { p_id: id, p_title: title, p_summary: summary, p_cover: cover, p_body: body, p_publish: Boolean(publish) })
+export async function adminSaveBlogPost({ id = null, title, summary = '', cover = null, body, publish = false, category = '', notify = false }) {
+  const { data, error } = await supabase.rpc('admin_save_blog_post', { p_id: id, p_title: title, p_summary: summary, p_cover: cover, p_body: body, p_publish: Boolean(publish), p_category: category.trim() || null, p_notify: Boolean(notify) })
   if (error) fail(error, featureReady(error) ? 'Could not save the post.' : BLOG_OFF)
   return data
 }

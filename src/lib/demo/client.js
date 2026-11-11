@@ -2,6 +2,7 @@
 // (students, payments, PINs and the admin dashboard) can be tried with no setup. Everything is stored in this
 // browser's localStorage. It enforces the same access rules as the real database, but it is NOT secure and
 // is never used once .env points at a real Supabase project.
+import { htmlToText } from '../blogHtml.js'
 import eng from '../../../supabase/questions/eng.json'
 import mat from '../../../supabase/questions/mat.json'
 import phy from '../../../supabase/questions/phy.json'
@@ -82,7 +83,7 @@ function seed() {
     nextAudit: 2,
     institutions: DEFAULT_INSTITUTIONS.map((i) => ({ ...i, id: 'inst-' + i.slug, created_at: daysAgo(60) })),
     notifications: [], nextNotif: 1, staffChat: [], nextChat: 1,
-    blog: [{ id: 1, title: 'Five habits that raise a JAMB score', summary: 'Small, steady habits beat last-minute cramming. Here are five you can start this week.', cover: null, published: true, published_at: daysAgo(2), created_at: daysAgo(2), updated_at: daysAgo(2),
+    blog: [{ id: 1, title: 'Five habits that raise a JAMB score', category: 'Study tips', summary: 'Small, steady habits beat last-minute cramming. Here are five you can start this week.', cover: null, published: true, published_at: daysAgo(2), created_at: daysAgo(2), updated_at: daysAgo(2),
       body: '<h2>1. Practise a little every day</h2><p>Thirty focused minutes a day is worth more than one long weekend session.</p><h2>2. Learn from every mistake</h2><p>After each practice, read the explanation for <b>every</b> question you missed, then redo it a day later.</p><ul><li>Keep a short list of topics that trip you up</li><li>Revisit that list every Sunday</li></ul><blockquote>Consistency is the real shortcut.</blockquote><p>Good luck, and keep going!</p>' }],
     parentCodes: { 'demo-student': { code: DEMO_PARENT.code, expires_at: daysAhead(365), created_at: new Date().toISOString() } }, parentSessions: [], parentLog: [], nextParentLog: 1,
     qEdits: { added: [], edited: {}, deleted: [], next: 100000 },
@@ -322,6 +323,18 @@ function from(name) {
 
 
 // ── notifications and admin ↔ teacher chat (same rules as supabase/schema.sql) ──
+const likesOf = (postId) => (db.blogLikes || []).filter((l) => l.post_id === postId).length
+const likedByMe = (postId) => (db.blogLikes || []).some((l) => l.post_id === postId && l.user_id === me())
+const blogLink = (p, id) => (p.is_teacher ? '/app/admin/blog/' : '/app/blog/') + id
+/** Takes back unread bells for a post (all of them when `all` is true, for a deleted post). */
+function blogUnbell(id, all = false) {
+  db.notifications = db.notifications.filter((n) => !(n.kind === 'blog' && /\/blog\/(\d+)$/.exec(n.link || '')?.[1] === String(id) && (all || !n.read_at)))
+}
+/** A bell for every student and teacher: a new post, or an updated one (an unread older bell for the post is replaced). */
+function blogBells(row, updated) {
+  blogUnbell(row.id)
+  db.profiles.filter((p) => !p.is_admin).forEach((p) => notify(p.id, 'blog', updated ? 'A blog post was updated' : 'New on the JAMBwise blog', row.title, blogLink(p, row.id)))
+}
 function notify(userId, kind, title, body, link) {
   if (kind === 'chat') {   // repeated chat pings collapse into one unread notification
     const open = db.notifications.find((n) => n.user_id === userId && n.kind === 'chat' && n.link === link && !n.read_at)
@@ -597,19 +610,38 @@ const rpcs = {
   // ── blog ──
   blog_list(a) {
     if (!me()) throw new Error('JWT expired')
-    const all = (db.blog || []).filter((x) => x.published).sort((x, y) => (x.published_at < y.published_at ? 1 : -1))
+    const words = String(a.p_q || '').toLowerCase().split(/\s+/).filter(Boolean)
+    const cat = String(a.p_category || '').trim()
+    const all = (db.blog || []).filter((x) => x.published && (!cat || x.category === cat)
+      && (() => { const hay = `${x.title} ${x.summary} ${x.category || ''} ${htmlToText(x.body)}`.toLowerCase(); return words.every((w) => hay.includes(w)) })())
+      .sort((x, y) => (x.published_at < y.published_at ? 1 : -1))
     const lim = Math.min(Math.max(Number(a.p_limit) || 9, 1), 30)
     const off = Math.max(Number(a.p_offset) || 0, 0)
-    return all.slice(off, off + lim).map((x) => ({ id: x.id, title: x.title, summary: x.summary, cover: x.cover, published_at: x.published_at, total: all.length }))
+    return all.slice(off, off + lim).map((x) => ({ id: x.id, title: x.title, summary: x.summary, cover: x.cover, category: x.category || null, published_at: x.published_at, likes: likesOf(x.id), liked: likedByMe(x.id), total: all.length }))
+  },
+  blog_categories() {
+    if (!me()) throw new Error('JWT expired')
+    const n = {}
+    ;(db.blog || []).filter((x) => x.published && x.category).forEach((x) => { n[x.category] = (n[x.category] || 0) + 1 })
+    return Object.entries(n).map(([category, c]) => ({ category, n: c })).sort((x, y) => y.n - x.n || (x.category < y.category ? -1 : 1))
+  },
+  blog_toggle_like(a) {
+    if (!me()) throw new Error('not allowed')
+    const post = (db.blog || []).find((y) => y.id === Number(a.p_id) && y.published)
+    if (!post) throw new Error('That post is not available.')
+    db.blogLikes = db.blogLikes || []
+    const at = db.blogLikes.findIndex((l) => l.post_id === post.id && l.user_id === me())
+    if (at >= 0) db.blogLikes.splice(at, 1); else db.blogLikes.push({ post_id: post.id, user_id: me() })
+    return [{ liked: likedByMe(post.id), likes: likesOf(post.id) }]
   },
   blog_get(a) {
     if (!me()) throw new Error('JWT expired')
     const x = (db.blog || []).find((y) => y.id === Number(a.p_id) && (y.published || isAdmin()))
-    return x ? [{ ...x }] : []
+    return x ? [{ ...x, category: x.category || null, likes: likesOf(x.id), liked: likedByMe(x.id) }] : []
   },
   admin_blog_posts() {
     adminOnly()
-    return (db.blog || []).map((x) => ({ id: x.id, title: x.title, summary: x.summary, published: x.published, has_cover: Boolean(x.cover), created_at: x.created_at, updated_at: x.updated_at, published_at: x.published_at })).sort((x, y) => (x.created_at < y.created_at ? 1 : -1))
+    return (db.blog || []).map((x) => ({ id: x.id, title: x.title, summary: x.summary, category: x.category || null, likes: likesOf(x.id), published: x.published, has_cover: Boolean(x.cover), created_at: x.created_at, updated_at: x.updated_at, published_at: x.published_at })).sort((x, y) => (x.created_at < y.created_at ? 1 : -1))
   },
   admin_blog_post(a) {
     adminOnly()
@@ -630,9 +662,14 @@ const rpcs = {
     if (a.p_id && !row) throw new Error('That post no longer exists.')
     const first = Boolean(a.p_publish) && !(row && row.published_at)
     if (!row) { row = { id: db.blog.reduce((n, x) => Math.max(n, x.id), 0) + 1, created_at: now, published_at: null }; db.blog.push(row) }
-    Object.assign(row, { title: t, summary: String(a.p_summary || '').trim().slice(0, 300), cover: a.p_cover || null, body: b, published: Boolean(a.p_publish), updated_at: now })
+    const cat = String(a.p_category || '').trim()
+    if (cat.length > 40) throw new Error('The category can be up to 40 characters.')
+    const wasLive = Boolean(row.published)
+    Object.assign(row, { title: t, summary: String(a.p_summary || '').trim().slice(0, 300), cover: a.p_cover || null, body: b, category: cat || null, published: Boolean(a.p_publish), updated_at: now })
     if (a.p_publish && !row.published_at) row.published_at = now
-    if (first) db.profiles.filter((p) => !p.is_admin).forEach((p) => notify(p.id, 'blog', 'New on the JAMBwise blog', t, (p.is_teacher ? '/app/admin/blog/' : '/app/blog/') + row.id))
+    if (first) blogBells(row, false)
+    else if (a.p_publish && a.p_notify) blogBells(row, true)
+    else if (wasLive && !a.p_publish) blogUnbell(row.id)
     log('blog.save', (a.p_publish ? 'published #' : 'draft #') + row.id)
     return row.id
   },
@@ -641,16 +678,19 @@ const rpcs = {
     const row = (db.blog || []).find((y) => y.id === Number(a.p_id))
     if (!row) throw new Error('That post no longer exists.')
     const first = Boolean(a.p_publish) && !row.published_at
+    const wasLive = Boolean(row.published)
     row.published = Boolean(a.p_publish)
     if (row.published && !row.published_at) row.published_at = new Date().toISOString()
     row.updated_at = new Date().toISOString()
-    if (first) db.profiles.filter((p) => !p.is_admin).forEach((p) => notify(p.id, 'blog', 'New on the JAMBwise blog', row.title, (p.is_teacher ? '/app/admin/blog/' : '/app/blog/') + row.id))
+    if (first) blogBells(row, false)
+    else if (wasLive && !row.published) blogUnbell(row.id)
     log('blog.publish', (row.published ? 'shown #' : 'hidden #') + row.id)
     return null
   },
   admin_delete_blog_post(a) {
     adminOnly()
-    db.notifications = db.notifications.filter((n) => !(n.kind === 'blog' && /\/blog\/(\d+)$/.exec(n.link || '')?.[1] === String(a.p_id)))
+    blogUnbell(Number(a.p_id), true)
+    db.blogLikes = (db.blogLikes || []).filter((l) => l.post_id !== Number(a.p_id))
     db.blog = (db.blog || []).filter((y) => y.id !== Number(a.p_id))
     log('blog.delete', '#' + a.p_id)
     return null

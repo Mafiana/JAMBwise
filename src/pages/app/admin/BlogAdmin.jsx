@@ -36,12 +36,14 @@ function Manage() {
       <ErrorLine>{act.error}</ErrorLine>
       <div className="card tw">
         <table>
-          <thead><tr><th>Post</th><th>Status</th><th>Updated</th><th /></tr></thead>
+          <thead><tr><th>Post</th><th>Category</th><th>Status</th><th>Likes</th><th>Updated</th><th /></tr></thead>
           <tbody>
             {pageRows.map((p) => (
               <tr key={p.id}>
                 <td style={{ minWidth: 220, overflowWrap: 'anywhere' }}><b>{p.title}</b>{p.summary && <><br /><span className="sm">{p.summary.length > 110 ? p.summary.slice(0, 110) + '…' : p.summary}</span></>}</td>
+                <td>{p.category || <span className="sm">–</span>}</td>
                 <td>{p.published ? <span className="tag">Published</span> : <span className="tag muted">Draft</span>}</td>
+                <td>{p.likes}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(p.updated_at)}</td>
                 <td>
                   <Link className="btn ghost" to={`/app/admin/blog/${p.id}`}>View</Link>{' '}
