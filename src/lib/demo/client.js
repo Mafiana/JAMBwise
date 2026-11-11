@@ -82,6 +82,8 @@ function seed() {
     nextAudit: 2,
     institutions: DEFAULT_INSTITUTIONS.map((i) => ({ ...i, id: 'inst-' + i.slug, created_at: daysAgo(60) })),
     notifications: [], nextNotif: 1, staffChat: [], nextChat: 1,
+    blog: [{ id: 1, title: 'Five habits that raise a JAMB score', summary: 'Small, steady habits beat last-minute cramming. Here are five you can start this week.', cover: null, published: true, published_at: daysAgo(2), created_at: daysAgo(2), updated_at: daysAgo(2),
+      body: '<h2>1. Practise a little every day</h2><p>Thirty focused minutes a day is worth more than one long weekend session.</p><h2>2. Learn from every mistake</h2><p>After each practice, read the explanation for <b>every</b> question you missed, then redo it a day later.</p><ul><li>Keep a short list of topics that trip you up</li><li>Revisit that list every Sunday</li></ul><blockquote>Consistency is the real shortcut.</blockquote><p>Good luck, and keep going!</p>' }],
     parentCodes: { 'demo-student': { code: DEMO_PARENT.code, expires_at: daysAhead(365), created_at: new Date().toISOString() } }, parentSessions: [], parentLog: [], nextParentLog: 1,
     qEdits: { added: [], edited: {}, deleted: [], next: 100000 },
     payments: [
@@ -591,6 +593,67 @@ const rpcs = {
   my_announcements() {
     if (!me()) throw new Error('JWT expired')
     return (db.announcements || []).filter((x) => x.audience === 'all' || x.recipients.includes(me())).map(({ recipients, ...r }) => r).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+  },
+  // ── blog ──
+  blog_list(a) {
+    if (!me()) throw new Error('JWT expired')
+    const all = (db.blog || []).filter((x) => x.published).sort((x, y) => (x.published_at < y.published_at ? 1 : -1))
+    const lim = Math.min(Math.max(Number(a.p_limit) || 9, 1), 30)
+    const off = Math.max(Number(a.p_offset) || 0, 0)
+    return all.slice(off, off + lim).map((x) => ({ id: x.id, title: x.title, summary: x.summary, cover: x.cover, published_at: x.published_at, total: all.length }))
+  },
+  blog_get(a) {
+    if (!me()) throw new Error('JWT expired')
+    const x = (db.blog || []).find((y) => y.id === Number(a.p_id) && (y.published || isAdmin()))
+    return x ? [{ ...x }] : []
+  },
+  admin_blog_posts() {
+    adminOnly()
+    return (db.blog || []).map((x) => ({ id: x.id, title: x.title, summary: x.summary, published: x.published, has_cover: Boolean(x.cover), created_at: x.created_at, updated_at: x.updated_at, published_at: x.published_at })).sort((x, y) => (x.created_at < y.created_at ? 1 : -1))
+  },
+  admin_blog_post(a) {
+    adminOnly()
+    const x = (db.blog || []).find((y) => y.id === Number(a.p_id))
+    return x ? [{ ...x }] : []
+  },
+  admin_save_blog_post(a) {
+    adminOnly()
+    db.blog = db.blog || []
+    const t = String(a.p_title || '').trim()
+    const b = String(a.p_body || '')
+    if (!t || t.length > 160) throw new Error('Write a title (up to 160 characters).')
+    if (!b.trim()) throw new Error('Write the post.')
+    if (b.length > 3000000) throw new Error('This post is too large. Use fewer or smaller pictures.')
+    if (/<\s*(script|iframe|object|embed)/i.test(b) || /javascript:/i.test(b)) throw new Error('That content is not allowed.')
+    const now = new Date().toISOString()
+    let row = a.p_id ? db.blog.find((y) => y.id === Number(a.p_id)) : null
+    if (a.p_id && !row) throw new Error('That post no longer exists.')
+    const first = Boolean(a.p_publish) && !(row && row.published_at)
+    if (!row) { row = { id: db.blog.reduce((n, x) => Math.max(n, x.id), 0) + 1, created_at: now, published_at: null }; db.blog.push(row) }
+    Object.assign(row, { title: t, summary: String(a.p_summary || '').trim().slice(0, 300), cover: a.p_cover || null, body: b, published: Boolean(a.p_publish), updated_at: now })
+    if (a.p_publish && !row.published_at) row.published_at = now
+    if (first) db.profiles.filter((p) => !p.is_admin).forEach((p) => notify(p.id, 'blog', 'New on the JAMBwise blog', t, (p.is_teacher ? '/app/admin/blog/' : '/app/blog/') + row.id))
+    log('blog.save', (a.p_publish ? 'published #' : 'draft #') + row.id)
+    return row.id
+  },
+  admin_set_blog_published(a) {
+    adminOnly()
+    const row = (db.blog || []).find((y) => y.id === Number(a.p_id))
+    if (!row) throw new Error('That post no longer exists.')
+    const first = Boolean(a.p_publish) && !row.published_at
+    row.published = Boolean(a.p_publish)
+    if (row.published && !row.published_at) row.published_at = new Date().toISOString()
+    row.updated_at = new Date().toISOString()
+    if (first) db.profiles.filter((p) => !p.is_admin).forEach((p) => notify(p.id, 'blog', 'New on the JAMBwise blog', row.title, (p.is_teacher ? '/app/admin/blog/' : '/app/blog/') + row.id))
+    log('blog.publish', (row.published ? 'shown #' : 'hidden #') + row.id)
+    return null
+  },
+  admin_delete_blog_post(a) {
+    adminOnly()
+    db.notifications = db.notifications.filter((n) => !(n.kind === 'blog' && /\/blog\/(\d+)$/.exec(n.link || '')?.[1] === String(a.p_id)))
+    db.blog = (db.blog || []).filter((y) => y.id !== Number(a.p_id))
+    log('blog.delete', '#' + a.p_id)
+    return null
   },
   submit_question(a) {
     if (!isStaff()) throw new Error('not allowed')

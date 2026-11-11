@@ -35,6 +35,11 @@ const AdminNovel = lazy(() => import('./pages/app/admin/Novel.jsx'))
 const AdminSyllabus = lazy(() => import('./pages/app/admin/Syllabus.jsx'))
 const Rate = lazy(() => import('./pages/app/Rate.jsx'))
 const Announcements = lazy(() => import('./pages/app/Announcements.jsx'))
+const Blog = lazy(() => import('./pages/app/BlogPage.jsx'))
+const BlogRead = lazy(() => import('./pages/app/BlogPage.jsx').then((m) => ({ default: m.BlogRead })))
+const AdminBlog = lazy(() => import('./pages/app/admin/BlogAdmin.jsx'))
+const AdminBlogRead = lazy(() => import('./pages/app/admin/BlogAdmin.jsx').then((m) => ({ default: m.BlogRead })))
+const BlogEditor = lazy(() => import('./pages/app/admin/BlogEditor.jsx'))
 const AdminFeedback = lazy(() => import('./pages/app/admin/Feedback.jsx'))
 const AdminAnnouncements = lazy(() => import('./pages/app/admin/Announcements.jsx'))
 const TeacherRate = lazy(() => import('./pages/app/admin/RateSuggest.jsx'))
@@ -91,6 +96,8 @@ export default function App() {
                     <Route path="progress" element={<StudentOnly><Progress /></StudentOnly>} />
                     <Route path="syllabus" element={<StudentOnly><Syllabus /></StudentOnly>} />
                     <Route path="novel" element={<StudentOnly><Novel /></StudentOnly>} />
+                    <Route path="blog" element={<StudentOnly><Blog /></StudentOnly>} />
+                    <Route path="blog/:id" element={<StudentOnly><BlogRead /></StudentOnly>} />
                     <Route path="rate" element={<StudentOnly><Rate /></StudentOnly>} />
                     <Route path="announcements" element={<StudentOnly><Announcements /></StudentOnly>} />
                     <Route path="profile" element={<Profile />} />
@@ -114,6 +121,10 @@ export default function App() {
                       <Route path="novel" element={<AdminNovel />} />
                       <Route path="feedback" element={<AdminOnly><AdminFeedback /></AdminOnly>} />
                       <Route path="announcements" element={<AdminAnnouncements />} />
+                      <Route path="blog" element={<AdminBlog />} />
+                      <Route path="blog/new" element={<AdminOnly><BlogEditor /></AdminOnly>} />
+                      <Route path="blog/edit/:id" element={<AdminOnly><BlogEditor /></AdminOnly>} />
+                      <Route path="blog/:id" element={<AdminBlogRead />} />
                       <Route path="rate" element={<TeacherRate />} />
                       <Route path="messages" element={<Messages />} />
                       <Route path="mail" element={<AdminOnly><Mail /></AdminOnly>} />

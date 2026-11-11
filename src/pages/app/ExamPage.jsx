@@ -324,13 +324,11 @@ function Running({ m }) {
       {needsFullscreen && !fsNow && !m.warn && !m.resumed && (
         <p className="notice" role="status"><Icon name="alert" size={16} /> ExamHall runs in full screen. <button className="btn ghost" onClick={enterFullscreen}>Enter full screen</button></p>
       )}
-      <div className="card bar exam-head">
-        <Portrait profile={profile} />
-        <div className="exam-who"><b>{profile.full_name}</b><br /><span className="sm">{profile.reg_number}</span></div>
-        <div className="exam-tools">
-          <button type="button" className="btn ghost calc-btn" aria-pressed={calcOpen} onClick={() => setCalcOpen((o) => !o)}><Icon name="calc" size={16} /> Calculator</button>
-          <span className="tag" aria-label="Time left">{fmtTime(left)}</span>
-        </div>
+      <div className="card exam-head xh">
+        <span className="xh-photo"><Portrait profile={profile} /><span className="xh-ok" aria-hidden="true"><Icon name="check" size={13} /></span></span>
+        <div className="xh-who"><b>{profile.full_name}</b><span className="xh-reg"><Icon name="user" size={16} />{profile.reg_number}</span></div>
+        <div className="xh-time"><Icon name="clock" size={26} /><span><span className="xh-tl">Time Remaining</span><b className="xh-tv" aria-label="Time left">{fmtTime(left)}</b></span></div>
+        <button type="button" className="xh-calc" aria-pressed={calcOpen} onClick={() => setCalcOpen((o) => !o)}><Icon name="calc" size={22} /><span>Calculator</span></button>
       </div>
       {calcOpen && <ExamCalculator onClose={() => setCalcOpen(false)} />}
       <div className="chips">

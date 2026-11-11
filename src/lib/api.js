@@ -761,6 +761,46 @@ export async function myAnnouncements() {
   return data || []
 }
 
+// ── Blog ──
+const BLOG_OFF = 'The blog is not switched on yet. Run supabase/migrate-blog.sql in the Supabase SQL Editor, then try again.'
+/** Student, teacher or admin: published posts, newest first. Returns { rows, total }; rows have no body (open one with getBlogPost). */
+export async function getBlogPosts(limit = 9, offset = 0) {
+  const { data, error } = await supabase.rpc('blog_list', { p_limit: limit, p_offset: offset })
+  if (error) fail(error, featureReady(error) ? 'Could not load the blog.' : BLOG_OFF)
+  const rows = data || []
+  return { rows, total: rows.length ? Number(rows[0].total) : 0 }
+}
+/** One post to read. null when it does not exist (or is still a draft and you are not the admin). */
+export async function getBlogPost(id) {
+  const { data, error } = await supabase.rpc('blog_get', { p_id: Number(id) })
+  if (error) fail(error, featureReady(error) ? 'Could not load this post.' : BLOG_OFF)
+  return (data || [])[0] || null
+}
+export async function adminBlogPosts() {
+  const { data, error } = await supabase.rpc('admin_blog_posts')
+  if (error) fail(error, featureReady(error) ? 'Could not load the posts.' : BLOG_OFF)
+  return data || []
+}
+export async function adminBlogPost(id) {
+  const { data, error } = await supabase.rpc('admin_blog_post', { p_id: Number(id) })
+  if (error) fail(error, featureReady(error) ? 'Could not load this post.' : BLOG_OFF)
+  return (data || [])[0] || null
+}
+/** Admin: creates (id null) or changes a post. publish true shows it to students and teachers; false keeps it as a draft. Returns the post id. */
+export async function adminSaveBlogPost({ id = null, title, summary = '', cover = null, body, publish = false }) {
+  const { data, error } = await supabase.rpc('admin_save_blog_post', { p_id: id, p_title: title, p_summary: summary, p_cover: cover, p_body: body, p_publish: Boolean(publish) })
+  if (error) fail(error, featureReady(error) ? 'Could not save the post.' : BLOG_OFF)
+  return data
+}
+export async function adminSetBlogPublished(id, publish) {
+  const { error } = await supabase.rpc('admin_set_blog_published', { p_id: id, p_publish: Boolean(publish) })
+  if (error) fail(error, featureReady(error) ? 'Could not update the post.' : BLOG_OFF)
+}
+export async function adminDeleteBlogPost(id) {
+  const { error } = await supabase.rpc('admin_delete_blog_post', { p_id: id })
+  if (error) fail(error, featureReady(error) ? 'Could not delete the post.' : BLOG_OFF)
+}
+
 // ── teacher questions wait for admin review ──
 const reviewReady = (error) => !/PGRST20[25]|42883|schema cache|does not exist|Could not find the function/i.test(String(error?.code || '') + ' ' + String(error?.message || ''))
 const REVIEW_OFF = 'Question review is not switched on yet. Run supabase/migrate-question-review.sql in the Supabase SQL Editor, then try again.'

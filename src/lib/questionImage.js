@@ -9,8 +9,11 @@ export function fitSize(w, h, max = IMAGE_MAX_SIDE) {
   return { w: Math.max(1, Math.round(w * k)), h: Math.max(1, Math.round(h * k)) }
 }
 
-/** Turns a chosen picture into a small JPEG data: URL (white behind transparent PNGs). Rejects if it cannot be made small enough. */
-export function fileToQuestionImage(file) {
+/** Turns a chosen picture into a small JPEG data: URL (white behind transparent PNGs). Rejects if it cannot be made small enough.
+ *  `opts` can ask for a smaller picture (the blog cover uses { maxSide: 720, maxChars: 120000 }). */
+export function fileToImage(file, opts = {}) {
+  const maxSide = opts.maxSide || IMAGE_MAX_SIDE
+  const maxChars = opts.maxChars || IMAGE_MAX_CHARS
   return new Promise((resolve, reject) => {
     if (!file || !String(file.type).startsWith('image/')) return reject(new Error('Please choose a picture (JPG or PNG).'))
     const reader = new FileReader()
@@ -19,7 +22,7 @@ export function fileToQuestionImage(file) {
       const img = new Image()
       img.onerror = () => reject(new Error('That picture could not be opened.'))
       img.onload = () => {
-        let side = IMAGE_MAX_SIDE
+        let side = maxSide
         for (let attempt = 0; attempt < 4; attempt++) {
           const { w, h } = fitSize(img.width, img.height, side)
           const c = document.createElement('canvas')
@@ -29,7 +32,7 @@ export function fileToQuestionImage(file) {
           ctx.drawImage(img, 0, 0, w, h)
           for (const q of [0.85, 0.7, 0.55]) {
             const url = c.toDataURL('image/jpeg', q)
-            if (url.length <= IMAGE_MAX_CHARS) return resolve(url)
+            if (url.length <= maxChars) return resolve(url)
           }
           side = Math.round(side * 0.75)
         }
@@ -40,3 +43,5 @@ export function fileToQuestionImage(file) {
     reader.readAsDataURL(file)
   })
 }
+
+export const fileToQuestionImage = (file) => fileToImage(file)

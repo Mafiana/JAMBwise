@@ -23,6 +23,7 @@ const NAV = [
   ['progress', 'My Progress', 'chart'],
   ['syllabus', 'Syllabus', 'book'],
   ['novel', 'Novel', 'book'],
+  ['blog', 'Blog', 'blog'],
 ]
 const MORE = [
   ['profile', 'My Profile', 'user'],
@@ -52,6 +53,7 @@ const ADMIN_NAV = [
   ['settings', 'Prices', 'settings', true],
   ['coupons', 'Coupons', 'wallet', true],
   ['announcements', 'Announcements', 'announce'],
+  ['blog', 'Blog', 'blog'],
   ['feedback', 'Feedback', 'star', true],
   ['rate', 'Rate & suggest', 'star', false, true],
   ['online', 'Who is online', 'users'],
