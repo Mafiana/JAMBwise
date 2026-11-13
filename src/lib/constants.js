@@ -30,7 +30,7 @@ export const SECONDS_PER_QUESTION = 40 // the real UTME pace (2 hours for 180 qu
 
 // Prices shown here are only a fallback. The real prices come from the `plans` table in the database.
 export const PLANS = [
-  { id: 'free', name: 'Free', kobo: 0, features: [
+  { id: 'free', name: 'Free', kobo: 0, blurb: 'Try JAMBwise with English and Maths. No payment needed.', features: [
     'English and Maths practice, with an explanation for every wrong answer',
     'My Progress: level, skill web, streaks and badges',
     'Aggregate calculator',
@@ -38,15 +38,15 @@ export const PLANS = [
     'Invite a friend and earn 15% off your next payment',
     'Support tickets for any question',
   ] },
-  { id: 'student', name: 'Student', kobo: 150000, features: [
+  { id: 'student', name: 'Student', kobo: 200000, blurb: 'Every subject and full timed CBT mocks. ExamHall is on the Pro plan.', features: [
     'Everything in Free',
     'All 16 subjects to practise, with explanations',
     'CBT Mock exams at the real pace (40 seconds a question), scored out of 400',
     'Mock score history and trend',
   ] },
-  { id: 'pro', name: 'Pro', kobo: 300000, features: [
+  { id: 'pro', name: 'Pro', kobo: 300000, blurb: 'Everything in Student, plus ExamHall and tools that plan your study.', features: [
     'Everything in Student',
-    'ExamHall: the one-time school exam. Your school or administrator releases the results',
+    'ExamHall: a one-time, school-style exam. Your school or the administrator releases the results',
     'Fix my weak spots: re-drill only the questions you keep getting wrong until you master them',
     'Study Planner with a countdown to your exam date',
     'A weekly plan built from your 3 subjects, with your weakest subject first, a weak-spot day and a mock day',
@@ -65,6 +65,8 @@ export const FAQ = [
   ['Is JAMBwise affiliated with JAMB?', 'No. JAMBwise is an independent practice platform and is not affiliated with or endorsed by JAMB.'],
   ['Are these real JAMB past questions?', 'No. Our questions are original and written in the style of the UTME syllabus. They are for practice only.'],
   ['How does the CBT mock work?', 'Choose your 3 subjects. You get English plus those subjects, with a countdown at the real exam pace of 40 seconds a question, scored out of 400.'],
+  ['What is ExamHall?', 'ExamHall is a one-time, school-style exam with a fixed opening and closing time. You sit it once, and your school or the administrator decides when the results are released. ExamHall is part of the Pro plan.'],
+  ['Which plan should I choose?', 'Free gives you English and Maths practice. Student adds all 16 subjects and full CBT mocks scored out of 400. Pro adds ExamHall, the Study Planner and weak-spot drills. You can change your plan any time from Plans in the sidebar.'],
   ['How do I get an Access PIN?', 'Your tutor, school or the JAMBwise team can give you one. Type it in the Access PIN box on the homepage to get in without an email.'],
   ['Can I use JAMBwise on my phone?', 'Yes. It works in any modern phone browser.'],
   ['Where or how can I get my Parent Code?', 'Log in, open Settings and find the "Parent access" box. Tap "Make a parent code". Share the code and your Student ID (shown in the same box) with your parent or guardian. They enter both under "Parents" on the JAMBwise home page. The code lasts 7 days and you can renew it or switch it off any time.'],

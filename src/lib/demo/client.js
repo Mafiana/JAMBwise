@@ -68,7 +68,7 @@ function seed() {
   return {
     users, profiles, attempts, nextAttempt: id,
     pins: [{ pin: DEMO_PIN, plan: 'student', student_name: 'Sample student', days: 30, used_by: null, used_at: null, created_at: daysAgo(1) }],
-    plans: [{ id: 'free', name: 'Free', price_kobo: 0 }, { id: 'student', name: 'Student', price_kobo: 150000 }, { id: 'pro', name: 'Pro', price_kobo: 300000 }],
+    plans: [{ id: 'free', name: 'Free', price_kobo: 0 }, { id: 'student', name: 'Student', price_kobo: 200000 }, { id: 'pro', name: 'Pro', price_kobo: 300000 }],
     messages: [
       { id: 1, name: 'Chioma Eze', email: 'chioma@example.com', topic: 'pin', body: 'My tutor gave me a PIN but it says invalid. Please help.', user_id: null, status: 'new', created_at: daysAgo(0.2) },
       { id: 3, name: 'Demo Student', email: 'student@demo.com', topic: 'general', subject: 'Question about my plan', body: 'Hello, how long does my free plan last and what do I get when I upgrade?', user_id: 'demo-student', status: 'answered', created_at: daysAgo(1) },

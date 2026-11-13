@@ -10,7 +10,7 @@ create table public.plans (
   name text not null,
   price_kobo int not null default 0 check (price_kobo >= 0)
 );
-insert into public.plans values ('free','Free',0),('student','Student',150000),('pro','Pro',300000);
+insert into public.plans values ('free','Free',0),('student','Student',200000),('pro','Pro',300000);
 
 create table public.profiles (
   id uuid primary key references auth.users on delete cascade,
