@@ -125,6 +125,8 @@ There are 14: Use of English, Mathematics, Physics, Chemistry, Biology, Governme
 ### Release ExamHall results, and the teacher role
 
 - **Results are hidden by default.** After an ExamHall sitting, students only see the date they took it. In **Admin > Scoresheet > ExamHall**, use the **Release** card to show results; once released, students see their score and subject breakdown on the ExamHall page and in My Progress. You can hide them again at any time.
+- **Teachers can release results for their own school.** On **Scoresheet > ExamHall**, a teacher (or other school staff) linked to a school sees a **Release results** card for that school's students only (run `supabase/migrate-school-release.sql`). Releasing sends a notification to that school's students only. The administrator's switch releases results for every school; if the administrator has released them, only the administrator can hide them, and hiding them hides them everywhere. A teacher who is not linked to a school cannot release anything.
+- **ExamHall is a Pro feature.** The CBT Mock needs a paid plan (Student or Pro); ExamHall needs the Pro plan, on the website and in the database (`supabase/migrate-examhall-pro.sql`). A student who already submitted an ExamHall keeps their result.
 - **Teacher role.** A teacher can view students, scores and exam logs, add and edit questions (including import) and answer support tickets. A teacher cannot see payments, PINs, prices or the activity log, cannot delete anything, and cannot schedule, release or reset ExamHall. Only an admin sets roles: **Students > student > Manage > Role**. In demo mode use the **Teacher** button on the login page (`teacher@demo.com`, password `demo1234`).
 - Database already running? Run `supabase/migrate-roles.sql` once, after `migrate-exam-controls.sql` (safe to repeat). New projects get it from `schema.sql`.
 
@@ -163,7 +165,8 @@ The login and signup pages have a "Continue with Google" button. It needs a one-
 1. Google Cloud Console → APIs & Services → Credentials → Create credentials → **OAuth client ID** → Web application.
 2. Under **Authorized redirect URIs** add `https://YOUR_REF.supabase.co/auth/v1/callback` (the Callback URL shown on the Google provider page in Supabase).
 3. Supabase → Authentication → Providers → **Google** → switch on, paste the Client ID and Client Secret, Save.
-4. Supabase → Authentication → URL Configuration → add your site address (for example `https://yoursite.netlify.app/**` and `http://localhost:5173/**`) to **Redirect URLs**.
+4. Supabase → Authentication → URL Configuration → set **Site URL** to your live address (for example `https://yoursite.netlify.app`) and add `https://yoursite.netlify.app/**` and `http://localhost:5173/**` to **Redirect URLs**. If Site URL is still `http://localhost:3000`, Google sends people back to a page that cannot open.
+5. If Google sign-in fails, the login page now shows the reason (for example "Google sign-in is not switched on yet" or "could not create your account"). "Database error saving new user" means the new-user trigger (`handle_new_user` in `supabase/schema.sql`) is missing or failing in your database.
 
 A student who signs in with Google gets a profile and a JAMBwise number automatically, the same as signing up with email. If the Google email matches an existing account, Supabase links them. Until step 3 is done the button shows "Google sign-in is not switched on yet". In demo mode it signs in a pretend Google account.
 

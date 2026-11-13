@@ -1,5 +1,6 @@
 import GoogleG from '../components/GoogleG.jsx'
-import { useState } from 'react'
+import { takeAuthError } from '../lib/oauthError.js'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo } from '../components/ui.jsx'
@@ -22,6 +23,7 @@ export default function Auth() {
   const [sentAt, setSentAt] = useState(null) // when a reset link was last requested (starts the 2-minute wait)
   const [dest, setDest] = useState('') // where to go after a one-click demo login
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  useEffect(() => { const m = takeAuthError(); if (m) setError(m) }, [setError])   // why a Google sign-in or an emailed link failed
 
   // Signed in already (and not in the middle of resetting a password): go to the app.
   if (session && !recovering && mode !== 'reset') return <Navigate to={dest || loc.state?.from || '/app/dashboard'} replace />
@@ -100,7 +102,7 @@ export default function Auth() {
         {(mode === 'login' || mode === 'signup') && (
           <>
             <div className="or-line"><span>or</span></div>
-            <button type="button" className="btn ghost w gbtn" disabled={busy} onClick={() => run(signInWithGoogle)}>
+            <button type="button" className="btn ghost w gbtn" disabled={busy} onClick={() => run(() => signInWithGoogle(typeof loc.state?.from === 'string' ? loc.state.from : '/app/dashboard'))}>
               <GoogleG /> {mode === 'signup' ? 'Sign up with Google' : 'Continue with Google'}
             </button>
           </>

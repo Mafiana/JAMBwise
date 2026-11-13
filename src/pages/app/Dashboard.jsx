@@ -36,7 +36,7 @@ export default function Dashboard() {
       <div className="grid">
         <Link className="card action" to="/app/practice"><span className="ic"><Icon name="practice" /></span><div><b>Practice</b><span className="mut">One subject, instant answers</span></div></Link>
         <Link className="card action" to="/app/mock"><span className="ic"><Icon name="mock" /></span><div><b>CBT Mock</b><span className="mut">English plus 3 subjects, timed</span></div></Link>
-        <Link className="card action" to="/app/examhall"><span className="ic"><Icon name="hall" /></span><div><b>ExamHall</b><span className="mut">Timed exam, result released by admin</span></div></Link>
+        <Link className="card action" to="/app/examhall"><span className="ic"><Icon name="hall" /></span><div><b>ExamHall</b><span className="mut">Timed school exam (Pro plan), result released by your school</span></div></Link>
       </div>
     </>
   )

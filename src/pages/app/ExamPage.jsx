@@ -431,7 +431,8 @@ export default function ExamPage({ kind }) {
   const { level } = useAuth()
   const { mock } = useExam()
   const cfg = EXAMS[kind]
-  if (level < 1) return <Lock title={cfg.title === 'ExamHall' ? 'ExamHall' : 'CBT Mock Exam'} plan="Student" />
+  const hall = kind === 'hall'
+  if (level < (hall ? 2 : 1)) return <Lock title={hall ? 'ExamHall' : 'CBT Mock Exam'} plan={hall ? 'Pro' : 'Student'} />   // CBT Mock needs a paid plan; ExamHall needs Pro
   if (!mock) return <Picker cfg={cfg} kind={kind} />
   if ((mock.kind || 'mock') !== kind) {
     const other = EXAMS[mock.kind || 'mock']

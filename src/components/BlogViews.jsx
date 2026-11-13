@@ -4,6 +4,7 @@ import * as api from '../lib/api.js'
 import Icon from './Icons.jsx'
 import { ErrorLine, Spinner } from './ui.jsx'
 import { readingMinutes, sanitizeHtml } from '../lib/blogHtml.js'
+import { Pagination } from '../pages/app/admin/shared.jsx'
 
 const PAGE = 9
 const when = (d) => (d ? new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }) : '')
@@ -21,7 +22,7 @@ export function Likes({ n, on, onClick, busy }) {
   return <button type="button" className={'blog-like' + (on ? ' on' : '')} aria-pressed={on} disabled={busy} onClick={onClick}>{inner}<span className="blog-like-t">{on ? 'Liked' : 'Like this post'}</span></button>
 }
 
-/** The published posts as cards, nine at a time, with a search box and category buttons. `base` is where a card links to ('/app/blog' for students, '/app/admin/blog' for staff). */
+/** The published posts as cards, nine at a time with page numbers (Previous, 1 2 3, Next), a search box and category buttons. `base` is where a card links to ('/app/blog' for students, '/app/admin/blog' for staff). */
 export function BlogList({ base }) {
   const [rows, setRows] = useState([])
   const [total, setTotal] = useState(0)
@@ -29,23 +30,27 @@ export function BlogList({ base }) {
   const [text, setText] = useState('')
   const [q, setQ] = useState('')
   const [cat, setCat] = useState('')
-  const [st, setSt] = useState({ loading: true, more: false, error: '' })
+  const [page, setPage] = useState(1)
+  const [size, setSize] = useState(PAGE)
+  const [st, setSt] = useState({ loading: true, busy: false, error: '' })
   const ticket = useRef(0)
 
-  const load = async (offset, query, category) => {
+  const load = async (pg, query, category, sz) => {
     const mine = ++ticket.current
-    setSt((s) => ({ ...s, loading: offset === 0 && rows.length === 0, more: offset > 0, error: '' }))
+    setSt((s) => ({ ...s, loading: rows.length === 0, busy: true, error: '' }))
     try {
-      const r = await api.getBlogPosts(PAGE, offset, { q: query, category })
-      if (mine !== ticket.current) return   // a newer search has already replaced this one
-      setRows((old) => (offset === 0 ? r.rows : [...old, ...r.rows]))
+      const r = await api.getBlogPosts(sz, (pg - 1) * sz, { q: query, category })
+      if (mine !== ticket.current) return   // a newer search or page has already replaced this one
+      if (!r.rows.length && pg > 1) { setPage(1); return }   // that page no longer exists (posts were removed): go back to the first
+      setRows(r.rows)
       setTotal(r.total)
-      setSt({ loading: false, more: false, error: '' })
-    } catch (e) { if (mine === ticket.current) setSt({ loading: false, more: false, error: e.message }) }
+      setSt({ loading: false, busy: false, error: '' })
+    } catch (e) { if (mine === ticket.current) setSt({ loading: false, busy: false, error: e.message }) }
   }
   useEffect(() => { api.getBlogCategories().then(setCats) }, [])
-  useEffect(() => { const t = setTimeout(() => setQ(text), 350); return () => clearTimeout(t) }, [text])   // wait until the typing pauses
-  useEffect(() => { load(0, q, cat) }, [q, cat])   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const t = setTimeout(() => { setQ(text); setPage(1) }, 350); return () => clearTimeout(t) }, [text])   // wait until the typing pauses
+  useEffect(() => { load(page, q, cat, size) }, [page, q, cat, size])   // eslint-disable-line react-hooks/exhaustive-deps
+  const pickCat = (c) => { setCat(c); setPage(1) }
 
   const filtering = Boolean(q.trim() || cat)
   if (st.loading) return <Spinner />
@@ -57,17 +62,17 @@ export function BlogList({ base }) {
         <div className="blog-search">
           <Icon name="search" size={18} />
           <input type="search" value={text} placeholder="Search posts" aria-label="Search posts" maxLength={80} onChange={(e) => setText(e.target.value)} />
-          {text && <button type="button" className="blog-clear" aria-label="Clear search" onClick={() => { setText(''); setQ('') }}>×</button>}
+          {text && <button type="button" className="blog-clear" aria-label="Clear search" onClick={() => { setText(''); setQ(''); setPage(1) }}>×</button>}
         </div>
         {cats.length > 0 && (
           <div className="blog-chips" role="group" aria-label="Categories">
-            <button type="button" className={'blog-chip' + (!cat ? ' on' : '')} aria-pressed={!cat} onClick={() => setCat('')}>All</button>
-            {cats.map((c) => <button key={c.category} type="button" className={'blog-chip' + (cat === c.category ? ' on' : '')} aria-pressed={cat === c.category} onClick={() => setCat(cat === c.category ? '' : c.category)}>{c.category} <small>{c.n}</small></button>)}
+            <button type="button" className={'blog-chip' + (!cat ? ' on' : '')} aria-pressed={!cat} onClick={() => pickCat('')}>All</button>
+            {cats.map((c) => <button key={c.category} type="button" className={'blog-chip' + (cat === c.category ? ' on' : '')} aria-pressed={cat === c.category} onClick={() => pickCat(cat === c.category ? '' : c.category)}>{c.category} <small>{c.n}</small></button>)}
           </div>
         )}
       </div>
       {!rows.length && <div className="card"><p style={{ margin: 0 }}>{st.error || 'No posts match your search.'}</p></div>}
-      <div className="blog-grid">
+      <div className="blog-grid" style={st.busy ? { opacity: 0.55, transition: 'opacity .15s' } : undefined} aria-busy={st.busy}>
         {rows.map((p) => (
           <Link key={p.id} className="blog-card" to={`${base}/${p.id}`}>
             {p.cover ? <img src={p.cover} alt="" loading="lazy" /> : <span className="blog-ph" aria-hidden="true"><Icon name="blog" size={36} /></span>}
@@ -80,7 +85,7 @@ export function BlogList({ base }) {
         ))}
       </div>
       {rows.length > 0 && <ErrorLine>{st.error}</ErrorLine>}
-      {rows.length < total && <div style={{ textAlign: 'center' }}><button className="btn ghost" disabled={st.more} onClick={() => load(rows.length, q, cat)}>{st.more ? 'Loading…' : 'Load more posts'}</button></div>}
+      {total > PAGE && <Pagination page={page} pageSize={size} total={total} onPage={(n) => { setPage(n); window.scrollTo({ top: 0 }) }} onPageSize={(n) => { setSize(n); setPage(1) }} sizes={[9, 18, 36]} />}
     </>
   )
 }

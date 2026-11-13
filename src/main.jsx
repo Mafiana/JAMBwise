@@ -4,8 +4,10 @@ import App from './App.jsx'
 import { initBackend, setupMissing } from './lib/supabase.js'
 import './index.css'
 import { captureReferral } from './lib/api.js'
+import { captureAuthError } from './lib/oauthError.js'
 
 captureReferral()
+captureAuthError()   // a failed Google sign-in comes back with the reason in the address: keep it for the login page
 
 // choose the real Supabase or the built-in demo backend, then draw the app
 initBackend().then(() => {

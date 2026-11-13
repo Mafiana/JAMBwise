@@ -7,6 +7,7 @@ import HeroMockup from '../components/HeroMockup.jsx'
 import Testimonials from '../components/Testimonials.jsx'
 import FaqList from '../components/FaqList.jsx'
 import ContactBlock from '../components/ContactBlock.jsx'
+import HomeBlog from '../components/HomeBlog.jsx'
 import ParentForm from '../components/ParentForm.jsx'
 import InstitutionPicker from '../components/InstitutionPicker.jsx'
 import { HOW, SUBJECT_KEYS } from '../lib/constants.js'
@@ -223,6 +224,8 @@ export default function Landing() {
         </div>
         <ContactBlock />
       </section>
+
+      <HomeBlog />
 
       <section className="wrap">
         <div className="cta">

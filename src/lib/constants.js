@@ -42,11 +42,11 @@ export const PLANS = [
     'Everything in Free',
     'All 16 subjects to practise, with explanations',
     'CBT Mock exams at the real pace (40 seconds a question), scored out of 400',
-    'ExamHall: the one-time exam your administrator releases results for',
     'Mock score history and trend',
   ] },
   { id: 'pro', name: 'Pro', kobo: 300000, features: [
     'Everything in Student',
+    'ExamHall: the one-time school exam. Your school or administrator releases the results',
     'Fix my weak spots: re-drill only the questions you keep getting wrong until you master them',
     'Study Planner with a countdown to your exam date',
     'A weekly plan built from your 3 subjects, with your weakest subject first, a weak-spot day and a mock day',

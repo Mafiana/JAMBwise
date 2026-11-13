@@ -61,25 +61,34 @@ function Schedule({ win, onSaved }) {
   )
 }
 
-/** Admin: show or hide ExamHall scores to the students who wrote it. Hidden until released. */
-function Release({ win, onSaved }) {
+/** Show or hide ExamHall scores to the students who wrote it. Hidden until released. The administrator's switch is for every school;
+ *  a teacher's (or other school staff's) switch is for their own school's students only. */
+function Release({ win, onSaved, admin, hasSchool }) {
   const { busy, error, run } = useAction()
   const confirm = useConfirm()
   const on = win.released
+  const change = (value) => (admin ? api.adminSetResultsReleased('hall', value) : api.staffSetResultsReleased('hall', value))
   const toggle = async () => {
+    const who = admin ? 'Every student who wrote ExamHall' : "Every student of your school who wrote ExamHall"
     const ok = await confirm(on
-      ? { title: 'Hide ExamHall results again?', message: 'Students will no longer see their ExamHall score.', confirmLabel: 'Hide results', danger: false }
-      : { title: 'Release ExamHall results?', message: 'Every student who wrote ExamHall will be able to see their own score and subject breakdown on the ExamHall page and under My Progress. You can hide them again at any time.', confirmLabel: 'Release results', danger: false })
-    if (ok) run(async () => { await api.adminSetResultsReleased('hall', !on); await onSaved() })
+      ? { title: 'Hide ExamHall results again?', message: admin ? 'Students will no longer see their ExamHall score, in any school.' : 'Your school\'s students will no longer see their ExamHall score.', confirmLabel: 'Hide results', danger: false }
+      : { title: 'Release ExamHall results?', message: `${who} will be able to see their own score and subject breakdown on the ExamHall page and under My Progress, and they will get a notification. You can hide them again at any time.`, confirmLabel: 'Release results', danger: false })
+    if (ok) run(async () => { await change(!on); await onSaved() })
   }
+  const blocked = !admin && (!hasSchool || win.releasedAll)
   return (
     <div className="card rel">
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <b>Results for students: {on ? 'visible' : 'hidden'}</b>
-          <p className="sm" style={{ margin: '4px 0 0' }}>{on ? 'Students can see their own ExamHall score.' : 'Students only see that they have submitted. Release the results when you are ready.'}</p>
+          <b>{admin ? 'Results for students' : "Results for your school's students"}: {on ? 'visible' : 'hidden'}</b>
+          <p className="sm" style={{ margin: '4px 0 0' }}>
+            {!admin && !hasSchool ? 'Ask the administrator to link your account to your school, then you can release results for your students.'
+              : !admin && win.releasedAll ? 'The administrator has released the results for every school. Only the administrator can hide them.'
+              : on ? (admin ? 'Students can see their own ExamHall score.' : 'Your school\'s students can see their own ExamHall score.')
+              : (admin ? 'Students only see that they have submitted. Release the results when you are ready.' : 'Your students only see that they have submitted. Release the results for your school when you are ready.')}
+          </p>
         </div>
-        <button className={'btn' + (on ? ' ghost' : '')} disabled={busy} onClick={toggle}>{on ? 'Hide results' : 'Release results'}</button>
+        {!blocked && <button className={'btn' + (on ? ' ghost' : '')} disabled={busy} onClick={toggle}>{on ? 'Hide results' : 'Release results'}</button>}
       </div>
       <ErrorLine>{error}</ErrorLine>
     </div>
@@ -101,7 +110,7 @@ function EventsModal({ who, events, onClose }) {
 export default function Scoresheet() {
   const { data, error, loading, reload } = useLoad(api.adminScoresheet)
   const confirm = useConfirm()
-  const { isAdmin } = useAuth()   // teachers can look and download, but not release, schedule or allow retakes
+  const { isAdmin, profile } = useAuth()   // teachers can look, download and release results for their own school; only the admin schedules or allows retakes
   const { busy, error: actError, run } = useAction()
   const [q, setQ] = useState('')
   const [kind, setKind] = useState('mock')
@@ -157,7 +166,7 @@ export default function Scoresheet() {
         <div className="card st"><b>{st.highest}</b><span>highest score</span></div>
         <div className="card st"><b>{st.over300}</b><span>scored 300 or more</span></div>
       </div>
-      {kind === 'hall' && isAdmin && <Release key={'r' + data.schedule.hall.released} win={data.schedule.hall} onSaved={reload} />}
+      {kind === 'hall' && <Release key={'r' + data.schedule.hall.released + data.schedule.hall.releasedAll} win={data.schedule.hall} onSaved={reload} admin={isAdmin} hasSchool={Boolean(profile?.institution_id)} />}
       {kind === 'hall' && isAdmin && <Schedule key={JSON.stringify(data.schedule.hall)} win={data.schedule.hall} onSaved={reload} />}
       <div className="adm-filters">
         <span className="srch"><Icon name="search" size={18} /><input type="search" aria-label="Search the scoresheet" placeholder="Search name, number, email or school" value={q} onChange={(e) => setQ(e.target.value)} /></span>

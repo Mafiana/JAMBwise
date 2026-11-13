@@ -115,6 +115,7 @@ const isStaff = () => { const p = profileOf(me()); return Boolean(p?.is_admin ||
 /** Same rule as public.staff_sees(): an admin sees everyone; staff in an institution see only that institution's people; staff in none see all. */
 const myInst = () => profileOf(me())?.institution_id || null
 const staffSees = (userId) => isAdmin() || (isStaff() && (!myInst() || (Boolean(userId) && profileOf(userId)?.institution_id === myInst())))
+const isPro = (p) => Boolean(p && p.plan === 'pro' && (!p.plan_expires || new Date(p.plan_expires) > new Date()) && !p.suspended)
 const isPaid = (p) => Boolean(p && ['student', 'pro'].includes(p.plan) && (!p.plan_expires || new Date(p.plan_expires) > new Date()) && !p.suspended)
 const hasAccess = (subject) => ['eng', 'mat'].includes(subject) || isPaid(profileOf(me()))
 const wait = (v) => new Promise((r) => setTimeout(() => r(v), 120))
@@ -234,7 +235,7 @@ function from(name) {
         const scored = new Set(db.attempts.filter((x) => x.user_id === uid && x.mock_score != null).map((x) => x.kind))
         for (const r of rows) {
           const ok = r.user_id === uid && !p.suspended && SUBJECTS.includes(r.subject) && hasAccess(r.subject) && ['practice', 'mock', 'hall'].includes(r.kind) &&
-            (r.kind === 'practice' || isPaid(p)) && r.correct >= 0 && r.correct <= r.total && r.total >= 1 && r.total <= 200
+            (r.kind === 'practice' || (r.kind === 'mock' && isPaid(p)) || (r.kind === 'hall' && isPro(p))) && r.correct >= 0 && r.correct <= r.total && r.total >= 1 && r.total <= 200
           if (!ok) return err('new row violates row-level security policy')
           // one CBT Mock and one ExamHall per student, like the database trigger
           if (r.kind !== 'practice' && r.mock_score != null) {
@@ -357,13 +358,16 @@ function pinReminder() {
 const canSeeThread = (teacherId) => isAdmin() || (isStaff() && teacherId === me())
 
 
+/** ExamHall results are out when the administrator released them for everyone, or the student's school released them. */
+const resultsVisible = (kind, inst) => Boolean(db.examSettings[kind]?.results_released) || Boolean(inst && (db.schoolReleased || []).some((r) => r.kind === kind && r.institution_id === inst))
+
 // ── parent access (same rules as supabase/schema.sql) ──
 function examResultFor(uid, kind) {
   if (!['mock', 'hall'].includes(kind)) return null
   const mine = db.attempts.filter((x) => x.user_id === uid && x.kind === kind)
   const head = mine.filter((x) => x.mock_score != null).sort((x, y) => String(y.created_at).localeCompare(String(x.created_at)))[0]
   if (!head) return null
-  if (kind === 'hall' && !db.examSettings.hall?.results_released) return { date: head.created_at, released: false }
+  if (kind === 'hall' && !resultsVisible(kind, profileOf(uid)?.institution_id)) return { date: head.created_at, released: false }
   const t = new Date(head.created_at).getTime()
   const subs = mine.filter((x) => x === head || (x.mock_score == null && Math.abs(new Date(x.created_at).getTime() - t) <= 60000)).sort((x, y) => x.id - y.id)
   return { date: head.created_at, released: true, total: head.mock_score, subjects: subs.map((x) => ({ subject: x.subject, correct: x.correct, total: x.total })) }
@@ -568,6 +572,10 @@ const rpcs = {
     f.show_photo = Boolean(a.p_show)
     log('feedback.photo', (f.show_photo ? 'shown #' : 'hidden #') + f.id)
     return null
+  },
+  public_blog_latest() {
+    return (db.blog || []).filter((x) => x.published).sort((x, y) => (x.published_at < y.published_at ? 1 : -1)).slice(0, 3)
+      .map((x) => ({ id: x.id, title: x.title, summary: x.summary, cover: x.cover, category: x.category || null, published_at: x.published_at }))
   },
   public_testimonials() {
     return (db.feedback || []).filter((f) => f.featured && f.kind === 'feedback' && String(f.message || '').trim().length >= 20)
@@ -876,7 +884,7 @@ const rpcs = {
   },
   exam_window(a) {
     const w = db.examSettings[a.p_kind] || {}
-    return { opens_at: w.opens_at || null, closes_at: w.closes_at || null, max_violations: w.max_violations ?? 3, results_released: Boolean(w.results_released), server_now: new Date().toISOString() }
+    return { opens_at: w.opens_at || null, closes_at: w.closes_at || null, max_violations: w.max_violations ?? 3, results_released: resultsVisible(a.p_kind, myInst()), results_released_all: Boolean(w.results_released), server_now: new Date().toISOString() }
   },
   admin_set_exam_window(a) {
     adminOnly()
@@ -897,11 +905,34 @@ const rpcs = {
     }
     return null
   },
+  staff_set_results_released(a) {
+    if (!isStaff() || isAdmin()) throw new Error('not allowed')
+    if (!['mock', 'hall'].includes(a.p_kind)) throw new Error('unknown exam')
+    const inst = myInst()
+    if (!inst) throw new Error('Ask the administrator to link your account to your school first.')
+    db.schoolReleased = db.schoolReleased || []
+    const all = Boolean(db.examSettings[a.p_kind]?.results_released)
+    const at = db.schoolReleased.findIndex((r) => r.kind === a.p_kind && r.institution_id === inst)
+    if (a.p_released) {
+      if (all || at >= 0) return null
+      db.schoolReleased.push({ kind: a.p_kind, institution_id: inst })
+      const hall = a.p_kind === 'hall'
+      db.profiles.filter((p) => p.institution_id === inst && !p.is_admin && !p.is_teacher && !p.suspended).forEach((p) =>
+        notify(p.id, 'result', hall ? 'ExamHall results are out' : 'CBT Mock results are out', 'Your school has released the results. Tap to see your score.', hall ? '/app/examhall' : '/app/mock'))
+      log(a.p_kind + '.release.school', "results shown to this school's students")
+    } else {
+      if (all) throw new Error('The administrator has released these results for every school, so only the administrator can hide them.')
+      if (at >= 0) db.schoolReleased.splice(at, 1)
+      log(a.p_kind + '.unrelease.school', "results hidden from this school's students")
+    }
+    return null
+  },
   admin_set_results_released(a) {
     adminOnly()
     if (!['mock', 'hall'].includes(a.p_kind)) throw new Error('unknown exam')
     const was = Boolean(db.examSettings[a.p_kind]?.results_released)
     db.examSettings[a.p_kind] = { ...(db.examSettings[a.p_kind] || {}), results_released: Boolean(a.p_released) }
+    if (!a.p_released) db.schoolReleased = (db.schoolReleased || []).filter((r) => r.kind !== a.p_kind)   // hiding hides it in every school
     if (a.p_released && !was) {   // ring the bell of everyone who sat the exam
       const hall = a.p_kind === 'hall'
       db.profiles.filter((p) => !p.is_admin && !p.is_teacher && !p.suspended).forEach((p) =>

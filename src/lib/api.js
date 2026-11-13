@@ -136,7 +136,7 @@ export async function getMyExam(uid, kind = 'mock') {
 }
 
 const WINDOW_CACHE = 'jw_exam_window'
-const DEFAULT_WINDOW = { opens: null, closes: null, maxViolations: 3, released: false, offset: 0 }
+const DEFAULT_WINDOW = { opens: null, closes: null, maxViolations: 3, released: false, releasedAll: false, offset: 0 }
 /**
  * When may students start this exam? { opens, closes (ms or null), maxViolations, offset } where `offset` is the server clock minus this
  * device's clock, so use Date.now() + offset. If the database has no schedule function yet, or the device is offline, the last known
@@ -152,7 +152,8 @@ export async function getExamWindow(kind) {
     opens: data?.opens_at ? new Date(data.opens_at).getTime() : null,
     closes: data?.closes_at ? new Date(data.closes_at).getTime() : null,
     maxViolations: data?.max_violations ?? 3,
-    released: Boolean(data?.results_released),
+    released: Boolean(data?.results_released),   // out for the person asking: for everyone, or released by their school
+    releasedAll: Boolean(data?.results_released_all),   // the administrator released it for every school
     offset: data?.server_now ? new Date(data.server_now).getTime() - Date.now() : 0,
   }
   try { localStorage.setItem(WINDOW_CACHE + kind, JSON.stringify(w)) } catch { /* private mode */ }
@@ -466,6 +467,14 @@ export async function adminSetStaffRole(id, role) {
 }
 
 /** Show (true) or hide (false) ExamHall scores to the students who wrote it. */
+/** School staff: show (true) or hide (false) the results for the students of their own school. */
+export async function staffSetResultsReleased(kind, released) {
+  const { error } = await supabase.rpc('staff_set_results_released', { p_kind: kind, p_released: released })
+  if (error) {
+    const off = /staff_set_results_released/.test(error.message || '') && /could not find|does not exist|schema cache/i.test(error.message || '')
+    fail(error, off ? 'Run supabase/migrate-school-release.sql in the Supabase SQL Editor, then try again.' : 'Could not change this.')
+  }
+}
 export async function adminSetResultsReleased(kind, released) {
   const { error } = await supabase.rpc('admin_set_results_released', { p_kind: kind, p_released: released })
   if (error) fail(error, 'Could not change this.')
@@ -734,6 +743,19 @@ export async function getTestimonials() {
     if (error || !Array.isArray(data)) return []
     return data
   } catch { return [] }
+}
+/** The three newest blog posts for the home page (no sign-in needed). Never throws: no posts just means no section. Fetched once per visit. */
+let homeBlog = null
+export function getHomeBlog() {
+  if (!homeBlog) {
+    homeBlog = (async () => {
+      try {
+        const { data, error } = await supabase.rpc('public_blog_latest')
+        return error || !Array.isArray(data) ? [] : data
+      } catch { return [] }
+    })()
+  }
+  return homeBlog
 }
 export async function adminDeleteFeedback(id) {
   const { error } = await supabase.rpc('admin_delete_feedback', { p_id: id })

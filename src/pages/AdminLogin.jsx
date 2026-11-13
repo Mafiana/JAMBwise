@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ErrorLine, Logo, Spinner } from '../components/ui.jsx'
 import GoogleG from '../components/GoogleG.jsx'
+import { takeAuthError } from '../lib/oauthError.js'
 import PasswordInput from '../components/PasswordInput.jsx'
 import { useAction } from '../hooks.js'
 import { supabase } from '../lib/supabase.js'
@@ -11,9 +12,10 @@ import * as api from '../lib/api.js'
 /** yoursite/admin: the Admin's own login. Teachers sign in from the home page (For institutions) and students from the normal login; anyone else is refused here. */
 export default function AdminLogin() {
   const { session, profile, profileLoading, isAdmin, signIn, signInWithGoogle, signOut } = useAuth()
-  const { busy, error, run } = useAction()
+  const { busy, error, setError, run } = useAction()
   const [f, setF] = useState({ email: '', password: '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  useEffect(() => { const m = takeAuthError(); if (m) setError(m) }, [setError])
 
   if (session && isAdmin) return <Navigate to="/app/admin" replace />
   if (session && (!profile || profileLoading)) return <Spinner />
